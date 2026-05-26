@@ -1,0 +1,47 @@
+/* style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 2.0;
+    color: #14b464;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    background-color: #040606;
+}
+
+h1 {
+    color: #740859;
+    border-bottom: 2px solid #26bf00;
+    padding-bottom: 10px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-image:-moz-element();
+    padding: 10px;
+    border-radius: 16%;
+    box-shadow: 0 2px 4px rgba(183, 0, 245, 0.908);
+    
+}
+body 
+{
+    /* Sets the image as the background */
+    background-image: 
+    url('https://images.steamusercontent.com/ugc/2476494829524673254/486E1BF9CD53948FB4135D7726C44EE044E6CF3F/?imw=637&imh=358&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');
+
+    /* Makes sure the image covers the whole screen without stretching weirdly */
+    background-size: cover;
+
+    /* Keeps the image centered */
+    background-position: center;
+
+    /* Prevents the image from repeating if the page is long */
+    background-repeat: no-repeat;
+
+    /* Optional: This keeps the background fixed while you scroll */
+    background-attachment: fixed;
+}

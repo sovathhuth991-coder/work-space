@@ -1,0 +1,6 @@
+strong{
+    color: red;
+    box-shadow: 0cm 0cm 0.2cm 0.1cm rgba(255, 0, 0, 0.5);
+    background-origin: padding-box;
+    animation: both 1s ease-in-out infinite;
+}
