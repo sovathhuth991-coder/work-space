@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace</title>
+
+    <!-- ===== FORCE NO CACHING (development) ===== -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet" />
+
+    <!-- ===== PWA Manifest ===== -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#7c6df0" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Workspace Hub" />
+
+    <!-- ===== Favicon ===== -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-96x96.png" />
+    <meta name="msapplication-TileColor" content="#7c6df0" />
+
+    <!-- ===== Prism.js for syntax highlighting (jsdelivr - more reliable) ===== -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-html.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-ruby.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-rust.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+
+    <!-- ===== CSS Modules ===== -->
+    <link rel="stylesheet" href="WorkspaceCore/reset.css" />
+    <link rel="stylesheet" href="WorkspaceCore/variables.css" />
+    <link rel="stylesheet" href="WorkspaceCore/layout.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/schedule/schedule.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/schedule/schedule-modal.css" />
+    <link rel="stylesheet" href="WorkspaceShared/drag-drop.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/dashboard/dashboard.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/weather/weather.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/lessons/lessons.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/tasks/tasks.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/library/library.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/dashboard/widgets.css" />
+    <link rel="stylesheet" href="WorkspaceShared/modals.css" />
+    <link rel="stylesheet" href="WorkspaceShared/animations.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/analytics/analytics.css">
+    <link rel="stylesheet" href="WorkspaceFeatures/dev-tools/dev-tools.css">
+    <link rel="stylesheet" href="WorkspaceFeatures/timer/timer-enhancements.css">
+    <link rel="stylesheet" href="WorkspaceFeatures/timer/pomodoro.css">
+    <link rel="stylesheet" href="WorkspaceFeatures/journal/journal.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/date-countdown/date-countdown.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/reading/reading.css" />
+    <link rel="stylesheet" href="WorkspaceShared/fab-buttons.css" />
+    <link rel="stylesheet" href="WorkspaceCore/mobile.css" />
+</head>
+
+<body>
+    <!-- ============================================================
+    CANVAS BACKGROUND LAYERS
+    ============================================================ -->
+    <canvas id="lineCanvas"></canvas>
+    <canvas id="flameCanvas"></canvas>
+    <canvas id="sparkleCanvas"></canvas>
+
+    <!-- ============================================================
+    MAIN APP SHELL
+    ============================================================ -->
+    <div class="app-layout-container hub-shell">
+
+        <!-- ===== SIDEBAR ===== -->
+    <aside class="hub-sidebar" id="hubSidebar">
+        <!-- Brand -->
+        <div class="hub-brand">
+            <h2>Workspace <span>Hub</span> <span class="hub-status-dot"></span></h2>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="hub-menu" aria-label="Workspace sections">
+            <p class="hub-menu-label">Main</p>
+            <button class="nav-btn hub-menu-item active" data-view="dashboard-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">⌂</span>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="schedule-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">▦</span>
+                <span>Schedule</span>
+            </button>
+
+            <p class="hub-menu-label">Tools</p>
+            <button class="nav-btn hub-menu-item" data-view="timer-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">◴</span>
+                <span>Focus Timer</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="weather-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">🌤️</span>
+                <span>Weather</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="todo-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">☑</span>
+                <span>To‑Do</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="analytics-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">📊</span>
+                <span>Analytics</span>
+            </button>
+            <p class="hub-menu-label">Knowledge</p>
+            <button class="nav-btn hub-menu-item" data-view="lessons-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">▣</span>
+                <span>Lessons</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="library-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">📚</span>
+                <span>Library</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="graph-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">✦</span>
+                <span>Knowledge Graph</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="habits-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">✅</span>
+                <span>Habits</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="journal-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">📔</span>
+                <span>Journal</span>
+            </button>
+            <button class="nav-btn hub-menu-item" data-view="reading-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">📚</span>
+                <span>Reading List</span>
+            </button>
+            <p class="hub-menu-label">Help</p>
+            <button class="nav-btn hub-menu-item" data-view="tutorial-view">
+                <span class="nav-glow-border"></span>
+                <span class="menu-icon">📖</span>
+                <span>Tutorial</span>
+            </button>
+        </nav>
+        <!-- Footer -->
+        <div class="hub-sidebar-footer">
+            <!-- AI Assistant -->
+            <div class="sidebar-ai" style="border-top:1px solid var(--border-color); padding-top:12px; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">🧠 AI Assistant</span>
+                    <span id="ai-status-side" style="font-size:9px; color:#555;">● offline</span>
+                </div>
+                <div id="ai-messages-side" style="max-height:120px; overflow-y:auto; background:var(--bg-primary); border-radius:6px; padding:6px 8px; font-size:12px; color:var(--text-secondary); border:1px solid var(--border-color); margin-bottom:6px; min-height:40px;">
+                    <div style="text-align:center; opacity:0.4; padding:6px 0; font-size:11px;">Ask me anything.</div>
+                </div>
+                <div style="display:flex; gap:4px;">
+                    <input type="text" id="ai-input-side" placeholder="Type a question..." style="flex:1; padding:4px 8px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); font-size:12px; outline:none;" />
+                    <button id="ai-send-side" style="background:var(--accent-gradient); border:none; color:#fff; padding:4px 12px; border-radius:4px; font-weight:600; font-size:12px; cursor:pointer;">Send</button>
+                </div>
+                <div style="font-size:8px; color:var(--text-muted); text-align:right; margin-top:3px;" id="ai-model-name-side">qwen2.5:7b</div>
+            </div>
+
+            <!-- Progress Ring -->
+            <div class="sidebar-progress">
+                <svg width="44" height="44" viewBox="0 0 48 48" style="transform: rotate(-90deg);">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4" />
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="var(--accent-1)" stroke-width="4"
+                        stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6"
+                        id="sidebarProgressRing" />
+                </svg>
+                <div class="sidebar-progress-text">
+                    <span class="pct" id="sidebarProgressText">0%</span>
+                    <span class="label">Today</span>
+                </div>
+            </div>
+
+            <!-- Theme Selector -->
+            <select id="globalThemeSelector" data-action="applyTheme">
+                <option value="cyberpunk">🌆 Cyberpunk</option>
+                <option value="minimal">☀️ Minimal</option>
+                <option value="ocean">🌊 Ocean</option>
+                <option value="sunset">🌅 Sunset</option>
+                <option value="forest">🌲 Forest</option>
+                <option value="midnight">🌙 Midnight</option>
+                <option value="auto">🌗 Auto (System)</option>
+            </select>
+
+            <!-- Tour & Shortcuts (two‑column) -->
+            <div class="sidebar-btn-row">
+                <button class="sidebar-btn" data-action="startTour">🎓 Tour</button>
+                <button class="sidebar-btn" data-action="showShortcuts">⌨️ Shortcuts</button>
+            </div>
+
+            <!-- Version -->
+            <div class="hub-version">v2.1.0 // Engine Active</div>
+
+            <!-- Clear All Data -->
+            <button class="sidebar-btn danger" data-action="clearAllData">🗑️ Clear All Data</button>
+            <div class="sidebar-clear-note">Clears all saved data (lessons, tasks, habits, etc.)</div>
+        </div>
+    </aside>
+
+        <!-- ===== MAIN CONTENT AREA ===== -->
+        <main class="hub-content">
+
+            <!-- ===== PAGE HEADER with burger (always visible) ===== -->
+            <div
+                style="display:flex; align-items:center; padding: 12px 24px; gap:12px; border-bottom:1px solid var(--border-color); background:var(--bg-secondary); position:sticky; top:0; z-index:10; backdrop-filter:blur(8px); overflow:visible;">
+                <button class="burger-toggle" id="burgerToggle" data-action="toggleSidebarMenu"
+                    aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span class="burger-line"></span>
+                    <span class="burger-line"></span>
+                    <span class="burger-line"></span>
+                </button>
+                <span style="font-size:1.1rem; font-weight:600; color:var(--text-secondary);">Workspace Hub</span>
+                <!-- Sideways Dropdown Toggle -->
+                <div id="headerToggleContainer" style="position:relative; margin-left:auto; display:inline-flex; align-items:center; overflow:visible;">
+                    <!-- Main Toggle Button -->
+                    <button id="headerToggleMain" class="header-toggle-main" title="Quick Actions" style="padding:6px 12px; border-radius:99px; background:var(--accent-gradient); border:none; color:#fff; font-size:0.75rem; font-weight:600; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(124, 109, 240, 0.3);">
+                        <span>⚡</span>
+                        <span>Actions</span>
+                        <span id="toggleArrow" style="transition:transform 0.3s ease; display:inline-block; font-size:0.7rem;">▶</span>
+                    </button>
+
+                    <!-- Sideways Dropdown -->
+<div id="headerToggleDropdown" style="position:absolute; top:50%; right:100%; transform:translateY(-50%) translateX(8px); display:none; background:var(--bg-card); border:1px solid var(--border-color); border-radius:99px; padding:4px; gap:0; box-shadow:var(--shadow-elevated); backdrop-filter:blur(12px);">
+                        <!-- Toggle 1: Focus Stats -->
+                        <button id="toggleFocusStats" class="header-toggle-btn active" data-action="toggleFocusStatsView" title="Toggle Focus Stats" style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.75rem; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; white-space:nowrap;">
+                            <span style="color:#2ecc71;">⏱</span>
+                            <span id="headerFocusTime">00:00</span>
+                            <span style="opacity:0.4;">|</span>
+                            <span style="color:#f39c12;">☕</span>
+                            <span id="headerBreakTime">00:00</span>
+                            <span style="opacity:0.4;">|</span>
+                            <span style="color:#95a5a6;">⏸</span>
+                            <span id="headerIdleTime">00:00</span>
+                        </button>
+
+                        <!-- Toggle 2: Focus Mode -->
+                        <button id="toggleFocusMode" class="header-toggle-btn" data-action="toggleFocusMode" title="Toggle Focus Mode" style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.8rem; cursor:pointer; transition:var(--transition); white-space:nowrap;">
+                            🧘 Focus
+                        </button>
+
+                        <!-- Toggle 3: Theme -->
+                        <button id="toggleTheme" class="header-toggle-btn" data-action="toggleTheme" title="Toggle Dark/Light Mode" style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.85rem; cursor:pointer; transition:var(--transition); white-space:nowrap;">
+                            🌓
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== GLOBAL SEARCH BAR ===== -->
+            <div class="global-search-bar"
+                style="position:relative; display:flex; justify-content:flex-end; padding: 8px 32px 0 0; gap:12px; align-items:center;">
+                <input type="text" id="globalSearchInput" placeholder="🔍 Search lessons, tasks, library..."
+                    style="flex:1; max-width:400px; padding:8px 14px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.9rem;" />
+                <span id="globalSearchResults" style="font-size:0.75rem; color:var(--text-muted);"></span>
+                <div id="globalSearchDropdown"
+                    style="display:none; position:absolute; right:0; top:calc(100% + 4px); background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); max-width:500px; width:100%; max-height:400px; overflow-y:auto; padding:8px; z-index:999; box-shadow:var(--shadow-elevated);">
+                </div>
+            </div>
+
+            <!-- ===== DASHBOARD VIEW ===== -->
+            <section id="dashboard-view" class="hub-view active">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Command Center</p>
+                        <h1>Dashboard</h1>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button class="dashboard-customize-btn" data-action="toggleCardVisibility" title="Show/Hide dashboard cards">⚙️ Customize</button>
+                    </div>
+                </div>
+                <div class="dashboard-grid">
+
+                    <!-- ===== BANNER ===== -->
+                    <div class="dash-card dash-banner" data-card-id="banner">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h2 style="margin:0;font-size:1.8rem;font-weight:700;">Study systems online</h2>
+                                <div class="card-controls">
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="banner" title="Resize">⤡</button>
+                                </div>
+                            </div>
+                            <div class="banner-text">
+                                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                                    <h2>Study systems online</h2>
+                                    <div id="streakDisplay" style="margin-top:0;"></div>
+                                </div>
+                                <p id="dashGreetingDate">System metrics nominal.</p>
+                            </div>
+                            <div class="banner-progress">
+                                <div class="progress-label">
+                                    <span>Daily completion</span>
+                                    <span id="dashProgressPercent">0%</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" id="dashProgressBar"></div>
+                                </div>
+                            </div>
+                            <!-- Daily Focus Goal -->
+                            <div id="dailyFocusGoal" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                    <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
+                                        <svg viewBox="0 0 80 80" style="transform: rotate(-90deg); width: 100%; height: 100%;">
+                                            <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" />
+                                            <circle id="focusGoalRing" cx="40" cy="40" r="35" fill="none" stroke="url(#focusGoalGradient)" stroke-width="6" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220" style="transition: stroke-dashoffset 0.5s ease;" />
+                                            <defs>
+                                                <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#7c6df0;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+                                                </linearGradient>
+                                            </defs>
+                                        </svg>
+                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                            <span id="focusGoalPercent" style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">0%</span>
+                                            <span style="font-size: 0.6rem; color: var(--text-muted);">of goal</span>
+                                        </div>
+                                    </div>
+                                    <div style="flex: 1; min-width: 150px;">
+                                        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;">Daily Focus Goal</div>
+                                        <div id="focusGoalText" style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 8px;">0h 0m / 4h 0m</div>
+                                        <div id="focusGoalMessage" style="font-size: 0.8rem; color: var(--accent-1); font-weight: 500;"></div>
+                                    </div>
+                                    <button id="editGoalBtn" class="matrix-btn" style="padding: 4px 12px; font-size: 0.75rem; white-space: nowrap;" title="Edit daily goal">⚙️ Set Goal</button>
+                                </div>
+                            </div>
+
+                            <!-- ===== DATE COUNTDOWN ===== -->
+                            <div id="dashDateCountdown" style="display: none; margin-top: 16px;"></div>
+                        </div>
+                    </div>
+                    <!-- ===== ACTIVE SESSION ===== -->
+                    <div class="dash-card" data-card-id="sessions">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;"><span class="pulse-dot"></span> Today's Sessions</h3>
+                                <div class="card-controls">
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="sessions" title="Resize">⤡</button>
+                                </div>
+                            </div>
+                            <button class="matrix-btn" data-action="showSessionDetailsModal" style="padding:4px 12px;font-size:0.75rem;">📊 View Details</button>
+                            <div id="allSessionsContainer" class="all-sessions-container">
+                                <div class="session-history-empty">
+                                    <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                                    <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your progress</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== MASTER TO-DO ===== -->
+                    <div class="dash-card" data-card-id="todo">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;">Master To-Do</h3>
+                                <div class="card-controls">
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="todo" title="Resize">⤡</button>
+                                </div>
+                            </div>
+                            <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task" style="padding:4px 12px;border-radius:99px;background:var(--accent-gradient);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+ Add Task</button>
+                    <ul class="strike-list" id="dashStrikeList"></ul>
+                        </div>
+                    </div>
+
+                    <!-- ===== SESSION HUB ===== -->
+                    <div class="dash-card session-hub-card" style="grid-column: 1 / -1;">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="session-hub-header">
+                                <h3>🎛️ Session Hub</h3>
+                                <div class="session-hub-controls">
+                                    <button class="matrix-btn hub-reset-btn" data-action="resetDashboardLayout" title="Reset entire dashboard layout">↺ Reset Dashboard</button>
+                                </div>
+                            </div>
+                            <div class="session-hub-grid" id="sessionHubGrid">
+                                <!-- Widget: System Status -->
+                                <div class="hub-widget" data-widget="status" style="grid-area: status;">
+                                    <div class="hub-widget-header">
+                                        <span class="hub-drag-handle" title="Drag to move">⠿</span>
+                                        <span>System Status</span>
+                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="status" title="Resize">⤡</button>
+                                    </div>
+                                    <div class="hub-widget-content" id="hubStatusContent">
+                                        <div class="session-status-indicator">
+                                            <span class="pulse-dot"></span>
+                                            <span id="hubSystemStatus">System Online</span>
+                                        </div>
+                                        <div class="session-metrics">
+                                            <div class="metric">
+                                                <span class="metric-label">Focus</span>
+                                                <span class="metric-value" id="hubFocusTime">00:00</span>
+                                            </div>
+                                            <div class="metric">
+                                                <span class="metric-label">Break</span>
+                                                <span class="metric-value" id="hubBreakTime">00:00</span>
+                                            </div>
+                                            <div class="metric">
+                                                <span class="metric-label">Idle</span>
+                                                <span class="metric-value" id="hubIdleTime">00:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Widget: Countdown -->
+                                <div class="hub-widget" data-widget="countdown" style="grid-area: countdown;">
+                                    <div class="hub-widget-header">
+                                        <span class="hub-drag-handle" title="Drag to move">⠿</span>
+                                        <span>Countdown</span>
+                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="countdown" title="Resize">⤡</button>
+                                    </div>
+                                    <div class="hub-widget-content" id="hubCountdownContent">
+                                        <div id="hubCountdownDisplay"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Widget: Today's Sessions -->
+                                <div class="hub-widget" data-widget="sessions" style="grid-area: sessions;">
+                                    <div class="hub-widget-header">
+                                        <span class="hub-drag-handle" title="Drag to move">⠿</span>
+                                        <span>Today's Sessions</span>
+                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="sessions" title="Resize">⤡</button>
+                                    </div>
+                                    <div class="hub-widget-content" id="hubSessionsContent">
+                                        <div class="session-history-empty">
+                                            <div style="font-size: 1.5rem; margin-bottom: 6px;">📊</div>
+                                            <div style="color: var(--text-muted); font-size: 0.8rem;">No sessions yet</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== WIDGETS ===== -->
+                    <div class="dash-card" data-card-id="widgets" style="grid-column: 1 / -1;">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;">📦 Custom Widgets</h3>
+                                <div class="card-controls">
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="widgets" title="Resize">⤡</button>
+                                </div>
+                            </div>
+                    <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
+                    <div id="dashQuickLinks" class="dash-quick-links" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+                        <div style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
+                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">📂 Current Lesson</div>
+                            <div id="dashRecentLessons" style="font-size:0.9rem;color:var(--text-secondary);">No open lesson</div>
+                        </div>
+                        <div style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
+                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">🔗 Recent Bookmarks</div>
+                            <div id="dashRecentLibs" style="font-size:0.9rem;color:var(--text-secondary);">No bookmarks yet</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Notes Widget -->
+                    <div id="quickNotesWidget" style="margin-top: 18px; background: var(--bg-primary); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">📝 Quick Notes</div>
+                            <button id="clearNotesBtn" class="matrix-btn" style="padding: 2px 8px; font-size: 0.7rem;" title="Clear all notes">Clear</button>
+                        </div>
+                        <textarea id="quickNotesInput" placeholder="Jot down quick thoughts, reminders, or ideas..." style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; font-family: inherit;"></textarea>
+                        <div id="quickNotesList" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+
+                    <div id="weatherWidgetContainer" class="dash-widget-placeholder" style="margin-top:18px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== STATS ===== -->
+                    <div class="dash-stats-container">
+
+                        <div class="dash-card stat-card" data-card-id="stat-tasks" data-action="switchView" data-view="todo-view"
+                            role="button" tabindex="0"
+                            aria-label="View Master To-Do">
+                            <div class="card-glow-border"></div>
+                            <div class="card-inner">
+                                <div class="card-header-drag" style="margin-bottom:8px;">
+                                    <span class="stat-icon">✓</span>
+                                    <div class="card-controls">
+                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-tasks" title="Resize">⤡</button>
+                                    </div>
+                                </div>
+                                <span class="stat-info">
+                                    <span class="stat-value" id="statTasksDone">0 / 0</span>
+                                    <span class="stat-title">Tasks Done</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="dash-card stat-card" data-card-id="stat-schedule" data-action="switchView" data-view="schedule-view"
+                            role="button"
+                            tabindex="0" aria-label="View Weekly Schedule">
+                            <div class="card-glow-border"></div>
+                            <div class="card-inner">
+                                <div class="card-header-drag" style="margin-bottom:8px;">
+                                    <span class="stat-icon">▦</span>
+                                    <div class="card-controls">
+                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-schedule" title="Resize">⤡</button>
+                                    </div>
+                                </div>
+                                <span class="stat-info">
+                                    <span class="stat-value" id="statTodayTasks">0</span>
+                                    <span class="stat-title">Today's Tasks</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="dash-card stat-card" data-card-id="stat-lessons" data-action="switchView" data-view="lessons-view"
+                            role="button"
+                            tabindex="0" aria-label="View Lessons">
+                            <div class="card-glow-border"></div>
+                            <div class="card-inner">
+                                <div class="card-header-drag" style="margin-bottom:8px;">
+                                    <span class="stat-icon">▣</span>
+                                    <div class="card-controls">
+                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-lessons" title="Resize">⤡</button>
+                                    </div>
+                                </div>
+                                <span class="stat-info">
+                                    <span class="stat-value" id="statLessonFolders">0</span>
+                                    <span class="stat-title">Lesson Folders</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="dash-card stat-card" data-card-id="stat-streak" data-action="switchView" data-view="analytics-view"
+                            role="button"
+                            tabindex="0" aria-label="View Analytics">
+                            <div class="card-glow-border"></div>
+                            <div class="card-inner">
+                                <div class="card-header-drag" style="margin-bottom:8px;">
+                                    <span class="stat-icon">🔥</span>
+                                    <div class="card-controls">
+                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-streak" title="Resize">⤡</button>
+                                    </div>
+                                </div>
+                                <span class="stat-info">
+                                    <span class="stat-value" id="statStreak">0</span>
+                                    <span class="stat-title">Day Streak</span>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ===== FOCUS MODE BADGE ===== -->
+                <div class="focus-mode-badge" id="focusModeBadge">🧘 Focus Mode Active</div>
+
+                <!-- ===== CARD VISIBILITY OVERLAY ===== -->
+                <div class="card-visibility-overlay" id="cardVisibilityOverlay">
+                    <div class="card-visibility-panel">
+                        <h3>⚙️ Customize Dashboard</h3>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 16px 0;">Toggle cards on/off. Hidden cards won't appear on the dashboard.</p>
+                        <div id="cardVisibilityList"></div>
+                        <button class="vis-close-btn" data-action="closeCardVisibility">Done</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== LIBRARY VIEW ===== -->
+            <section id="library-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Resource Hub</p>
+                        <h1>Library</h1>
+                    </div>
+                </div>
+                <div class="library-toolbar" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+                    <input type="text" id="library-search" placeholder="Search library..."
+                        style="flex:1;min-width:200px;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;" />
+                    <select id="library-category-filter"
+                        style="padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:0.9rem;">
+                        <option value="all">All Categories</option>
+                        <option value="link">Link</option>
+                        <option value="video">Video</option>
+                        <option value="document">Document</option>
+                        <option value="code">Code</option>
+                    </select>
+                    <button class="matrix-btn" data-action="toggleLibraryForm">+
+                        Add Item</button>
+                </div>
+                <div id="library-add-form"
+                    style="display:none;margin-bottom:20px;padding:16px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <input type="text" id="library-title" placeholder="Title"
+                            style="padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-primary);" />
+                        <input type="text" id="library-url" placeholder="URL"
+                            style="padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-primary);" />
+                        <select id="library-category"
+                            style="padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-primary);">
+                            <option value="link">Link</option>
+                            <option value="video">Video</option>
+                            <option value="document">Document</option>
+                            <option value="code">Code</option>
+                        </select>
+                        <input type="text" id="library-tags" placeholder="Tags (comma separated)"
+                            style="padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-primary);" />
+                    </div>
+                    <button class="matrix-btn" data-action="addLibraryItem" style="margin-top:12px;">Save Item</button>
+                </div>
+                <div id="libraryItemsGrid" class="library-items-grid"></div>
+            </section>
+
+            <!-- ===== KNOWLEDGE GRAPH VIEW ===== -->
+            <section id="graph-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Visualise Your Knowledge</p>
+                        <h1>Knowledge Graph</h1>
+                    </div>
+                    <button class="matrix-btn" data-action="renderKnowledgeGraph" title="Refresh graph">⟳ Refresh</button>
+                </div>
+                <div id="graphContainer"
+                    style="width:100%; height:calc(100vh - 200px); background: var(--bg-primary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                </div>
+            </section>
+
+            <!-- ===== SCHEDULE VIEW ===== -->
+            <section id="schedule-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Schedule</p>
+                        <h1>Weekly Schedule</h1>
+                    </div>
+                    <button class="matrix-btn" data-action="exportToIcal">📅 Export iCal</button>
+                </div>
+                <section class="calendar-section-wrapper">
+                    <div class="calendar" id="calendar"></div>
+                </section>
+                <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                    <div class="calendar-month-view">
+                        <div class="calendar-month-header"
+                            style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                            <button class="matrix-btn" data-action="changeMonth" data-delta="-1">‹</button>
+                            <h3 id="calendarMonthTitle" style="margin: 0;">January 2026</h3>
+                            <button class="matrix-btn" data-action="changeMonth" data-delta="1">›</button>
+                        </div>
+                        <div id="calendarMonthGrid" class="calendar-month-grid"
+                            style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px;">
+                        </div>
+                        <div id="calendarSelectedDate" style="font-weight: 600; color: var(--text-primary);"></div>
+                        <div id="calendarEventsList" style="margin-top: 8px;"></div>
+                    </div>
+                </div>
+
+                <!-- ===== DATE COUNTDOWN PANEL ===== -->
+                <div id="dateCountdownPanel" style="display: none; margin-top: 24px;"></div>
+            </section>
+
+            <!-- ===== HABITS VIEW ===== -->
+            <section id="habits-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Daily Habits</p>
+                        <h1>Habit Tracker</h1>
+                    </div>
+                    <button class="matrix-btn" data-action="addHabit">+ Add Habit</button>
+                </div>
+                <div id="habitsContainer" class="habits-grid"></div>
+            </section>
+
+            <!-- ===== JOURNAL VIEW ===== -->
+            <section id="journal-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Daily Reflections</p>
+                        <h1>Journal</h1>
+                    </div>
+                </div>
+
+                <div class="journal-stats-bar" id="journalStatsBar"></div>
+
+                <div class="journal-container" id="journalEntriesList"></div>
+            </section>
+
+            <!-- ===== READING LIST VIEW ===== -->
+            <section id="reading-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Track Your Reading</p>
+                        <h1>Reading List</h1>
+                    </div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div class="reading-stats-bar" id="readingStatsBar"></div>
+
+                <!-- Toolbar -->
+                <div class="reading-toolbar">
+                    <input type="text" id="readingSearch" class="reading-search" placeholder="🔍 Search reading list..." data-action="searchReadingList">
+                    <div class="reading-filter-btns">
+                        <button class="reading-filter-btn active" data-filter="all" data-action="filterReadingList">All</button>
+                        <button class="reading-filter-btn" data-filter="to-read" data-action="filterReadingList">To Read</button>
+                        <button class="reading-filter-btn" data-filter="reading" data-action="filterReadingList">Reading</button>
+                        <button class="reading-filter-btn" data-filter="finished" data-action="filterReadingList">Finished</button>
+                    </div>
+                    <button class="matrix-btn" data-action="toggleReadingForm">+ Add Item</button>
+                </div>
+
+                <!-- Add/Edit Form -->
+                <div id="readingAddForm" class="reading-add-form">
+                    <div class="reading-form-grid">
+                        <div class="reading-form-group">
+                            <label class="reading-form-label">Title *</label>
+                            <input type="text" id="readingTitle" class="reading-form-input" placeholder="Book or article title" required>
+                        </div>
+                        <div class="reading-form-group">
+                            <label class="reading-form-label">Author</label>
+                            <input type="text" id="readingAuthor" class="reading-form-input" placeholder="Author name">
+                        </div>
+                        <div class="reading-form-group">
+                            <label class="reading-form-label">URL</label>
+                            <input type="text" id="readingUrl" class="reading-form-input" placeholder="https://...">
+                        </div>
+                        <div class="reading-form-group">
+                            <label class="reading-form-label">Type</label>
+                            <select id="readingType" class="reading-form-select">
+                                <option value="book">📖 Book</option>
+                                <option value="article">📄 Article</option>
+                                <option value="document">📝 Document</option>
+                                <option value="video">🎥 Video</option>
+                            </select>
+                        </div>
+                        <div class="reading-form-group">
+                            <label class="reading-form-label">Status</label>
+                            <select id="readingStatus" class="reading-form-select">
+                                <option value="to-read">To Read</option>
+                                <option value="reading">Reading</option>
+                                <option value="finished">Finished</option>
+                            </select>
+                        </div>
+                        <div class="reading-form-group full-width">
+                            <label class="reading-form-label">Notes</label>
+                            <textarea id="readingNotes" class="reading-form-textarea" placeholder="Your thoughts, key takeaways, or review..."></textarea>
+                        </div>
+                    </div>
+                    <div class="reading-form-actions">
+                        <button class="matrix-btn" data-action="cancelReadingEdit">Cancel</button>
+                        <button id="readingAddBtn" class="matrix-btn" data-action="saveReadingItem" style="background: var(--accent-gradient); color: #fff; border: none;">Add Item</button>
+                    </div>
+                </div>
+
+                <!-- Items Grid -->
+                <div id="readingItemsGrid" class="reading-items-grid"></div>
+            </section>
+
+            <!-- ===== TUTORIAL VIEW ===== -->
+            <section id="tutorial-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Documentation</p>
+                        <h1>Tutorial & Guide</h1>
+                    </div>
+                    <button class="matrix-btn" data-action="openTutorialGuide">📄 Open Full Guide</button>
+                </div>
+
+                <!-- Tutorial Hero -->
+                <div class="tutorial-hero" style="background: linear-gradient(135deg, rgba(124, 109, 240, 0.1) 0%, rgba(124, 109, 240, 0.05) 100%); border: 1px solid rgba(124, 109, 240, 0.2); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; text-align: center;">
+                    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">🎓 Interactive Tutorials</h2>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Click any section below to start an interactive walkthrough. We'll guide you through each feature step-by-step!</p>
+                </div>
+
+                <!-- Tutorial Cards Grid (generated by JS) -->
+                <div id="tutorialCardsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;"></div>
+
+                <!-- Quick Start Section -->
+                <div class="dash-card" style="margin-top: 24px; grid-column: span 2;">
+                    <div class="card-inner" style="padding: 24px;">
+                        <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">📖 Full Documentation</h3>
+                        <p style="margin: 0 0 16px 0; color: var(--text-secondary); font-size: 0.9rem;">For comprehensive documentation, tips, and advanced features, check out the complete guide.</p>
+                        <button class="matrix-btn" data-action="openTutorialGuide" style="background: var(--accent-gradient); color: #fff; border: none; padding: 12px 24px; font-size: 0.95rem;">
+                            📄 Open Full Guide in New Tab
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== FOCUS TIMER VIEW ===== -->
+            <section id="timer-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Focus Tools</p>
+                        <h1>Simple Countdown Timer</h1>
+                    </div>
+                </div>
+
+                <!-- ===== SESSION TRACKER (Auto‑linked to Schedule) ===== -->
+                <div id="sessionTracker" class="session-tracker-enhanced" style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+                    <div class="session-tracker-header">
+                        <div class="session-tracker-title">Session Tracker</div>
+                        <div class="task-selector-wrapper">
+                            <select id="taskSelector" class="task-selector">
+                                <option value="">— Select a task —</option>
+                            </select>
+                            <span id="autoLabelBadge" class="auto-link-badge">🔗 Linked</span>
+                        </div>
+                        <div class="scheduled-input-wrapper">
+                            <label>Scheduled</label>
+                            <input type="number" id="trackerScheduled" value="120" min="1" class="scheduled-input">
+                            <span>mins</span>
+                        </div>
+                    </div>
+
+                    <div class="session-time-display">
+                        <div class="time-block focus-block">
+                            <div class="time-label">Focus Time</div>
+                            <div class="time-value" id="focusTimeDisplay">00:00</div>
+                        </div>
+                        <div class="time-block break-block">
+                            <div class="time-label">Break Time</div>
+                            <div class="time-value" id="breakTimeDisplay">00:00</div>
+                        </div>
+                        <div class="time-block idle-block">
+                            <div class="time-label">Idle Time</div>
+                            <div class="time-value" id="idleTimeDisplay">00:00</div>
+                        </div>
+                        <div class="time-block total-block">
+                            <div class="time-label">Total Time</div>
+                            <div class="time-value" id="totalTimeDisplay">00:00</div>
+                        </div>
+                        <div class="time-block progress-block">
+                            <div class="time-label">Progress</div>
+                            <div class="time-value" id="progressPercent">0%</div>
+                            <div class="time-subtitle">of <span id="scheduledDisplay">120</span> min</div>
+                        </div>
+                    </div>
+
+                    <div class="session-progress">
+                        <div id="progressFill" class="session-progress-fill" style="width: 0%;"></div>
+                    </div>
+
+                    <div class="session-actions">
+                        <button id="resetTrackerBtn" class="session-btn session-btn-reset">Reset Log</button>
+                        <button id="endSessionBtn" class="session-btn session-btn-end">✅ End Session & Log</button>
+                    </div>
+                </div>
+
+                <!-- ===== CURRENT SESSION TRACKER (Per-Task) ===== -->
+                <div id="currentSessionTracker" class="session-tracker-enhanced current-session-tracker" style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f97316;">
+                    <div class="session-tracker-header">
+                        <div class="session-tracker-title">Current Session <span style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">(resets per task)</span></div>
+                        <div class="current-session-task-info" id="currentSessionTaskInfo" style="font-size:0.85rem;color:var(--text-secondary);">
+                            <span id="currentSessionTaskName">No active task</span>
+                            <span id="currentSessionTaskTime" style="color:var(--text-muted);font-size:0.75rem;"></span>
+                        </div>
+                    </div>
+
+                    <div class="session-time-display session-time-display-4">
+                        <div class="time-block focus-block current-focus-block">
+                            <div class="time-label">Focus Time</div>
+                            <div class="time-value" id="sessionFocusDisplay">00:00</div>
+                        </div>
+                        <div class="time-block break-block current-break-block">
+                            <div class="time-label">Break Time</div>
+                            <div class="time-value" id="sessionBreakDisplay">00:00</div>
+                        </div>
+                        <div class="time-block idle-block current-idle-block">
+                            <div class="time-label">Idle Time</div>
+                            <div class="time-value" id="sessionIdleDisplay">00:00</div>
+                        </div>
+                        <div class="time-block total-block current-total-block">
+                            <div class="time-label">Total Time</div>
+                            <div class="time-value" id="sessionTotalDisplay">00:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== SIMPLE COUNTDOWN TIMER ===== -->
+                <div class="simple-timer-card" style="max-width: 500px; margin: 0 auto; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
+
+                    <!-- Progress Ring -->
+                    <div class="timer-progress-ring">
+                        <svg viewBox="0 0 280 280">
+                            <defs>
+                                <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#7c6df0;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="ring-bg" cx="140" cy="140" r="130" />
+                            <circle id="timerRingGlow" class="ring-glow" cx="140" cy="140" r="130" />
+                            <circle id="timerRingFill" class="ring-fill" cx="140" cy="140" r="130" />
+                        </svg>
+                        <div class="timer-display-container">
+                            <div id="countdownDisplay" class="timer-display-main">25:00</div>
+                            <div class="timer-display-label">Focus Timer</div>
+                        </div>
+                    </div>
+
+                    <!-- Timer State Indicator -->
+                    <div id="timerStateIndicator" class="timer-state-indicator">
+                        <span class="state-dot"></span>
+                        <span id="timerStateText">Ready</span>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
+                        <button id="startBtn" style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: var(--accent-gradient); border: none; color: #fff; cursor: pointer; font-size: 1rem;">Start</button>
+                        <button id="pauseBtn" style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;" disabled>Pause</button>
+                        <button id="resetBtn" style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;">Reset</button>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
+                        <button class="preset-btn" data-time="5" style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">5 min</button>
+                        <button class="preset-btn active" data-time="25" style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: var(--accent-gradient); color: #fff; border: none; cursor: pointer;">25 min</button>
+                        <button class="preset-btn" data-time="50" style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">50 min</button>
+                    </div>
+
+                    <!-- Custom Timers -->
+                    <div id="customTimersContainer" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;"></div>
+
+                    <!-- Add Custom Timer -->
+                    <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 16px;">
+                        <input type="number" id="customTimerInput" placeholder="Custom minutes..." min="1" max="999"
+                            style="padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; width: 140px; text-align: center; outline: none;">
+                        <button id="addCustomTimerBtn" style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); border: 1px solid var(--accent-1); color: var(--accent-1); cursor: pointer; transition: var(--transition);">
+                            + Add Timer
+                        </button>
+                    </div>
+
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">Simple countdown timer</p>
+                </div>
+
+                <!-- ===== MODE TOGGLE (always visible) ===== -->
+                <div class="pomodoro-mode-toggle" style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
+                    <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
+                    <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
+                </div>
+
+                <!-- ===== POMODORO MODE ===== -->
+                <div id="pomodoroShell" class="pomodoro-shell" style="max-width:500px;margin:0 auto;">
+
+                    <div class="pomodoro-ring-container" id="pomodoroRingContainer">
+                        <svg viewBox="0 0 280 280">
+                            <defs>
+                                <linearGradient id="pomodoroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="pomodoro-ring-bg" cx="140" cy="140" r="130" />
+                            <circle id="pomodoroRingGlow" class="pomodoro-ring-glow" cx="140" cy="140" r="130" />
+                            <circle id="pomodoroRingFill" class="pomodoro-ring-fill" cx="140" cy="140" r="130" />
+                        </svg>
+                        <div class="timer-display-container">
+                            <div id="pomodoroDisplay" class="pomodoro-display">25:00</div>
+                            <div id="pomodoroLabel" class="pomodoro-label">Pomodoro</div>
+                        </div>
+                    </div>
+
+                    <div id="pomodoroPhase" class="pomodoro-phase ready">
+                        <span class="state-dot"></span> Ready
+                    </div>
+
+                    <div id="pomodoroCycleBar" class="pomodoro-cycle-bar"></div>
+
+                    <div class="pomodoro-controls">
+                        <button id="pomodoroStartBtn" class="pomodoro-btn pomodoro-btn-primary">Start</button>
+                        <button id="pomodoroPauseBtn" class="pomodoro-btn pomodoro-btn-secondary" style="display:none;">Pause</button>
+                        <button id="pomodoroResetBtn" class="pomodoro-btn pomodoro-btn-secondary">Reset</button>
+                    </div>
+
+                    <div class="pomodoro-stats">
+                        <div class="pomodoro-stat">
+                            <span class="pomodoro-stat-value" id="pomoStatCycles">0</span>
+                            <span class="pomodoro-stat-label">This Set</span>
+                        </div>
+                        <div class="pomodoro-stat">
+                            <span class="pomodoro-stat-value" id="pomoStatFocus">0m</span>
+                            <span class="pomodoro-stat-label">Focus Today</span>
+                        </div>
+                        <div class="pomodoro-stat">
+                            <span class="pomodoro-stat-value" id="pomoStatToday">0</span>
+                            <span class="pomodoro-stat-label">Pomodoros</span>
+                        </div>
+                    </div>
+
+                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">25 min focus · 5 min break · 15 min long break</p>
+                </div>
+            </section>
+
+            <!-- ===== WEATHER VIEW ===== -->
+            <section id="weather-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Forecast</p>
+                        <h1>Weather</h1>
+                    </div>
+                </div>
+                <div id="weather-view-container"></div>
+            </section>
+
+            <!-- ===== MASTER TO-DO VIEW ===== -->
+            <section id="todo-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Focus Tools</p>
+                        <h1>Master To-Do</h1>
+                    </div>
+                </div>
+                <div class="todo-view-shell">
+                    <div class="dash-card todo-page-card">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header">
+                                <h3>Master To-Do</h3>
+                                <button class="dash-add-todo-btn" data-action="addDashTodo">+ Add task</button>
+                            </div>
+                            <p class="todo-view-hint">These items sync with the dashboard and stay saved locally.</p>
+                            <ul class="strike-list" id="todoStrikeList"></ul>
+                        </div>
+                    </div>
+                    <div class="dash-card todo-summary-card">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header">
+                                <h3>Momentum</h3>
+                            </div>
+                            <div class="todo-summary-grid">
+                                <div class="todo-summary-stat"> <strong id="todoCount">0</strong> <span>Tasks</span> </div>
+                                <div class="todo-summary-stat"> <strong id="todoDoneCount">0</strong> <span>Done</span>
+                                </div>
+                                <div class="todo-summary-stat"> <strong id="todoPercent">0%</strong> <span>Complete</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== LESSONS VIEW ===== -->
+            <section id="lessons-view" class="hub-view lessons-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Curriculum Ledger</p>
+                        <h1>Lessons</h1>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <button class="matrix-btn" data-action="exportBackup">Export Backup</button>
+                        <button class="matrix-btn" data-action="exportPageAsMarkdown">📄 Export MD</button>
+                        <button class="matrix-btn secondary" data-action="importBackup">Import Backup</button>
+                    <input id="backup-import-input" type="file" accept="application/json"
+                        data-action="importBackup" hidden>
+
+                    </div>
+                </div>
+                <div class="export-dropdown">
+                    <button class="matrix-btn export-toggle" data-action="toggleExportOptions">📤 Export / Print ▾</button>
+                    <div class="export-options" id="exportOptions" style="display:none;">
+                        <button class="matrix-btn" data-action="exportBackup">💾 Export Backup</button>
+                        <button class="matrix-btn" data-action="exportPageAsMarkdown">📄 Export MD</button>
+                        <button class="matrix-btn" data-action="exportPageAsHTML">📄 Export HTML</button>
+                        <button class="matrix-btn" data-action="windowPrint">🖨️ Print / PDF</button>
+                        <button class="matrix-btn secondary" data-action="triggerImportBackup">📂 Import
+                            Backup</button>
+                    </div>
+                </div>
+
+                <div class="lesson-workspace-shell">
+                    <!-- Sidebar -->
+                    <aside class="sidebar-panel lesson-menu-panel" id="app-sidebar">
+                        <div class="sidebar-header">
+                            <span class="sidebar-title">📂 Explorer</span>
+                        </div>
+                        <div class="explorer-search">
+                            <input type="text" id="lessonSearchInput" placeholder="Search lessons..."
+                                data-action="searchLessons" />
+                            <button class="search-clear" data-action="clearSearch" style="display:none;">✕</button>
+                        </div>
+                        <div id="dynamic-lesson-tree" class="lesson-tree-wrapper"></div>
+                    </aside>
+
+                    <!-- Context menu -->
+                    <div id="lessonContextMenu" class="custom-menu" style="display:none; position:fixed; z-index:9999;">
+                    </div>
+
+                    <!-- Main Editor -->
+                    <section class="main-workspace-content lesson-document-panel" id="app-main-content">
+                        <div class="workspace-utility-bar">
+                            <span class="view-status-indicator">Live editing node matrix</span>
+                            <span style="display:flex; align-items:center; gap:8px;">
+                                <span id="saveIndicator" style="display:none; font-size:0.7rem; color:#34d399;">💾
+                                    Saved</span>
+                                <button id="toggleFindBtn" class="utility-toggle-btn" data-action="toggleFindBar">🔍
+                                    Find</button>
+                            </span>
+                            <button id="toggle-creator-btn" class="utility-toggle-btn" data-action="toggleSidebar">Hide
+                                Lesson Menu</button>
+                        </div>
+
+                        <!-- ===== FIND BAR (Search within page) ===== -->
+                        <div class="find-bar"
+                            style="display:none; align-items:center; gap:8px; padding:4px 12px; background:var(--bg-primary); border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-bottom:8px;">
+                            <span style="font-size:0.7rem; color:var(--text-muted);">🔍</span>
+                            <input type="text" id="findInput" placeholder="Find in page..."
+                                style="flex:1; background:transparent; border:none; outline:none; color:var(--text-primary); font-size:0.85rem; padding:4px 0;" />
+                            <span id="findCount" style="font-size:0.65rem; color:var(--text-muted);">0/0</span>
+                            <button id="findPrev" class="matrix-btn"
+                                style="padding:2px 8px; font-size:0.7rem;">‹</button>
+                            <button id="findNext" class="matrix-btn"
+                                style="padding:2px 8px; font-size:0.7rem;">›</button>
+                            <button id="findClose" class="matrix-btn"
+                                style="padding:2px 8px; font-size:0.7rem;">✕</button>
+                        </div>
+
+                        <header>
+                            <div class="header-main">
+                                <div>
+                                    <p class="view-kicker">Curriculum Ledger</p>
+                                    <h1 id="active-page-headline">Select a page from the tree view to open a workspace
+                                    </h1>
+                                </div>
+                            </div>
+                        </header>
+
+                        <div class="ledger-container">
+                            <div id="live-ledger-output" class="notion-editor-surface"></div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- ===== SESSION DETAILS MODAL ===== -->
+            <div id="sessionDetailsModal" class="diagram-modal">
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header-bar">
+                        <h2 class="modal-header-title">📊 Session Details</h2>
+                        <button class="close-btn" data-action="closeSessionDetailsModal">✕</button>
+                    </div>
+                    <div id="sessionDetailsContent"></div>
+                </div>
+            </div>
+
+            <!-- ===== TUTORIAL GUIDE MODAL ===== -->
+            <div id="tutorialGuideModal" class="diagram-modal">
+                <div class="modal-content" style="max-width: 900px;">
+                    <div class="modal-header-bar">
+                        <h2 class="modal-header-title">📄 Workspace Hub — Full Guide</h2>
+                        <button class="close-btn" data-action="closeTutorialGuide">✕</button>
+                    </div>
+                    <div id="tutorialGuideContent" style="line-height: 1.7;">
+                        <p style="color: var(--text-muted); font-style: italic;">Loading guide...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ANALYTICS VIEW ===== -->
+            <section id="analytics-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Insights Engine</p>
+                        <h1>Analytics & Reports</h1>
+                    </div>
+                    <button class="matrix-btn" data-action="renderAnalytics" title="Refresh data">⟳ Refresh</button>
+                </div>
+
+                <!-- Focus Session History -->
+                <div class="dash-card" style="grid-column: span 2; margin-bottom:24px;">
+                    <div class="card-header">
+                        <h3>⏱️ Focus Session History</h3>
+                    </div>
+                    <div id="focusHistoryContainer"></div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="analytics-stats-grid" id="analyticsStatsGrid"></div>
+
+                <!-- Charts & Insights -->
+                <div class="analytics-charts-grid">
+                    <div class="dash-card">
+                        <div class="card-header">
+                            <h3>📂 Category Breakdown</h3>
+                        </div>
+                        <div id="categoryBreakdownContainer"></div>
+                    </div>
+                    <div class="dash-card">
+                        <div class="card-header">
+                            <h3>⚡ Peak Performance Hours</h3>
+                        </div>
+                        <div id="optimalTimesContainer"></div>
+                    </div>
+                    <div class="dash-card" style="grid-column: span 2;">
+                        <div class="card-header">
+                            <h3>⚠️ Scheduling Conflicts</h3>
+                        </div>
+                        <div id="conflictsContainer"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== FLOATING QUICK ADD BUTTON ===== -->
+            <button id="quickAddBtn" class="fab-btn" data-action="quickAdd"
+                title="Quick Add Task for Today"
+                aria-label="Quick Add Task for Today">
+                +
+            </button>
+
+            <!-- ===== JOURNAL QUICK ADD BUTTON ===== -->
+            <button id="journalQuickAddBtn" class="fab-btn" title="Quick Journal Entry"
+                aria-label="Quick Journal Entry">
+                📝
+            </button>
+
+            <!-- ===== SLASH COMMAND DROPDOWN ===== -->
+            <div id="slashCommandDropdown"
+                style="display:none; position:fixed; z-index:9999; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); min-width:200px; max-height:300px; overflow-y:auto; box-shadow:var(--shadow-elevated); padding:4px 0; backdrop-filter:blur(12px);">
+                <div class="slash-item" data-type="h1"># Heading 1</div>
+                <div class="slash-item" data-type="h2">## Heading 2</div>
+                <div class="slash-item" data-type="h3">### Heading 3</div>
+                <div class="slash-item" data-type="bullet">• Bullet list</div>
+                <div class="slash-item" data-type="quote">" Quote</div>
+                <div class="slash-item" data-type="code">{ } Code</div>
+                <div class="slash-item" data-type="callout">💡 Callout</div>
+                <div class="slash-item" data-type="toggle">▸ Toggle</div>
+                <div class="slash-item" data-type="embed">🔗 Embed</div>
+                <div class="slash-item" data-type="divider">— Divider</div>
+            </div>
+
+            <!-- Backdrop moved outside hub-shell to avoid clipping -->
+        </main>
+    </div>
+
+    <!-- ===== BACKDROP OVERLAY (for mobile sidebar) ===== -->
+    <div id="sidebarBackdrop"
+        style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);"
+        data-action="toggleSidebarMenu"></div>
+
+    <!-- ============================================================
+    CUSTOM MODAL (for folder/page creation & renaming)
+    ============================================================ -->
+    <div id="customModal" style="display:none; position:fixed; inset:0; z-index:10000;
+            background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
+            align-items:center; justify-content:center;">
+        <div class="custom-modal-content" style="background:var(--bg-secondary);
+                border:1px solid var(--border-color); border-radius:var(--radius-lg);
+                padding:32px 40px; max-width:420px; width:90%;
+                box-shadow:var(--shadow-elevated); animation:modalZoomIn 0.25s ease;">
+            <h3 id="customModalTitle"
+                style="margin:0 0 8px 0; font-size:1.1rem; font-weight:600; color:var(--text-primary);">Create Folder
+            </h3>
+            <p id="customModalDesc" style="margin:0 0 16px 0; font-size:0.85rem; color:var(--text-muted);">Enter a name
+                for the new folder:</p>
+            <div id="customModalBody">
+                <input type="text" id="customModalInput" placeholder="Folder name..." style="width:100%; padding:10px 14px; border-radius:var(--radius-sm);
+                    border:1px solid var(--border-color); background:var(--bg-primary);
+                    color:var(--text-primary); font-size:0.95rem; outline:none; transition:var(--transition);" />
+                <div id="customModalSelectContainer" style="display:none; margin-top:10px;">
+                    <select id="customModalSelect" style="width:100%; padding:10px 14px; border-radius:var(--radius-sm);
+                        border:1px solid var(--border-color); background:var(--bg-primary);
+                        color:var(--text-primary); font-size:0.95rem; outline:none;">
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                <button id="customModalCancel" class="matrix-btn" style="min-width:80px;">Cancel</button>
+                <button id="customModalConfirm" class="matrix-btn"
+                    style="min-width:80px; background:var(--accent-gradient); color:#fff; border:none;">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    COLOR PICKER MODAL
+    ============================================================ -->
+    <div id="colorPickerModal" style="display:none; position:fixed; inset:0; z-index:10000;
+            background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
+            align-items:center; justify-content:center;">
+        <div class="custom-modal-content" style="background:var(--bg-secondary);
+                border:1px solid var(--border-color); border-radius:var(--radius-lg);
+                padding:32px 40px; max-width:420px; width:90%;
+                box-shadow:var(--shadow-elevated); animation:modalZoomIn 0.25s ease;">
+            <h3 style="margin:0 0 8px 0; font-size:1.1rem; font-weight:600; color:var(--text-primary);">Choose Color
+            </h3>
+            <p style="margin:0 0 16px 0; font-size:0.85rem; color:var(--text-muted);">Pick a color for the block:</p>
+            <input type="color" id="colorPickerInput" value="#7c6df0"
+                style="width:100%; height:60px; padding:0; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:transparent; cursor:pointer;" />
+            <div style="display:flex; gap:12px; margin-top:12px; align-items:center;">
+                <label
+                    style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">
+                    <input type="checkbox" id="colorPickerBackground" /> Apply as background
+                </label>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                <button id="colorPickerCancel" class="matrix-btn" style="min-width:80px;">Cancel</button>
+                <button id="colorPickerConfirm" class="matrix-btn"
+                    style="min-width:80px; background:var(--accent-gradient); color:#fff; border:none;">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    LANGUAGE PICKER MODAL
+    ============================================================ -->
+    <div id="languagePickerModal" style="display:none; position:fixed; inset:0; z-index:10000;
+            background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
+            align-items:center; justify-content:center;">
+        <div class="custom-modal-content" style="background:var(--bg-secondary);
+                border:1px solid var(--border-color); border-radius:var(--radius-lg);
+                padding:32px 40px; max-width:460px; width:90%;
+                box-shadow:var(--shadow-elevated); animation:modalZoomIn 0.25s ease;">
+            <h3 style="margin:0 0 8px 0; font-size:1.1rem; font-weight:600; color:var(--text-primary);">Choose Language
+            </h3>
+            <p style="margin:0 0 16px 0; font-size:0.85rem; color:var(--text-muted);">Select a programming language for
+                this code block:</p>
+            <div id="languagePickerGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+                <button id="languagePickerCancel" class="matrix-btn" style="min-width:80px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    TASK ADD MODAL
+    ============================================================ -->
+    <div id="taskAddModal" style="display:none; position:fixed; inset:0; z-index:10000;
+            background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
+            align-items:center; justify-content:center;">
+        <div class="custom-modal-content" style="background:var(--bg-secondary);
+                border:1px solid var(--border-color); border-radius:var(--radius-lg);
+                padding:32px 40px; max-width:480px; width:90%;
+                box-shadow:var(--shadow-elevated); animation:modalZoomIn 0.25s ease;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div>
+                    <h3 style="margin:0; font-size:1.1rem; font-weight:600; color:var(--text-primary);">✨ New Task</h3>
+                    <p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-muted);">Add a new task to your master to-do list</p>
+                </div>
+                <button class="close-btn" data-action="closeTaskModal" style="width:32px; height:32px; font-size:1.5rem;">✕</button>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Task Description</label>
+                <input type="text" id="taskAddInput" placeholder="What needs to be done?" style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; transition:var(--transition);" autofocus />
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:24px;">
+                <button class="matrix-btn" data-action="closeTaskModal" style="min-width:80px;">Cancel</button>
+                <button class="matrix-btn" data-action="confirmAddTask" style="min-width:80px; background:var(--accent-gradient); color:#fff; border:none; font-weight:600;">✨ Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    AMBIENT MUSIC WIDGET
+    ============================================================ -->
+    <div class="lofi-widget" id="lofiWidget">
+        <div class="lofi-header">
+            <div class="lofi-title">Ambient Mix Station</div>
+            <button class="lofi-toggle-btn" data-action="toggleLofiConsole" id="lofiToggleBtn">−</button>
+        </div>
+        <div class="lofi-body" id="lofiBody">
+            <!-- Local Audio Player with cache-busting -->
+            <audio id="rainAudioEngine" controls loop style="width:100%; border-radius:8px; margin-bottom:12px;">
+                <source src="Assets/Rain-Music.mp3?v=2" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+
+            <!-- Rain Deck -->
+            <div class="rain-deck">
+                <div class="rain-info">
+                    <span>Continuous Rain Layer</span>
+                    <button id="rainPlayBtn" data-action="toggleRainSound">Play Rain</button>
+                </div>
+                    <input type="range" id="rainVolume" min="0" max="1" step="0.1" value="0.5"
+                    data-action="changeRainVolume">
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== JOURNAL EDITOR MODAL ===== -->
+    <div id="journalEditorModal" class="journal-editor-modal">
+        <div class="journal-editor-content">
+            <div class="journal-editor-header">
+                <h3 id="journalEditorTitle">New Journal Entry</h3>
+                <p>Document your thoughts and reflections</p>
+            </div>
+
+            <textarea id="journalEditorTextarea" class="journal-editor-textarea"
+                placeholder="What's on your mind today?"></textarea>
+
+            <div id="journalEditorError" style="display:none; padding:10px 14px; margin-bottom:12px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:var(--radius-sm); color:#ef4444; font-size:0.85rem;"></div>
+
+            <div style="margin-bottom: 8px; font-size: 0.85rem; color: var(--text-secondary);">How are you feeling?</div>
+            <div class="journal-mood-selector">
+                <div class="journal-mood-option" data-mood="😊">😊</div>
+                <div class="journal-mood-option" data-mood="😢">😢</div>
+                <div class="journal-mood-option" data-mood="😡">😡</div>
+                <div class="journal-mood-option" data-mood="😴">😴</div>
+                <div class="journal-mood-option" data-mood="🤔">🤔</div>
+                <div class="journal-mood-option" data-mood="🎉">🎉</div>
+                <div class="journal-mood-option" data-mood="😰">😰</div>
+                <div class="journal-mood-option" data-mood="😌">😌</div>
+            </div>
+
+            <div class="journal-editor-actions">
+                <button id="journalEditorCancel" class="matrix-btn">Cancel</button>
+                <button id="journalEditorSave" class="matrix-btn"
+                    style="background: var(--accent-gradient); color: #fff; border: none;">Save Entry</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================================
+    JAVASCRIPT MODULES (order matters)
+    ============================================================ -->
+    <script type="text/javascript" src="WorkspaceCore/init-globals.js"></script>
+    <script type="text/javascript" src="WorkspaceCore/config.js"></script>
+    <script type="text/javascript" src="WorkspaceCore/helpers.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/theme.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/notifications.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/analytics/analytics.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/undo-redo.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/drag-drop.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/context-menu.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/schedule/schedule-core.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/schedule/schedule-planner.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/lessons/lessons.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/dashboard/dashboard.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/timer/simple-timer.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/timer/pomodoro.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/timer/session-tracker.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/weather/weather.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/graph/graph.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/tasks/tasks.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/library/library.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/dashboard/widgets.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/schedule/calendar.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/date-countdown/date-countdown.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/habits/habits.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/dev-tools/dev-tools.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/sparkles.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/schedule/templates.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/schedule/ical-export.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/tour.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/interactive-tutorial.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/ux-enhancements.js"></script>
+    <!-- Journal scripts must load BEFORE app.js -->
+    <script type="text/javascript" src="WorkspaceFeatures/journal/journal.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/journal/journal-ui.js"></script>
+    <!-- Reading List engine -->
+    <script type="text/javascript" src="WorkspaceFeatures/reading/reading.js"></script>
+    <!-- app.js loads last -->
+    <script type="text/javascript" src="WorkspaceCore/app.js"></script>
+
+
+    <!-- ===== PWA Service Worker Registration (relative path) ===== -->
+    <script type="text/javascript">
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('[PWA] Service Worker registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.error('[PWA] Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+
+</html>

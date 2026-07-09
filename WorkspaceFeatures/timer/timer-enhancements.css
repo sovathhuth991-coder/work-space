@@ -1,0 +1,867 @@
+/* ============================================================
+   TIMER ENHANCEMENTS - Progress Ring & Improved Display
+   ============================================================ */
+
+/* ---- Timer Card Enhancement ---- */
+.simple-timer-card {
+    position: relative;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+    overflow: visible;
+}
+
+/* ---- Progress Ring Container ---- */
+.timer-progress-ring {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-progress-ring svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-progress-ring .ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 8;
+}
+
+.timer-progress-ring .ring-fill {
+    fill: none;
+    stroke: url(#timerGradient);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 816.8;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 8px rgba(124, 109, 240, 0.6));
+}
+
+.timer-progress-ring .ring-glow {
+    fill: none;
+    stroke: url(#timerGradient);
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 816.8;
+    stroke-dashoffset: 0;
+    opacity: 0.3;
+    filter: blur(4px);
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---- Timer Display in Center ---- */
+.timer-display-container {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.timer-display-main {
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(124, 109, 240, 0.5);
+    margin-bottom: 8px;
+}
+
+.timer-display-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+}
+
+/* ---- Timer State Indicators ---- */
+.timer-state-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 99px;
+    background: rgba(124, 109, 240, 0.15);
+    border: 1px solid rgba(124, 109, 240, 0.3);
+    color: var(--accent-1);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.timer-state-indicator.running {
+    background: rgba(46, 204, 113, 0.15);
+    border-color: rgba(46, 204, 113, 0.3);
+    color: #2ecc71;
+    animation: pulse 2s infinite;
+}
+
+.timer-state-indicator.paused {
+    background: rgba(243, 156, 18, 0.15);
+    border-color: rgba(243, 156, 18, 0.3);
+    color: #f39c12;
+}
+
+.state-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+}
+
+/* ---- Enhanced Control Buttons ---- */
+.timer-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.timer-btn {
+    padding: 14px 36px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.timer-btn-primary {
+    background: var(--accent-gradient);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(124, 109, 240, 0.4);
+}
+
+.timer-btn-primary:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 30px rgba(124, 109, 240, 0.6);
+}
+
+.timer-btn-primary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.timer-btn-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.timer-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: var(--border-color-hover);
+    transform: translateY(-2px);
+}
+
+.timer-btn-secondary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.timer-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ---- Preset Timer Buttons ---- */
+.timer-presets {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.preset-btn {
+    padding: 10px 22px;
+    border-radius: 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.preset-btn:hover {
+    background: rgba(124, 109, 240, 0.15);
+    border-color: var(--accent-1);
+    color: var(--accent-1);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 16px rgba(124, 109, 240, 0.2);
+}
+
+.preset-btn.active {
+    background: var(--accent-gradient);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 20px rgba(124, 109, 240, 0.4);
+}
+
+.preset-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+/* ---- Custom Timer Section ---- */
+.custom-timers-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.custom-timers-list {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.custom-timer-item {
+    position: relative;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(124, 109, 240, 0.1);
+    border: 1px solid rgba(124, 109, 240, 0.3);
+    color: var(--accent-1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-timer-item:hover {
+    background: rgba(124, 109, 240, 0.2);
+    border-color: var(--accent-1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 109, 240, 0.3);
+}
+
+.custom-timer-item.active {
+    background: var(--accent-gradient);
+    color: #fff;
+    border: none;
+}
+
+.custom-timer-delete {
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.9);
+    color: #fff;
+    border: 2px solid var(--bg-card);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.custom-timer-item:hover .custom-timer-delete {
+    opacity: 1;
+}
+
+.custom-timer-delete:hover {
+    background: #ef4444;
+    transform: scale(1.2);
+}
+
+.add-custom-timer {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.add-custom-timer input {
+    padding: 10px 16px;
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    width: 160px;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.add-custom-timer input:focus {
+    border-color: var(--accent-1);
+    box-shadow: 0 0 0 3px rgba(124, 109, 240, 0.1);
+}
+
+.add-custom-timer button {
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: rgba(124, 109, 240, 0.15);
+    border: 1px solid var(--accent-1);
+    color: var(--accent-1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-custom-timer button:hover {
+    background: rgba(124, 109, 240, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 109, 240, 0.3);
+}
+
+/* ---- Timer Completion Animation ---- */
+@keyframes timerComplete {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 40px rgba(124, 109, 240, 0.8);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.timer-complete-animation {
+    animation: timerComplete 0.6s ease;
+}
+
+/* ---- Responsive Timer Design ---- */
+@media (max-width: 600px) {
+    .timer-progress-ring {
+        width: 240px;
+        height: 240px;
+    }
+
+    .timer-display-main {
+        font-size: 3.5rem;
+    }
+
+    .timer-controls {
+        gap: 8px;
+    }
+
+    .timer-btn {
+        padding: 12px 28px;
+        font-size: 0.9rem;
+    }
+
+    .preset-btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+}
+
+/* ---- Current Session Tracker ---- */
+.current-session-tracker {
+    border-left-color: #f97316 !important;
+}
+
+.current-session-tracker::before {
+    background: linear-gradient(90deg, transparent, #f97316, transparent) !important;
+}
+
+.session-time-display-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+
+/* ---- Current Session Mobile Responsive ---- */
+@media (max-width: 768px) {
+    .current-session-tracker {
+        padding: 12px !important;
+    }
+
+    .session-time-display-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .current-session-tracker .time-block {
+        padding: 12px 8px !important;
+    }
+
+    .current-session-tracker .time-value {
+        font-size: 1.3rem !important;
+    }
+
+    .current-session-tracker .time-label {
+        font-size: 0.65rem !important;
+    }
+
+    #currentSessionTaskInfo {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 4px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .session-time-display-4 {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    .current-session-tracker .time-value {
+        font-size: 1.5rem !important;
+    }
+
+    .session-tracker-title {
+        font-size: 0.75rem !important;
+    }
+}
+
+.current-session-tracker .time-block {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(249, 115, 22, 0.1);
+}
+
+.current-session-tracker .time-block:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+}
+
+.current-session-tracker .time-block.current-focus-block::before {
+    color: #2ecc71;
+}
+.current-session-tracker .time-block.current-break-block::before {
+    color: #f39c12;
+}
+.current-session-tracker .time-block.current-idle-block::before {
+    color: #95a5a6;
+}
+.current-session-tracker .time-block.current-total-block::before {
+    color: #7c6df0;
+}
+
+.current-session-tracker .time-block.current-focus-block .time-value {
+    color: #2ecc71;
+    text-shadow: 0 0 12px rgba(46, 204, 113, 0.4);
+}
+.current-session-tracker .time-block.current-break-block .time-value {
+    color: #f39c12;
+    text-shadow: 0 0 12px rgba(243, 156, 18, 0.4);
+}
+.current-session-tracker .time-block.current-idle-block .time-value {
+    color: #95a5a6;
+    text-shadow: 0 0 12px rgba(149, 165, 166, 0.4);
+}
+.current-session-tracker .time-block.current-total-block .time-value {
+    color: #7c6df0;
+    text-shadow: 0 0 12px rgba(124, 109, 240, 0.4);
+}
+
+#currentSessionTaskInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+/* ---- Session Tracker Enhancements ---- */
+#sessionTracker {
+    position: relative;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+    border-radius: 12px;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+#sessionTracker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #3498db, transparent);
+    opacity: 0.5;
+}
+
+.session-tracker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.session-tracker-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.session-tracker-title::before {
+    content: '📌';
+    font-size: 1rem;
+}
+
+.task-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.task-selector-wrapper select {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    min-width: 180px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.task-selector-wrapper select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    outline: none;
+}
+
+.auto-link-badge {
+    font-size: 0.75rem;
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.15);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.auto-link-badge::before {
+    content: '🔗';
+}
+
+.scheduled-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.scheduled-input-wrapper label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.scheduled-input-wrapper input {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #fff;
+    width: 70px;
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.scheduled-input-wrapper input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    outline: none;
+}
+
+.scheduled-input-wrapper span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ---- Time Display Grid ---- */
+.session-time-display {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.time-block {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.time-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0.5;
+}
+
+.time-block.focus-block::before {
+    color: #2ecc71;
+}
+
+.time-block.break-block::before {
+    color: #f39c12;
+}
+
+.time-block.progress-block::before {
+    color: #3498db;
+}
+
+.time-block.idle-block::before {
+    color: #95a5a6;
+}
+
+.time-block.total-block::before {
+    color: #7c6df0;
+}
+
+.time-block:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.time-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.time-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.time-block.focus-block .time-value {
+    color: #2ecc71;
+    text-shadow: 0 0 12px rgba(46, 204, 113, 0.4);
+}
+
+.time-block.break-block .time-value {
+    color: #f39c12;
+    text-shadow: 0 0 12px rgba(243, 156, 18, 0.4);
+}
+
+.time-block.progress-block .time-value {
+    color: #3498db;
+    text-shadow: 0 0 12px rgba(52, 152, 219, 0.4);
+}
+
+.time-block.idle-block .time-value {
+    color: #95a5a6;
+    text-shadow: 0 0 12px rgba(149, 165, 166, 0.4);
+}
+
+.time-block.total-block .time-value {
+    color: #7c6df0;
+    text-shadow: 0 0 12px rgba(124, 109, 240, 0.4);
+}
+
+.time-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ---- Progress Bar Enhancement ---- */
+.session-progress {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 99px;
+    overflow: hidden;
+    margin: 16px 0;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.session-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+}
+
+.session-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* ---- Session Action Buttons ---- */
+.session-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.session-btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    flex: 1;
+    min-width: 120px;
+}
+
+.session-btn-reset {
+    background: #c0392b;
+    color: #fff;
+}
+
+.session-btn-reset:hover {
+    background: #e74c3c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.4);
+}
+
+.session-btn-end {
+    background: #2ecc71;
+    color: #1a1a1a;
+}
+
+.session-btn-end:hover {
+    background: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+}
+
+.session-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ---- Responsive Session Tracker ---- */
+@media (max-width: 768px) {
+    .session-tracker-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .task-selector-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .task-selector-wrapper select {
+        width: 100%;
+    }
+
+    .session-time-display {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .time-value {
+        font-size: 1.3rem;
+    }
+
+    .session-actions {
+        flex-direction: column;
+    }
+
+    .session-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .session-time-display {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .time-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* ---- Smooth Transitions ---- */
+#sessionTracker,
+.time-block,
+.timer-btn,
+.preset-btn,
+.custom-timer-item {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---- Focus Mode Indicator ---- */
+.focus-mode-active #sessionTracker {
+    border-left-color: #2ecc71;
+    box-shadow: 0 0 30px rgba(46, 204, 113, 0.2);
+}
+
+.focus-mode-active #sessionTracker::before {
+    background: linear-gradient(90deg, transparent, #2ecc71, transparent);
+}
+
+.break-mode-active #sessionTracker {
+    border-left-color: #f39c12;
+    box-shadow: 0 0 30px rgba(243, 156, 18, 0.2);
+}
+
+.break-mode-active #sessionTracker::before {
+    background: linear-gradient(90deg, transparent, #f39c12, transparent);
+}

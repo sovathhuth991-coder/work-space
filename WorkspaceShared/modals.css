@@ -1,0 +1,395 @@
+.diagram-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    overflow-y: auto;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    max-width: 1100px;
+    width: 100%;
+    box-shadow: var(--shadow-elevated);
+    animation: modalZoomIn 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-gradient);
+    opacity: 0.6;
+}
+
+.modal-content::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(124, 109, 240, 0.03) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.modal-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.modal-task-summary {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 4px 12px;
+    border-radius: 99px;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+}
+
+.close-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    transform: rotate(90deg);
+}
+
+.close-btn:focus-visible {
+    box-shadow: 0 0 0 2px var(--accent-1);
+}
+
+.close-btn:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+/* .modal-layout and .modal-form-zone removed — schedule-only,
+   the real rules live in WorkspaceFeatures/schedule/schedule-modal.css.
+   Having them here (this file loads later) was silently overriding them. */
+
+.timeline-container {
+    position: relative;
+    padding-left: 36px;
+}
+
+.timeline-line {
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-color);
+}
+
+.timeline-node {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* ---- Timeline items removed — schedule-only, duplicate of
+   WorkspaceFeatures/schedule/schedule-modal.css. That file's version is
+   the real one (more detailed blur/opacity/animation tuning); this
+   duplicate was silently winning the cascade since it loads later. ---- */
+
+/* ---- .modal-close-btn and .modal-conflict-badge removed — schedule-only,
+   duplicates of WorkspaceFeatures/schedule/schedule-modal.css ---- */
+
+.modal-header-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* ---- .form-row removed — schedule-only, duplicate of schedule-modal.css.
+   .form-actions and .btn-primary below stay — genuinely used elsewhere too. ---- */
+
+.form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    padding: 8px 20px;
+    background: var(--accent-gradient);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 4px 16px rgba(124, 109, 240, 0.3);
+}
+
+/* ---- .btn-preset removed — schedule-only, duplicate of schedule-modal.css ---- */
+
+.node-pulse {
+    position: absolute;
+    left: -32px;
+    top: 12px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-1);
+}
+
+.node-data {
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    border: 1px solid var(--border-color);
+}
+
+.node-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.node-time {
+    font-weight: 600;
+    color: var(--accent-1);
+    font-size: 0.85rem;
+}
+
+.badge {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+}
+
+/* ---- .badge-study removed — schedule-only, duplicate of schedule-modal.css ---- */
+
+.badge-break {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.badge-assignment {
+    background: rgba(236, 72, 153, 0.15);
+    color: #f472b6;
+}
+
+.badge-class {
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+}
+
+.node-action-footer {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.node-check-btn {
+    padding: 4px 16px;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    background: rgba(124, 109, 240, 0.1);
+    border: 1px solid var(--accent-1);
+    color: var(--accent-1);
+    cursor: pointer;
+}
+
+/* ---- .node-del-btn removed — schedule-only, duplicate of schedule-modal.css ---- */
+
+/* ===== Compact Time Picker ===== */
+.time-picker-dropdown {
+    margin-top: 4px;
+}
+
+.time-select-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    transition: border-color 0.2s;
+}
+
+.time-select-group:focus-within {
+    border-color: var(--accent-1);
+}
+
+.time-select {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 6px 4px;
+    cursor: pointer;
+    outline: none;
+    font-variant-numeric: tabular-nums;
+    min-width: 36px;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.time-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 4px 8px;
+}
+
+.time-select.hour-select {
+    min-width: 40px;
+}
+
+.time-select.minute-select {
+    min-width: 40px;
+}
+
+.time-select.ampm-select {
+    min-width: 44px;
+    font-weight: 600;
+    color: var(--accent-1);
+}
+
+.time-separator {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 1.1rem;
+    user-select: none;
+}
+
+/* Hide the up/down arrows on number inputs (keep clean) */
+.time-select::-webkit-inner-spin-button,
+.time-select::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.time-select {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Small screen adjustments */
+@media (max-width: 600px) {
+    .time-select-group {
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 6px;
+    }
+
+    .time-select {
+        font-size: 0.85rem;
+        padding: 4px 2px;
+        min-width: 30px;
+    }
+
+    .time-select.ampm-select {
+        min-width: 36px;
+    }
+}
+
+/* ---- Custom modal for folder/page creation ---- */
+#customModal {
+    animation: fadeIn 0.2s ease;
+}
+
+.custom-modal-content input:focus,
+.custom-modal-content select:focus {
+    border-color: var(--accent-1);
+    box-shadow: 0 0 0 3px rgba(124, 109, 240, 0.15);
+}
+
+/* ---- Mobile Modal Optimizations ---- */
+@media (max-width: 600px) {
+    .diagram-modal {
+        padding: 20px 12px;
+    }
+
+    .modal-content {
+        padding: 24px 20px !important;
+        max-width: 100% !important;
+    }
+
+    /* .modal-layout, .modal-form-zone, .timeline-item, .timeline-item-time,
+       .timeline-item-title mobile overrides removed — schedule-only,
+       and the !important here was beating schedule-modal.css's own
+       mobile tuning regardless of load order. Schedule handles its own
+       mobile layout in its @media (max-width: 600px) block now. */
+
+    .timeline-container {
+        padding-left: 28px !important;
+    }
+
+    .close-btn {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 2rem !important;
+    }
+
+    .modal-header-title {
+        font-size: 1.1rem !important;
+    }
+
+    .custom-modal-content {
+        padding: 24px 20px !important;
+        max-width: 95% !important;
+        width: 95% !important;
+    }
+
+    .node-pulse {
+        left: -24px !important;
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    .node-data {
+        padding: 12px !important;
+    }
+
+    .time-select {
+        font-size: 0.9rem !important;
+        padding: 6px 2px !important;
+    }
+}
