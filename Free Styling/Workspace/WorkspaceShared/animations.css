@@ -1,0 +1,329 @@
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 0.4;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(124, 109, 240, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(124, 109, 240, 0.6);
+    }
+}
+
+@keyframes modalZoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+@keyframes activeGlow {
+    from {
+        transform: scale(1);
+        box-shadow: 0 0 8px #ef4444;
+    }
+
+    to {
+        transform: scale(1.3);
+        box-shadow: 0 0 20px #ef4444;
+    }
+}
+
+.toast-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    animation: slideInRight 0.3s ease;
+}
+
+.toast-notification.toast-hide {
+    animation: slideOutRight 0.3s ease forwards;
+}
+
+/* ============================================================
+   SPARKLE CANVAS – Background Glitter
+   ============================================================ */
+
+#sparkleCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100;
+    /* ← was 0, now above everything */
+    pointer-events: none;
+    /* ← keep this so clicks pass through */
+    opacity: 0.6;
+    /* adjust to your taste (0.3–0.8) */
+}
+
+/* Ensure the app content stays above sparkles */
+.hub-shell,
+.hub-content,
+.lofi-widget {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================================
+   SMOOTH TRANSITIONS & MICRO-INTERACTIONS
+   ============================================================ */
+
+/* Smooth view transitions - only on initial load */
+.hub-view {
+    animation: fadeSlide 0.3s ease;
+}
+
+.hub-view.active {
+    animation: none;
+}
+
+/* Card entrance animation - only on initial load */
+.dash-card,
+.stat-card,
+.calendar-event-item {
+    animation: slideInUp 0.4s ease backwards;
+}
+
+.dash-card.rendered,
+.stat-card.rendered,
+.calendar-event-item.rendered {
+    animation: none;
+}
+
+/* Calendar day cards - NO animation to prevent blinking */
+.day {
+    animation: none !important;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Staggered animation delays for grid items */
+.dashboard-grid .dash-card:nth-child(1) { animation-delay: 0.05s; }
+.dashboard-grid .dash-card:nth-child(2) { animation-delay: 0.1s; }
+.dashboard-grid .dash-card:nth-child(3) { animation-delay: 0.15s; }
+.dashboard-grid .dash-card:nth-child(4) { animation-delay: 0.2s; }
+.dashboard-grid .dash-card:nth-child(5) { animation-delay: 0.25s; }
+
+.dash-stats-container .stat-card:nth-child(1) { animation-delay: 0.3s; }
+.dash-stats-container .stat-card:nth-child(2) { animation-delay: 0.35s; }
+.dash-stats-container .stat-card:nth-child(3) { animation-delay: 0.4s; }
+.dash-stats-container .stat-card:nth-child(4) { animation-delay: 0.45s; }
+
+/* Smooth icon transitions */
+.stat-icon,
+.menu-icon {
+    transition: transform var(--transition), filter var(--transition);
+}
+
+/* Button ripple effect */
+.nav-btn::after,
+.matrix-btn::after,
+.timer-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(124, 109, 240, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0);
+    transition: transform 0.5s, opacity 0.3s;
+}
+
+.nav-btn:active::after,
+.matrix-btn:active::after,
+.timer-btn:active::after {
+    opacity: 1;
+    transform: scale(2);
+}
+
+/* Smooth sidebar navigation */
+.nav-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent-gradient);
+    animation: slideInLeft 0.3s ease;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: scaleY(0);
+    }
+
+    to {
+        transform: scaleY(1);
+    }
+}
+
+/* Progress bar animation */
+.progress-bar-fill {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* Smooth checkbox transitions */
+.strike-item input[type="checkbox"] {
+    position: relative;
+    overflow: hidden;
+}
+
+.strike-item input[type="checkbox"]::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0);
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.strike-item input[type="checkbox"]:checked::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Smooth focus transitions */
+*:focus-visible {
+    transition: box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+/* Loading shimmer effect */
+.loading-shimmer {
+    background: linear-gradient(90deg, var(--bg-card) 0%, var(--bg-card-hover) 50%, var(--bg-card) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* ============================================================
+   GLITTER KEYFRAMES (CSS fallback + extra shimmer)
+   ============================================================ */
+
+@keyframes shimmer {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(0deg);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2) rotate(180deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.5) rotate(360deg);
+    }
+}
