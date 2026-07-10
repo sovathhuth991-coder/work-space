@@ -68,11 +68,16 @@ html, body {
     #headerToggleDropdown {
         right: 0;
         top: calc(100% + 8px);
-        transform: none;
+        transform: translateY(-8px) scale(0.96);
+        transform-origin: top right;
         flex-direction: column;
         border-radius: var(--radius-md);
         padding: 8px;
         gap: 4px;
+    }
+
+    #headerToggleDropdown.show {
+        transform: translateY(0) scale(1);
     }
 
     #headerToggleMain {
