@@ -1,0 +1,405 @@
+/* ============================================================
+   MOBILE OPTIMIZATION - Consolidated Mobile Overrides
+   ============================================================ */
+
+/* ---- Prevent 300ms tap delay on mobile ---- */
+button, a, input, select, textarea {
+    touch-action: manipulation;
+}
+
+/* ---- Prevent pull-to-refresh and overscroll ---- */
+html, body {
+    overscroll-behavior: none;
+    -webkit-overscroll-behavior: none;
+}
+
+/* ---- Minimum tap target size (44px) ---- */
+.nav-btn, .matrix-btn, .session-btn, .preset-btn, .timer-btn,
+.pomodoro-btn, .dash-add-todo-btn, .sidebar-btn, .close-btn {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* ---- Sidebar backdrop overlay (mobile) ---- */
+@media (max-width: 850px) {
+    .hub-sidebar::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+    }
+
+    .hub-sidebar.open::before {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Burger toggle - larger tap target */
+    .burger-toggle {
+        width: 48px;
+        height: 48px;
+    }
+
+    .burger-line {
+        width: 24px;
+        height: 2.5px;
+    }
+
+    /* Header adjustments */
+    .hub-content>div:first-child {
+        padding: 12px 16px;
+    }
+
+    /* Global search - full width on mobile */
+    .global-search-bar {
+        padding: 8px 16px 0 16px !important;
+    }
+
+    .global-search-bar input {
+        max-width: 100% !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Actions dropdown - reposition on mobile */
+    #headerToggleDropdown {
+        right: 0;
+        top: calc(100% + 8px);
+        transform: none;
+        flex-direction: column;
+        border-radius: var(--radius-md);
+        padding: 8px;
+        gap: 4px;
+    }
+
+    #headerToggleMain {
+        font-size: 0.7rem;
+        padding: 8px 14px;
+    }
+
+    #toggleFocusStats {
+        font-size: 0.7rem;
+        padding: 8px 12px;
+    }
+
+    #toggleFocusMode, #toggleTheme {
+        font-size: 0.75rem;
+        padding: 8px 12px;
+    }
+}
+
+/* ---- Extra small screens (< 400px) ---- */
+@media (max-width: 400px) {
+    .hub-view {
+        padding: 12px 12px 80px;
+    }
+
+    .view-header {
+        padding: 12px 0;
+        margin-bottom: 20px;
+    }
+
+    .view-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .view-kicker {
+        font-size: 0.7rem;
+    }
+
+    .card-inner {
+        padding: 16px !important;
+    }
+
+    .dash-banner .card-inner {
+        padding: 20px !important;
+    }
+
+    .banner-text h2 {
+        font-size: 1.2rem !important;
+    }
+
+    .banner-text p {
+        font-size: 0.9rem !important;
+    }
+
+    .stat-value {
+        font-size: 1.2rem !important;
+    }
+
+    .stat-icon {
+        font-size: 1.4rem !important;
+        padding: 8px !important;
+    }
+
+    .card-header h3 {
+        font-size: 0.95rem !important;
+    }
+
+    .matrix-btn {
+        padding: 8px 14px !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+/* ---- Tablet adjustments (600px - 850px) ---- */
+@media (min-width: 601px) and (max-width: 850px) {
+    .hub-view {
+        padding: 20px 20px 80px;
+    }
+
+    .view-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .card-inner {
+        padding: 24px;
+    }
+}
+
+/* ---- Touch-friendly form inputs ---- */
+@media (max-width: 850px) {
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
+        min-height: 44px;
+        font-size: 16px !important; /* Prevents iOS zoom */
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+    }
+}
+
+/* ---- Improve scrolling on mobile ---- */
+@media (max-width: 850px) {
+    .hub-content {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+
+    .hub-sidebar {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ---- Disable text selection on UI elements ---- */
+@media (max-width: 850px) {
+    .nav-btn,
+    .matrix-btn,
+    .burger-toggle,
+    .session-btn,
+    .preset-btn,
+    .timer-btn,
+    .pomodoro-btn {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}
+
+/* ---- Safe area insets for notched phones ---- */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .hub-content>div:first-child {
+        padding-top: calc(12px + env(safe-area-inset-top));
+    }
+
+    .hub-view {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+
+    .hub-sidebar {
+        padding-top: calc(24px + env(safe-area-inset-top));
+        padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    }
+}
+
+/* ---- Override common inline styles for mobile ---- */
+@media (max-width: 850px) {
+    /* Header */
+    .hub-content>div:first-child {
+        padding: 12px 16px !important;
+    }
+
+    /* Global search */
+    .global-search-bar {
+        padding: 8px 16px 0 16px !important;
+    }
+
+    .global-search-bar input {
+        max-width: 100% !important;
+    }
+
+    /* Session trackers */
+    #sessionTracker,
+    #currentSessionTracker {
+        padding: 12px !important;
+    }
+
+    /* Timer card */
+    .simple-timer-card {
+        max-width: 100% !important;
+        padding: 24px 16px !important;
+    }
+
+    /* Pomodoro shell */
+    #pomodoroShell {
+        max-width: 100% !important;
+    }
+
+    /* Library toolbar */
+    .library-toolbar {
+        flex-direction: column;
+    }
+
+    .library-toolbar input,
+    .library-toolbar select {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Reading toolbar */
+    .reading-toolbar {
+        flex-direction: column;
+    }
+
+    .reading-filter-btns {
+        flex-wrap: wrap;
+    }
+
+    /* Tutorial cards */
+    #tutorialCardsGrid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Quick links */
+    #dashQuickLinks {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Schedule toggles */
+    .schedule-view-toggle {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Further reduce padding on very small screens */
+    #sessionTracker,
+    #currentSessionTracker {
+        padding: 10px !important;
+    }
+
+    .simple-timer-card {
+        padding: 20px 12px !important;
+    }
+
+    /* Make buttons full width */
+    .session-actions {
+        flex-direction: column;
+    }
+
+    .session-btn {
+        width: 100%;
+    }
+}
+
+/* ---- Landscape mobile adjustments ---- */
+@media (max-width: 850px) and (orientation: landscape) {
+    .hub-view {
+        padding: 12px 16px 60px;
+    }
+
+    .view-header {
+        margin-bottom: 16px;
+        padding: 8px 0;
+    }
+
+    .view-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .timer-progress-ring {
+        width: 200px !important;
+        height: 200px !important;
+    }
+
+    .timer-display-main {
+        font-size: 3rem !important;
+    }
+
+    .pomodoro-ring-container {
+        width: 200px !important;
+        height: 200px !important;
+        margin: 0 auto 16px !important;
+    }
+
+    .pomodoro-display {
+        font-size: 2.5rem !important;
+    }
+}
+
+/* ---- High DPI displays ---- */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .nav-glow-border,
+    .card-glow-border {
+        -webkit-mask-composite: source-in;
+        mask-composite: add;
+    }
+}
+
+/* ---- Dark mode preference (system) ---- */
+@media (prefers-color-scheme: dark) {
+    /* Already dark by default, but ensure consistency */
+    .modal-content {
+        background: var(--bg-secondary);
+    }
+}
+
+/* ---- Reduced motion preference ---- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ---- Print optimization (already in layout.css, keeping here for reference) ---- */
+@media print {
+    .hub-sidebar,
+    .burger-toggle,
+    .global-search-bar,
+    .view-header .matrix-btn,
+    .workspace-utility-bar,
+    .find-bar,
+    #quickAddBtn,
+    .lofi-widget {
+        display: none !important;
+    }
+
+    .hub-content {
+        padding: 0 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .hub-view.active {
+        display: block !important;
+        padding: 20px !important;
+        animation: none !important;
+    }
+}

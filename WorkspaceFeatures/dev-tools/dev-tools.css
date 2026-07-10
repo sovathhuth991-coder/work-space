@@ -1,0 +1,289 @@
+/* ============================================================
+   DEV TOOLS PANEL
+   ============================================================ */
+
+.dev-tools-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.dev-tools-toggle-btn:hover {
+    color: var(--accent-1);
+    background: rgba(124, 109, 240, 0.1);
+}
+
+.dev-tools-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 460px;
+    max-width: 90vw;
+    max-height: 70vh;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glow), var(--shadow-soft);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    animation: fadeSlide 0.25s ease;
+}
+
+.dev-tools-panel.open {
+    display: flex;
+}
+
+.dev-tools-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.dev-tools-header h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.dev-tools-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.dev-tools-close:hover {
+    color: #ef4444;
+}
+
+.dev-tools-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px 0 12px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.dev-tools-tab {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.dev-tools-tab:hover {
+    color: var(--text-primary);
+}
+
+.dev-tools-tab.active {
+    color: var(--accent-1);
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+.dev-tools-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dev-tools-body .tab-content {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dev-tools-body .tab-content.active {
+    display: flex;
+}
+
+/* ---- Theme tab ---- */
+.color-var-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.color-var-row label {
+    min-width: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: monospace;
+}
+
+.color-var-row input[type="color"] {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+    cursor: pointer;
+    background: transparent;
+}
+
+.color-var-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent-1);
+    height: 4px;
+    cursor: pointer;
+}
+
+.color-var-row .range-value {
+    min-width: 30px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: right;
+    font-family: monospace;
+}
+
+.color-var-row .reset-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    cursor: pointer;
+}
+
+.color-var-row .reset-btn:hover {
+    border-color: var(--accent-1);
+    color: var(--accent-1);
+}
+
+/* ---- CSS tab ---- */
+.dev-css-textarea {
+    width: 100%;
+    min-height: 200px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    padding: 10px;
+    resize: vertical;
+    tab-size: 2;
+    line-height: 1.5;
+}
+
+.dev-css-textarea:focus {
+    border-color: var(--accent-1);
+    outline: none;
+}
+
+.dev-apply-btn {
+    padding: 8px 16px;
+    background: var(--accent-gradient);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    align-self: flex-start;
+}
+
+.dev-apply-btn:hover {
+    transform: scale(0.97);
+    opacity: 0.9;
+}
+
+.dev-inject-status {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    min-height: 20px;
+}
+
+/* ---- HTML tab ---- */
+.dev-html-display {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    max-height: 300px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.dev-copy-btn {
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    align-self: flex-start;
+}
+
+.dev-copy-btn:hover {
+    border-color: var(--accent-1);
+    color: var(--accent-1);
+}
+
+/* ---- Draggable handle ---- */
+.dev-tools-drag-handle {
+    cursor: grab;
+    user-select: none;
+    padding: 4px 8px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.dev-tools-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+    .dev-tools-panel {
+        width: 100%;
+        max-width: 100vw;
+        bottom: 0;
+        right: 0;
+        max-height: 80vh;
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .color-var-row {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .color-var-row label {
+        min-width: 80px;
+    }
+}
