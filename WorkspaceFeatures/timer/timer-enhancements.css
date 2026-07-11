@@ -215,7 +215,7 @@
 }
 
 .preset-btn.active {
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     color: #fff;
     border: none;
     box-shadow: 0 4px 20px rgba(124, 109, 240, 0.4);
@@ -261,7 +261,7 @@
 }
 
 .custom-timer-item.active {
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     color: #fff;
     border: none;
 }
@@ -344,10 +344,12 @@
     0% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.1);
         box-shadow: 0 0 40px rgba(124, 109, 240, 0.8);
     }
+
     100% {
         transform: scale(1);
     }
@@ -455,12 +457,15 @@
 .current-session-tracker .time-block.current-focus-block::before {
     color: #2ecc71;
 }
+
 .current-session-tracker .time-block.current-break-block::before {
     color: #f39c12;
 }
+
 .current-session-tracker .time-block.current-idle-block::before {
     color: #95a5a6;
 }
+
 .current-session-tracker .time-block.current-total-block::before {
     color: #7c6df0;
 }
@@ -469,14 +474,17 @@
     color: #2ecc71;
     text-shadow: 0 0 12px rgba(46, 204, 113, 0.4);
 }
+
 .current-session-tracker .time-block.current-break-block .time-value {
     color: #f39c12;
     text-shadow: 0 0 12px rgba(243, 156, 18, 0.4);
 }
+
 .current-session-tracker .time-block.current-idle-block .time-value {
     color: #95a5a6;
     text-shadow: 0 0 12px rgba(149, 165, 166, 0.4);
 }
+
 .current-session-tracker .time-block.current-total-block .time-value {
     color: #7c6df0;
     text-shadow: 0 0 12px rgba(124, 109, 240, 0.4);

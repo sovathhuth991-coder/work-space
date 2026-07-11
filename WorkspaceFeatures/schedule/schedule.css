@@ -50,7 +50,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     opacity: 0;
     transition: opacity var(--transition);
 }
@@ -134,7 +134,7 @@
 
 .progress-bar {
     height: 100%;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     width: 0%;
     transition: width 0.4s ease;
 }

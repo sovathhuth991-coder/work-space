@@ -200,7 +200,7 @@
 
 .dev-apply-btn {
     padding: 8px 16px;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     border: none;
     border-radius: var(--radius-sm);
     color: #fff;

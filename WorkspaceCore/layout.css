@@ -386,39 +386,51 @@ body {
 .nav-btn[data-view="dashboard-view"] {
     --nav-color: var(--nav-dashboard);
 }
+
 .nav-btn[data-view="ai-view"] {
     --nav-color: var(--nav-ai);
 }
+
 .nav-btn[data-view="schedule-view"] {
     --nav-color: var(--nav-schedule);
 }
+
 .nav-btn[data-view="timer-view"] {
     --nav-color: var(--nav-timer);
 }
+
 .nav-btn[data-view="weather-view"] {
     --nav-color: var(--nav-weather);
 }
+
 .nav-btn[data-view="todo-view"] {
     --nav-color: var(--nav-todo);
 }
+
 .nav-btn[data-view="analytics-view"] {
     --nav-color: var(--nav-analytics);
 }
+
 .nav-btn[data-view="lessons-view"] {
     --nav-color: var(--nav-lessons);
 }
+
 .nav-btn[data-view="library-view"] {
     --nav-color: var(--nav-library);
 }
+
 .nav-btn[data-view="graph-view"] {
     --nav-color: var(--nav-graph);
 }
+
 .nav-btn[data-view="habits-view"] {
     --nav-color: var(--nav-habits);
 }
+
 .nav-btn[data-view="journal-view"] {
     --nav-color: var(--nav-journal);
 }
+
 .nav-btn[data-view="tutorial-view"] {
     --nav-color: var(--nav-tutorial);
 }
@@ -1139,8 +1151,13 @@ body.minimal-ui .nav-btn:hover {
     }
 
     @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     .tutorial-hero h2 {
@@ -1191,13 +1208,13 @@ body.minimal-ui .nav-btn:hover {
     }
 
     /* Tutorial Card Icon */
-    .tutorial-card > div:first-of-type {
+    .tutorial-card>div:first-of-type {
         position: relative;
         z-index: 1;
         transition: transform 0.3s ease;
     }
 
-    .tutorial-card:hover > div:first-of-type {
+    .tutorial-card:hover>div:first-of-type {
         transform: scale(1.1) rotate(5deg);
     }
 
@@ -1219,17 +1236,17 @@ body.minimal-ui .nav-btn:hover {
     }
 
     /* Tutorial Card CTA */
-    .tutorial-card > div:last-child {
+    .tutorial-card>div:last-child {
         position: relative;
         z-index: 1;
         transition: all 0.3s ease;
     }
 
-    .tutorial-card:hover > div:last-child {
+    .tutorial-card:hover>div:last-child {
         gap: 12px;
     }
 
-    .tutorial-card:hover > div:last-child span:last-child {
+    .tutorial-card:hover>div:last-child span:last-child {
         transform: translateX(4px);
     }
 
@@ -1265,30 +1282,30 @@ body.minimal-ui .nav-btn:hover {
     transform: scale(0.95);
 }
 
-    #headerToggleDropdown {
-        position: absolute;
-        top: 50%;
-        right: 100%;
-        transform: translateY(-50%) translateX(8px);
-        display: none;
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: 99px;
-        padding: 4px;
-        gap: 0;
-        box-shadow: var(--shadow-elevated);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        opacity: 0;
-        transition: opacity 0.3s ease, transform 0.3s ease;
-        z-index: 9999;
-    }
+#headerToggleDropdown {
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%) translateX(8px);
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 99px;
+    padding: 4px;
+    gap: 0;
+    box-shadow: var(--shadow-elevated);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 9999;
+}
 
-    #headerToggleDropdown.show {
-        display: flex !important;
-        opacity: 1;
-        transform: translateY(-50%) translateX(12px);
-    }
+#headerToggleDropdown.show {
+    display: flex !important;
+    opacity: 1;
+    transform: translateY(-50%) translateX(12px);
+}
 
 .header-toggle-btn {
     position: relative;
@@ -1313,7 +1330,7 @@ body.minimal-ui .nav-btn:hover {
 }
 
 .header-toggle-btn.active {
-    background: var(--accent-gradient) !important;
+    background: var(--accent-solid) !important;
     color: #fff !important;
     box-shadow: 0 2px 12px rgba(124, 109, 240, 0.3) !important;
 }

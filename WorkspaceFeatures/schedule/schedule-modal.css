@@ -23,6 +23,7 @@
         opacity: 0;
         backdrop-filter: blur(0px);
     }
+
     to {
         opacity: 1;
         backdrop-filter: blur(20px);
@@ -51,6 +52,7 @@
         opacity: 0;
         transform: translateY(-30px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -65,11 +67,11 @@
     right: 0;
     height: 3px;
     background: linear-gradient(90deg,
-        transparent 0%,
-        var(--accent-1) 20%,
-        #f97316 50%,
-        var(--accent-1) 80%,
-        transparent 100%);
+            transparent 0%,
+            var(--accent-1) 20%,
+            #f97316 50%,
+            var(--accent-1) 80%,
+            transparent 100%);
     opacity: 0.8;
     box-shadow: 0 0 20px rgba(124, 109, 240, 0.5);
 }
@@ -150,9 +152,12 @@
 }
 
 @keyframes pulseBadge {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 20px rgba(251, 146, 60, 0.2);
     }
+
     50% {
         box-shadow: 0 0 30px rgba(251, 146, 60, 0.4);
     }
@@ -219,7 +224,7 @@
 
 .day-nav-today {
     padding: 10px 20px;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     border: none;
     border-radius: 12px;
     color: #fff;
@@ -271,7 +276,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -288,7 +293,7 @@
 }
 
 .day-nav-pill.active {
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     border-color: transparent;
     color: #fff;
     font-weight: 600;
@@ -488,7 +493,7 @@
 }
 
 #daySelection label:has(input:checked) {
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     border-color: transparent;
     color: #fff;
     font-weight: 600;
@@ -572,7 +577,7 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     transform: scaleY(0);
     transition: transform 0.3s ease;
 }
@@ -694,10 +699,13 @@
 }
 
 @keyframes pulseWarning {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         opacity: 1;
     }
+
     50% {
         transform: scale(1.2);
         opacity: 0.7;
