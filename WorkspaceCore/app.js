@@ -268,23 +268,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('hubSidebar');
 
     if (burgerToggle && sidebar) {
-        burgerToggle.addEventListener('click', () => {
-            const isOpen = sidebar.classList.toggle('open');
-            burgerToggle.classList.toggle('active');
-            burgerToggle.setAttribute('aria-expanded', isOpen);
-        });
+        // NOTE: the burger opens the sidebar via data-action="toggleSidebarMenu"
+        // (delegated handler). Do NOT add a second click listener here or it will
+        // double-toggle and cancel out.
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const sidebar = document.getElementById('hubSidebar');
-                const burger = document.getElementById('burgerToggle');
-                const backdrop = document.getElementById('sidebarBackdrop');
                 if (sidebar && sidebar.classList.contains('open')) {
-                    sidebar.classList.remove('open');
-                    burger?.classList.remove('active');
-                    burger?.setAttribute('aria-expanded', 'false');
-                    if (backdrop) backdrop.style.display = 'none';
-                    document.body.style.overflow = '';
+                    closeSidebarMenu();
                 }
             }
         });
@@ -354,8 +346,8 @@ window.switchView = function(targetViewId) {
         } catch (_) { /* ignore */ }
 
         const sidebar = document.getElementById('hubSidebar');
-        if (sidebar && window.innerWidth < 850) {
-            sidebar.classList.remove('open');
+        if (sidebar && window.innerWidth <= 850) {
+            closeSidebarMenu();
         }
     } catch (error) {
         console.error('SwitchView error:', error);
@@ -933,6 +925,23 @@ window.clearAllDataAndCache = () => clearAllData(true);
 // ============================================================
 // SIDEBAR TOGGLE – with backdrop overlay
 // ============================================================
+// Single source of truth for closing the mobile sidebar. Removes the
+// open state, hides the backdrop, resets the burger + body scroll lock.
+function closeSidebarMenu() {
+    const sidebar = document.getElementById('hubSidebar');
+    const burger = document.getElementById('burgerToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
+
+    if (sidebar) sidebar.classList.remove('open');
+    if (burger) {
+        burger.classList.remove('active');
+        burger.setAttribute('aria-expanded', 'false');
+    }
+    if (backdrop) backdrop.style.display = 'none';
+    document.body.style.overflow = '';
+}
+window.closeSidebarMenu = closeSidebarMenu;
+
 function toggleSidebarMenu() {
     const shell = document.querySelector('.hub-shell');
     const sidebar = document.getElementById('hubSidebar');
@@ -971,15 +980,8 @@ function toggleSidebarMenu() {
 
 // Handle window resize – close sidebar if resizing to desktop
 window.addEventListener('resize', function() {
-    const sidebar = document.getElementById('hubSidebar');
-    const burger = document.getElementById('burgerToggle');
-    const backdrop = document.getElementById('sidebarBackdrop');
-    if (window.innerWidth > 850 && sidebar && burger) {
-        sidebar.classList.remove('open');
-        burger.classList.remove('active');
-        burger.setAttribute('aria-expanded', 'false');
-        if (backdrop) backdrop.style.display = 'none';
-        document.body.style.overflow = '';
+    if (window.innerWidth > 850) {
+        closeSidebarMenu();
     }
 });
 
