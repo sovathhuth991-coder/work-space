@@ -69,15 +69,6 @@ function formatTime(hhmm) {
     return `${hour12}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
-function getInitialTheme() {
-    const saved = localStorage.getItem(STORAGE_KEYS.theme);
-    if (saved && THEMES.includes(saved)) return saved;
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'cyberpunk';
-    }
-    return DEFAULT_THEME;
-}
-
 function saveToLocalStorage(key, data) {
     try {
         localStorage.setItem(key, JSON.stringify(data));

@@ -264,19 +264,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     // BURGER MENU TOGGLE
     // ============================================================
+    // NOTE: The actual open/close toggle is handled by toggleSidebarMenu()
+    // (see the delegated data-action="toggleSidebarMenu" handler above,
+    // and toggleSidebarMenu()'s definition later in this file). Do NOT add
+    // a second click listener on #burgerToggle here — it double-toggles
+    // the 'open'/'active' classes on every click and cancels itself out,
+    // which is why the burger menu appeared to do nothing on mobile.
     const burgerToggle = document.getElementById('burgerToggle');
     const sidebar = document.getElementById('hubSidebar');
 
     if (burgerToggle && sidebar) {
-        // NOTE: the burger opens the sidebar via data-action="toggleSidebarMenu"
-        // (delegated handler). Do NOT add a second click listener here or it will
-        // double-toggle and cancel out.
-
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const sidebar = document.getElementById('hubSidebar');
+                const burger = document.getElementById('burgerToggle');
+                const backdrop = document.getElementById('sidebarBackdrop');
                 if (sidebar && sidebar.classList.contains('open')) {
-                    closeSidebarMenu();
+                    sidebar.classList.remove('open');
+                    burger?.classList.remove('active');
+                    burger?.setAttribute('aria-expanded', 'false');
+                    if (backdrop) backdrop.style.display = 'none';
+                    document.body.style.overflow = '';
                 }
             }
         });
@@ -346,8 +354,8 @@ window.switchView = function(targetViewId) {
         } catch (_) { /* ignore */ }
 
         const sidebar = document.getElementById('hubSidebar');
-        if (sidebar && window.innerWidth <= 850) {
-            closeSidebarMenu();
+        if (sidebar && window.innerWidth < 850) {
+            sidebar.classList.remove('open');
         }
     } catch (error) {
         console.error('SwitchView error:', error);
@@ -925,23 +933,6 @@ window.clearAllDataAndCache = () => clearAllData(true);
 // ============================================================
 // SIDEBAR TOGGLE – with backdrop overlay
 // ============================================================
-// Single source of truth for closing the mobile sidebar. Removes the
-// open state, hides the backdrop, resets the burger + body scroll lock.
-function closeSidebarMenu() {
-    const sidebar = document.getElementById('hubSidebar');
-    const burger = document.getElementById('burgerToggle');
-    const backdrop = document.getElementById('sidebarBackdrop');
-
-    if (sidebar) sidebar.classList.remove('open');
-    if (burger) {
-        burger.classList.remove('active');
-        burger.setAttribute('aria-expanded', 'false');
-    }
-    if (backdrop) backdrop.style.display = 'none';
-    document.body.style.overflow = '';
-}
-window.closeSidebarMenu = closeSidebarMenu;
-
 function toggleSidebarMenu() {
     const shell = document.querySelector('.hub-shell');
     const sidebar = document.getElementById('hubSidebar');
@@ -980,8 +971,15 @@ function toggleSidebarMenu() {
 
 // Handle window resize – close sidebar if resizing to desktop
 window.addEventListener('resize', function() {
-    if (window.innerWidth > 850) {
-        closeSidebarMenu();
+    const sidebar = document.getElementById('hubSidebar');
+    const burger = document.getElementById('burgerToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (window.innerWidth > 850 && sidebar && burger) {
+        sidebar.classList.remove('open');
+        burger.classList.remove('active');
+        burger.setAttribute('aria-expanded', 'false');
+        if (backdrop) backdrop.style.display = 'none';
+        document.body.style.overflow = '';
     }
 });
 
