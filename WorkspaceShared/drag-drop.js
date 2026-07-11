@@ -811,6 +811,17 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
             if (!saved) return;
 
             const layout = JSON.parse(saved);
+            // A saved gridColumn span (e.g. "span 2") and pixel minHeight were
+            // computed against whatever viewport they were saved on. Re-applying
+            // them unmodified on a much narrower mobile screen forces the card
+            // wider than the grid actually has room for, which overflows /
+            // visually overlaps the content below it. Recompute the max span
+            // the CURRENT viewport can actually support (same formula used
+            // when resizing) and clamp to it; on mobile that's always 1, i.e.
+            // full-width, which matches the natural single-column layout.
+            const grid = document.querySelector('.dashboard-grid');
+            const maxSpan = grid ? Math.max(1, Math.min(3, Math.round(grid.getBoundingClientRect().width / 420))) : 1;
+
             Object.keys(layout).forEach(cardId => {
                 const card = document.querySelector(`.dash-card[data-card-id="${cardId}"]`);
                 if (!card || !layout[cardId]) return;
@@ -818,8 +829,16 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
 
                 if (entry.order) card.style.order = entry.order;
                 if (entry.hidden) card.style.display = 'none';
-                if (entry.gridColumn) card.style.gridColumn = entry.gridColumn;
-                if (entry.minHeight) card.style.minHeight = entry.minHeight;
+                if (entry.gridColumn) {
+                    const match = /span\s+(\d+)/.exec(entry.gridColumn);
+                    const savedSpan = match ? parseInt(match[1], 10) : 1;
+                    card.style.gridColumn = savedSpan > maxSpan ? `span ${maxSpan}` : entry.gridColumn;
+                }
+                if (entry.minHeight && maxSpan > 1) {
+                    // Only honor a custom pixel height on wider screens where it
+                    // was actually set; on mobile let the card size to its content.
+                    card.style.minHeight = entry.minHeight;
+                }
                 if (entry.minimized) {
                     card.classList.add('card-minimized');
                     ensureMinimizeButton(card);

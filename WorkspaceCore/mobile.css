@@ -89,11 +89,26 @@ body {
     /* Global search - full width on mobile */
     .global-search-bar {
         padding: 8px 16px 0 16px !important;
+        flex-wrap: wrap !important;
+        justify-content: flex-start !important;
     }
 
     .global-search-bar input {
         max-width: 100% !important;
         font-size: 0.85rem !important;
+    }
+
+    /* Filter pills (All/Lessons/Tasks/Library) injected next to the search
+       box: wrap onto their own row instead of overflowing past the screen
+       edge, and shrink their padding/font to fit more comfortably. */
+    #searchFilters {
+        flex-wrap: wrap !important;
+        width: 100%;
+    }
+
+    #searchFilters .filter-btn {
+        padding: 4px 8px !important;
+        font-size: 0.7rem !important;
     }
 
     /* Actions dropdown - reposition on mobile */
@@ -364,6 +379,21 @@ body {
             radial-gradient(circle 180px at 75% 75%, rgba(91, 141, 239, 0.1) 0%, transparent 70%),
             var(--bg-primary);
         animation: none;
+    }
+}
+
+/* ---- Card glow border: static & subtle on mobile ----
+   .card-glow-border sweeps a conic-gradient (with a bright white/orange
+   highlight segment) around each card's edge, timed for a wide desktop
+   card's proportions. On a narrower, taller mobile card the same angular
+   slice covers a much larger share of the visible edge, so it reads as a
+   solid bright wedge in a corner instead of a subtle moving highlight.
+   Freeze it and calm the colors down for mobile. ---- */
+@media (max-width: 850px) {
+    .card-glow-border {
+        animation: none;
+        background: linear-gradient(135deg, var(--accent-1) 0%, transparent 50%);
+        opacity: 0.25;
     }
 }
 
