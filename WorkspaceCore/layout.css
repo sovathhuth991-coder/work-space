@@ -43,13 +43,13 @@ body {
 }
 
 .sidebar-progress-text .pct {
-    font-size: 0.85rem;
+    font-size: var(--text-base);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .sidebar-progress-text .label {
-    font-size: 0.55rem;
+    font-size: var(--text-2xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -64,7 +64,7 @@ body {
     background: var(--bg-primary);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     cursor: pointer;
     outline: none;
     transition: border-color 0.2s;
@@ -74,7 +74,7 @@ body {
 .hub-sidebar .sidebar-btn {
     padding: 6px 14px;
     border-radius: var(--radius-sm);
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     font-weight: 500;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-color);
@@ -110,7 +110,7 @@ body {
 
 /* Clear data warning */
 .sidebar-clear-note {
-    font-size: 0.5rem;
+    font-size: var(--text-2xs);
     color: var(--text-muted);
     text-align: center;
     opacity: 0.4;
@@ -225,7 +225,7 @@ body {
 }
 
 .hub-brand h2 {
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
     font-weight: 700;
     letter-spacing: -0.2px;
     display: flex;
@@ -244,9 +244,9 @@ body {
     display: inline-block;
     width: 7px;
     height: 7px;
-    background: #0bec99;
+    background: var(--status-online);
     border-radius: 50%;
-    box-shadow: 0 0 10px #00fedc;
+    box-shadow: 0 0 10px var(--status-online);
     animation: pulse 2s infinite;
     flex-shrink: 0;
 }
@@ -260,7 +260,7 @@ body {
 
 /* Menu labels (act as collapsible group headers) */
 .hub-menu-label {
-    font-size: 0.6rem;
+    font-size: var(--text-2xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -278,7 +278,7 @@ body {
 
 .hub-menu-label::after {
     content: '⌄';
-    font-size: 0.85rem;
+    font-size: var(--text-base);
     opacity: 0.6;
     transition: transform 0.2s ease;
 }
@@ -326,7 +326,7 @@ body {
     align-items: center;
     gap: 10px;
     width: 100%;
-    font-size: 0.8rem;
+    font-size: var(--text-base-sm);
     font-weight: 500;
     color: var(--text-secondary);
     cursor: pointer;
@@ -334,7 +334,7 @@ body {
     transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* The glow border – uses animated conic gradient angle */
+/* The glow border – a quick single trace on hover, not a constant loop */
 .nav-glow-border {
     position: absolute;
     inset: 0;
@@ -342,10 +342,9 @@ body {
     padding: 2px;
     background: conic-gradient(from var(--nav-border-angle),
             transparent 0deg,
-            transparent 270deg,
-            #fff 310deg,
-            var(--accent-1) 335deg,
-            #f97316 360deg);
+            transparent 280deg,
+            var(--accent-1) 320deg,
+            transparent 360deg);
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
@@ -354,10 +353,16 @@ body {
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
     mask-composite: exclude;
-    animation: rotate-nav-border 4s linear infinite;
-    opacity: 1;
+    opacity: 0;
     pointer-events: none;
     z-index: 1;
+    transition: opacity 0.2s ease;
+}
+
+/* Trace plays once when the cursor arrives, then settles */
+.nav-btn:hover .nav-glow-border {
+    opacity: 1;
+    animation: rotate-nav-border 0.7s ease-out 1;
 }
 
 /* Content sits above the glow */
@@ -365,11 +370,6 @@ body {
 .nav-btn>span:not(.nav-glow-border) {
     position: relative;
     z-index: 2;
-}
-
-/* Active state – faster rotation */
-.nav-btn.active .nav-glow-border {
-    animation-duration: 1s;
 }
 
 /* Active button background + accent border */
@@ -449,10 +449,9 @@ body {
 .nav-btn .nav-glow-border {
     background: conic-gradient(from var(--nav-border-angle),
             transparent 0deg,
-            transparent 270deg,
-            #fff 310deg,
-            var(--nav-color) 335deg,
-            color-mix(in srgb, var(--nav-color) 80%, #f97316) 360deg);
+            transparent 280deg,
+            var(--nav-color) 320deg,
+            transparent 360deg);
 }
 
 /* Apply nav color to hover state */
@@ -482,7 +481,7 @@ body {
 }
 
 .nav-btn .menu-icon {
-    font-size: 1rem;
+    font-size: var(--text-lg);
     width: 22px;
     text-align: center;
     flex-shrink: 0;
@@ -563,7 +562,7 @@ body {
 }
 
 .hub-version {
-    font-size: 0.6rem;
+    font-size: var(--text-2xs);
     color: var(--text-muted);
     text-align: center;
     font-family: 'SF Mono', 'Fira Code', monospace;
@@ -628,20 +627,15 @@ body {
 }
 
 .view-header h1 {
-    font-size: 2.4rem;
+    font-size: var(--text-4xl);
     font-weight: 700;
     letter-spacing: -0.5px;
     margin: 0;
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
 .view-header:hover h1 {
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-1) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
+    color: var(--text-primary);
 }
 
 .matrix-btn {
@@ -650,7 +644,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--text-base);
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
@@ -688,7 +682,7 @@ body {
 }
 
 .view-kicker {
-    font-size: 0.80rem;
+    font-size: var(--text-base-sm);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -793,7 +787,7 @@ body {
     }
 
     .view-header h1 {
-        font-size: 1.6rem;
+        font-size: var(--text-2xl);
     }
 
     .global-search-bar {
@@ -802,7 +796,7 @@ body {
 
     .global-search-bar input {
         max-width: 100% !important;
-        font-size: 0.8rem !important;
+        font-size: var(--text-base-sm) !important;
         padding: 8px 12px !important;
     }
 }
@@ -853,7 +847,7 @@ body {
     transition: var(--transition) !important;
     border-radius: var(--radius-sm) !important;
     padding: 10px 16px !important;
-    font-size: 0.9rem !important;
+    font-size: var(--text-md) !important;
     color: var(--text-primary) !important;
     max-width: 100%;
 }
@@ -1317,7 +1311,7 @@ body.minimal-ui .nav-btn:hover {
     white-space: nowrap !important;
     font-weight: 500 !important;
     padding: 4px 10px !important;
-    font-size: 0.7rem !important;
+    font-size: var(--text-xs) !important;
 }
 
 .header-toggle-btn:hover {
@@ -1363,7 +1357,7 @@ body.minimal-ui .nav-btn:hover {
 
 /* ─── Base Focus Mode ─── */
 body.focus-mode {
-    background: #0a0a12 !important;
+    background: var(--bg-primary) !important;
 }
 
 body.focus-mode .hub-shell {
@@ -1431,17 +1425,17 @@ body.focus-mode #timer-view .focus-ring {
 
 /* ─── Timer display – bigger text ─── */
 body.focus-mode #timer-view .timer-display {
-    font-size: 4rem !important;
+    font-size: var(--text-display) !important;
 }
 
 body.focus-mode #timer-view .timer-mode-label {
-    font-size: 1rem !important;
+    font-size: var(--text-lg) !important;
 }
 
 /* ─── Headline ─── */
 body.focus-mode #timer-view .timer-headline h2 {
-    font-size: 1.8rem !important;
-    background: linear-gradient(135deg, #f1f1f7 0%, #b0b0c8 100%) !important;
+    font-size: var(--text-3xl) !important;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
@@ -1455,7 +1449,7 @@ body.focus-mode #timer-view .timer-controls {
 
 body.focus-mode #timer-view .timer-btn {
     padding: 12px 36px !important;
-    font-size: 1rem !important;
+    font-size: var(--text-lg) !important;
 }
 
 /* ─── Presets ─── */
@@ -1466,11 +1460,11 @@ body.focus-mode #timer-view .timer-presets {
 
 body.focus-mode #timer-view .timer-preset {
     padding: 8px 20px !important;
-    font-size: 0.9rem !important;
+    font-size: var(--text-md) !important;
 }
 
 /* ─── Linked task ─── */
 body.focus-mode #timer-view .timer-linked-task {
-    font-size: 1rem !important;
+    font-size: var(--text-lg) !important;
     margin-top: 4px !important;
 }
