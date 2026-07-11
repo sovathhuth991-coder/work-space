@@ -544,6 +544,14 @@ body {
     animation-duration: 3s;
 }
 
+.nav-btn[data-view="ai-view"] .nav-glow-border {
+    animation-duration: 3s;
+}
+
+.nav-btn[data-view="reading-view"] .nav-glow-border {
+    animation-duration: 3s;
+}
+
 @keyframes pulseGlow {
     0% {
         box-shadow: 0 0 8px rgba(29, 0, 252, 0.15), inset 0 0 8px rgba(124, 109, 240, 0.02);
