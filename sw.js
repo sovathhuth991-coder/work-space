@@ -1,7 +1,7 @@
 ﻿// Service Worker for Workspace Hub PWA
-const CACHE_NAME = 'workspace-hub-v9';
+const CACHE_NAME = 'workspace-hub-v11';
 const STATIC_ASSETS = [
-  'Workspace.html',
+  'index.html',
   'TUTORIAL.md',
 
   // CSS - core
@@ -30,6 +30,7 @@ const STATIC_ASSETS = [
   'WorkspaceFeatures/date-countdown/date-countdown.css',
   'WorkspaceFeatures/reading/reading.css',
   'WorkspaceShared/fab-buttons.css',
+  'WorkspaceFeatures/command-palette/command-palette.css',
 
   // JS - core
   'WorkspaceCore/init-globals.js',
@@ -64,6 +65,7 @@ const STATIC_ASSETS = [
   'WorkspaceFeatures/ai-assistant/ai-tools.js',
   'WorkspaceFeatures/journal/journal-ui.js',
   'WorkspaceCore/app.js',
+  'WorkspaceFeatures/command-palette/command-palette.js',
 
   // JS - engines
   'WorkspaceFeatures/schedule/schedule-core.js',
@@ -173,7 +175,7 @@ self.addEventListener('fetch', (event) => {
           .catch(() => {
             // If both cache and network fail, return offline page for navigation requests
             if (request.mode === 'navigate') {
-              return caches.match('Workspace.html');
+              return caches.match('index.html');
             }
           });
       })
@@ -218,6 +220,6 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   event.waitUntil(
-    clients.openWindow('Workspace.html')
+    clients.openWindow('index.html')
   );
 });

@@ -277,14 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const sidebar = document.getElementById('hubSidebar');
-                const burger = document.getElementById('burgerToggle');
-                const backdrop = document.getElementById('sidebarBackdrop');
                 if (sidebar && sidebar.classList.contains('open')) {
-                    sidebar.classList.remove('open');
-                    burger?.classList.remove('active');
-                    burger?.setAttribute('aria-expanded', 'false');
-                    if (backdrop) backdrop.style.display = 'none';
-                    document.body.style.overflow = '';
+                    closeSidebarMenu();
                 }
             }
         });
@@ -354,8 +348,8 @@ window.switchView = function(targetViewId) {
         } catch (_) { /* ignore */ }
 
         const sidebar = document.getElementById('hubSidebar');
-        if (sidebar && window.innerWidth < 850) {
-            sidebar.classList.remove('open');
+        if (sidebar && window.innerWidth <= 850) {
+            closeSidebarMenu();
         }
     } catch (error) {
         console.error('SwitchView error:', error);
@@ -933,53 +927,100 @@ window.clearAllDataAndCache = () => clearAllData(true);
 // ============================================================
 // SIDEBAR TOGGLE – with backdrop overlay
 // ============================================================
-function toggleSidebarMenu() {
-    const shell = document.querySelector('.hub-shell');
+// Single source of truth for closing the mobile sidebar. Removes the
+// open state, hides the backdrop, resets the burger + body scroll lock.
+function closeSidebarMenu() {
     const sidebar = document.getElementById('hubSidebar');
     const burger = document.getElementById('burgerToggle');
     const backdrop = document.getElementById('sidebarBackdrop');
 
-    if (!shell || !sidebar || !burger) return;
+    if (sidebar) sidebar.classList.remove('open');
+    if (burger) {
+        burger.classList.remove('active');
+        burger.setAttribute('aria-expanded', 'false');
+    }
+    if (backdrop) backdrop.style.display = 'none';
+    document.body.style.overflow = '';
+}
+window.closeSidebarMenu = closeSidebarMenu;
 
-    const isMobile = window.innerWidth <= 850;
+function toggleSidebarMenu() {
+    try {
+        const shell = document.querySelector('.hub-shell');
+        const sidebar = document.getElementById('hubSidebar');
+        const burger = document.getElementById('burgerToggle');
+        const backdrop = document.getElementById('sidebarBackdrop');
 
-    if (isMobile) {
-        // Mobile: toggle 'open' class on sidebar (transform)
-        const isOpen = sidebar.classList.toggle('open');
-        burger.classList.toggle('active');
-        burger.setAttribute('aria-expanded', isOpen);
-
-        // Toggle backdrop
-        if (backdrop) {
-            backdrop.style.display = isOpen ? 'block' : 'none';
+        if (!shell || !sidebar || !burger) {
+            console.warn('[Sidebar] Missing required elements:', { shell: !!shell, sidebar: !!sidebar, burger: !!burger });
+            return;
         }
 
-        // Prevent body scroll when sidebar is open
-        document.body.style.overflow = isOpen ? 'hidden' : '';
-    } else {
-        // Desktop: toggle 'sidebar-collapsed' on the shell
-        const isCollapsed = shell.classList.toggle('sidebar-collapsed');
-        burger.classList.toggle('active');
-        burger.setAttribute('aria-expanded', !isCollapsed);
+        const isMobile = window.innerWidth <= 850;
 
-        // No backdrop on desktop
-        if (backdrop) {
-            backdrop.style.display = 'none';
+        if (isMobile) {
+            // Mobile: toggle 'open' class on sidebar (transform)
+            const isOpen = sidebar.classList.toggle('open');
+            burger.classList.toggle('active');
+            burger.setAttribute('aria-expanded', isOpen);
+
+            // Toggle backdrop
+            if (backdrop) {
+                backdrop.style.display = isOpen ? 'block' : 'none';
+            }
+
+            // Prevent body scroll when sidebar is open
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        } else {
+            // Desktop: toggle 'sidebar-collapsed' on the shell
+            const isCollapsed = shell.classList.toggle('sidebar-collapsed');
+            burger.classList.toggle('active');
+            burger.setAttribute('aria-expanded', !isCollapsed);
+
+            // No backdrop on desktop
+            if (backdrop) {
+                backdrop.style.display = 'none';
+            }
         }
+    } catch (error) {
+        console.error('[Sidebar] Error toggling sidebar menu:', error);
     }
 }
 
 // Handle window resize – close sidebar if resizing to desktop
 window.addEventListener('resize', function() {
-    const sidebar = document.getElementById('hubSidebar');
+    if (window.innerWidth > 850) {
+        closeSidebarMenu();
+    }
+});
+
+// ============================================================
+// BURGER DIRECT CLICK HANDLER (bypasses delegated event system)
+// ============================================================
+// The burger sits inside the sticky header (z-index: 9998) but the
+// mobile sidebar is position:fixed at z-index:10000 covering the
+// entire screen. The delegated data-action handler may not fire
+// because the sidebar intercepts clicks. A direct listener ensures
+// clicks always reach toggleSidebarMenu() regardless of stacking.
+document.addEventListener('DOMContentLoaded', function() {
     const burger = document.getElementById('burgerToggle');
+    if (burger) {
+        burger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (typeof toggleSidebarMenu === 'function') {
+                toggleSidebarMenu();
+            }
+        });
+    }
+
+    // Also ensure the sidebar backdrop click closes the sidebar
     const backdrop = document.getElementById('sidebarBackdrop');
-    if (window.innerWidth > 850 && sidebar && burger) {
-        sidebar.classList.remove('open');
-        burger.classList.remove('active');
-        burger.setAttribute('aria-expanded', 'false');
-        if (backdrop) backdrop.style.display = 'none';
-        document.body.style.overflow = '';
+    if (backdrop) {
+        backdrop.addEventListener('click', function(e) {
+            if (typeof closeSidebarMenu === 'function') {
+                closeSidebarMenu();
+            }
+        });
     }
 });
 

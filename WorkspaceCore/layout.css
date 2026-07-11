@@ -187,9 +187,11 @@ body {
     .hub-sidebar {
         position: fixed;
         left: 0;
+        right: 0;
         top: 0;
-        width: 280px;
+        width: 100%;
         height: 100%;
+        height: 100dvh;
         z-index: 10000;
         transform: translateX(-100%);
         transition: transform 0.3s ease, opacity 0.3s ease;
@@ -202,18 +204,18 @@ body {
     }
 
     .hub-sidebar.open {
-        transform: translateX(0);
+        transform: translateX(0) !important;
     }
 
     .hub-shell.sidebar-collapsed .hub-sidebar {
-        width: 280px;
+        width: 100%;
         padding: 24px 16px;
         opacity: 1;
         transform: translateX(-100%);
     }
 
     .hub-shell.sidebar-collapsed .hub-sidebar.open {
-        transform: translateX(0);
+        transform: translateX(0) !important;
     }
 }
 
@@ -832,6 +834,7 @@ body {
     width: 100vw;
     overflow: hidden;
 }
+
 
 /* ===== Remove any lingering top space ===== */
 html,
