@@ -72,6 +72,7 @@
     <link rel="stylesheet" href="WorkspaceFeatures/reading/reading.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/ai-assistant/ai-assistant.css" />
     <link rel="stylesheet" href="WorkspaceShared/fab-buttons.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/command-palette/command-palette.css" />
     <link rel="stylesheet" href="WorkspaceCore/mobile.css" />
 </head>
 
@@ -89,141 +90,141 @@
     <div class="app-layout-container hub-shell">
 
         <!-- ===== SIDEBAR ===== -->
-    <aside class="hub-sidebar" id="hubSidebar">
-        <!-- Brand -->
-        <div class="hub-brand">
-            <h2>Workspace <span>Hub</span> <span class="hub-status-dot"></span></h2>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="hub-menu" aria-label="Workspace sections">
-            <p class="hub-menu-label">Main</p>
-            <div class="hub-menu-group">
-                <button class="nav-btn hub-menu-item active" data-view="dashboard-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">⌂</span>
-                    <span>Dashboard</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="ai-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">🧠</span>
-                    <span>AI Assistant</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="schedule-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">▦</span>
-                    <span>Schedule</span>
-                </button>
+        <aside class="hub-sidebar" id="hubSidebar">
+            <!-- Brand -->
+            <div class="hub-brand">
+                <h2>Workspace <span>Hub</span> <span class="hub-status-dot"></span></h2>
             </div>
 
-            <p class="hub-menu-label">Tools</p>
-            <div class="hub-menu-group">
-                <button class="nav-btn hub-menu-item" data-view="timer-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">◴</span>
-                    <span>Focus Timer</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="weather-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">🌤️</span>
-                    <span>Weather</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="todo-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">☑</span>
-                    <span>To‑Do</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="analytics-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">📊</span>
-                    <span>Analytics</span>
-                </button>
-            </div>
-
-            <p class="hub-menu-label">Knowledge</p>
-            <div class="hub-menu-group">
-                <button class="nav-btn hub-menu-item" data-view="lessons-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">▣</span>
-                    <span>Lessons</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="library-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">📚</span>
-                    <span>Library</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="graph-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">✦</span>
-                    <span>Knowledge Graph</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="habits-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">✅</span>
-                    <span>Habits</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="journal-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">📔</span>
-                    <span>Journal</span>
-                </button>
-                <button class="nav-btn hub-menu-item" data-view="reading-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">📚</span>
-                    <span>Reading List</span>
-                </button>
-            </div>
-
-            <p class="hub-menu-label">Help</p>
-            <div class="hub-menu-group">
-                <button class="nav-btn hub-menu-item" data-view="tutorial-view">
-                    <span class="nav-glow-border"></span>
-                    <span class="menu-icon">📖</span>
-                    <span>Tutorial</span>
-                </button>
-            </div>
-        </nav>
-        <!-- Footer -->
-        <div class="hub-sidebar-footer">
-            <!-- Progress Ring -->
-            <div class="sidebar-progress">
-                <svg width="44" height="44" viewBox="0 0 48 48" style="transform: rotate(-90deg);">
-                    <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4" />
-                    <circle cx="24" cy="24" r="20" fill="none" stroke="var(--accent-1)" stroke-width="4"
-                        stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6"
-                        id="sidebarProgressRing" />
-                </svg>
-                <div class="sidebar-progress-text">
-                    <span class="pct" id="sidebarProgressText">0%</span>
-                    <span class="label">Today</span>
+            <!-- Navigation -->
+            <nav class="hub-menu" aria-label="Workspace sections">
+                <p class="hub-menu-label">Main</p>
+                <div class="hub-menu-group">
+                    <button class="nav-btn hub-menu-item active" data-view="dashboard-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">⌂</span>
+                        <span>Dashboard</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="ai-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">🧠</span>
+                        <span>AI Assistant</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="schedule-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">▦</span>
+                        <span>Schedule</span>
+                    </button>
                 </div>
+
+                <p class="hub-menu-label">Tools</p>
+                <div class="hub-menu-group">
+                    <button class="nav-btn hub-menu-item" data-view="timer-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">◴</span>
+                        <span>Focus Timer</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="weather-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">🌤️</span>
+                        <span>Weather</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="todo-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">☑</span>
+                        <span>To‑Do</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="analytics-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">📊</span>
+                        <span>Analytics</span>
+                    </button>
+                </div>
+
+                <p class="hub-menu-label">Knowledge</p>
+                <div class="hub-menu-group">
+                    <button class="nav-btn hub-menu-item" data-view="lessons-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">▣</span>
+                        <span>Lessons</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="library-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">📚</span>
+                        <span>Library</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="graph-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">✦</span>
+                        <span>Knowledge Graph</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="habits-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">✅</span>
+                        <span>Habits</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="journal-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">📔</span>
+                        <span>Journal</span>
+                    </button>
+                    <button class="nav-btn hub-menu-item" data-view="reading-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">📚</span>
+                        <span>Reading List</span>
+                    </button>
+                </div>
+
+                <p class="hub-menu-label">Help</p>
+                <div class="hub-menu-group">
+                    <button class="nav-btn hub-menu-item" data-view="tutorial-view">
+                        <span class="nav-glow-border"></span>
+                        <span class="menu-icon">📖</span>
+                        <span>Tutorial</span>
+                    </button>
+                </div>
+            </nav>
+            <!-- Footer -->
+            <div class="hub-sidebar-footer">
+                <!-- Progress Ring -->
+                <div class="sidebar-progress">
+                    <svg width="44" height="44" viewBox="0 0 48 48" style="transform: rotate(-90deg);">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4" />
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="var(--accent-1)" stroke-width="4"
+                            stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6"
+                            id="sidebarProgressRing" />
+                    </svg>
+                    <div class="sidebar-progress-text">
+                        <span class="pct" id="sidebarProgressText">0%</span>
+                        <span class="label">Today</span>
+                    </div>
+                </div>
+
+                <!-- Theme Selector -->
+                <select id="globalThemeSelector" data-action="applyTheme">
+                    <option value="cyberpunk">🌆 Cyberpunk</option>
+                    <option value="minimal">☀️ Minimal</option>
+                    <option value="ocean">🌊 Ocean</option>
+                    <option value="sunset">🌅 Sunset</option>
+                    <option value="forest">🌲 Forest</option>
+                    <option value="midnight">🌙 Midnight</option>
+                    <option value="auto">🌗 Auto (System)</option>
+                </select>
+
+                <!-- Tour & Shortcuts (two‑column) -->
+                <div class="sidebar-btn-row">
+                    <button class="sidebar-btn" data-action="startTour">🎓 Tour</button>
+                    <button class="sidebar-btn" data-action="showShortcuts">⌨️ Shortcuts</button>
+                </div>
+
+                <!-- Version -->
+                <div class="hub-version">v2.1.0 // Engine Active</div>
+
+                <!-- Clear All Data -->
+                <button class="sidebar-btn danger" data-action="clearAllData">🗑️ Clear All Data</button>
+                <div class="sidebar-clear-note">Clears all saved data (lessons, tasks, habits, etc.)</div>
             </div>
-
-            <!-- Theme Selector -->
-            <select id="globalThemeSelector" data-action="applyTheme">
-                <option value="cyberpunk">🌆 Cyberpunk</option>
-                <option value="minimal">☀️ Minimal</option>
-                <option value="ocean">🌊 Ocean</option>
-                <option value="sunset">🌅 Sunset</option>
-                <option value="forest">🌲 Forest</option>
-                <option value="midnight">🌙 Midnight</option>
-                <option value="auto">🌗 Auto (System)</option>
-            </select>
-
-            <!-- Tour & Shortcuts (two‑column) -->
-            <div class="sidebar-btn-row">
-                <button class="sidebar-btn" data-action="startTour">🎓 Tour</button>
-                <button class="sidebar-btn" data-action="showShortcuts">⌨️ Shortcuts</button>
-            </div>
-
-            <!-- Version -->
-            <div class="hub-version">v2.1.0 // Engine Active</div>
-
-            <!-- Clear All Data -->
-            <button class="sidebar-btn danger" data-action="clearAllData">🗑️ Clear All Data</button>
-            <div class="sidebar-clear-note">Clears all saved data (lessons, tasks, habits, etc.)</div>
-        </div>
-    </aside>
+        </aside>
 
         <!-- ===== MAIN CONTENT AREA ===== -->
         <main class="hub-content">
@@ -239,18 +240,24 @@
                 </button>
                 <span style="font-size:1.1rem; font-weight:600; color:var(--text-secondary);">Workspace Hub</span>
                 <!-- Sideways Dropdown Toggle -->
-                <div id="headerToggleContainer" style="position:relative; margin-left:auto; display:inline-flex; align-items:center; overflow:visible;">
+                <div id="headerToggleContainer"
+                    style="position:relative; margin-left:auto; display:inline-flex; align-items:center; overflow:visible;">
                     <!-- Main Toggle Button -->
-                    <button id="headerToggleMain" class="header-toggle-main" title="Quick Actions" style="padding:6px 12px; border-radius:99px; background:var(--accent-gradient); border:none; color:#fff; font-size:0.75rem; font-weight:600; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(124, 109, 240, 0.3);">
+                    <button id="headerToggleMain" class="header-toggle-main" title="Quick Actions"
+                        style="padding:6px 12px; border-radius:99px; background:var(--accent-gradient); border:none; color:#fff; font-size:0.75rem; font-weight:600; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(124, 109, 240, 0.3);">
                         <span>⚡</span>
                         <span>Actions</span>
-                        <span id="toggleArrow" style="transition:transform 0.3s ease; display:inline-block; font-size:0.7rem;">▶</span>
+                        <span id="toggleArrow"
+                            style="transition:transform 0.3s ease; display:inline-block; font-size:0.7rem;">▶</span>
                     </button>
 
                     <!-- Sideways Dropdown -->
-<div id="headerToggleDropdown" style="position:absolute; top:50%; right:100%; transform:translateY(-50%) translateX(8px); display:none; background:var(--bg-card); border:1px solid var(--border-color); border-radius:99px; padding:4px; gap:0; box-shadow:var(--shadow-elevated); backdrop-filter:blur(12px);">
+                    <div id="headerToggleDropdown"
+                        style="position:absolute; top:50%; right:100%; transform:translateY(-50%) translateX(8px); display:none; background:var(--bg-card); border:1px solid var(--border-color); border-radius:99px; padding:4px; gap:0; box-shadow:var(--shadow-elevated); backdrop-filter:blur(12px);">
                         <!-- Toggle 1: Focus Stats -->
-                        <button id="toggleFocusStats" class="header-toggle-btn active" data-action="toggleFocusStatsView" title="Toggle Focus Stats" style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.75rem; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; white-space:nowrap;">
+                        <button id="toggleFocusStats" class="header-toggle-btn active"
+                            data-action="toggleFocusStatsView" title="Toggle Focus Stats"
+                            style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.75rem; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; white-space:nowrap;">
                             <span style="color:#2ecc71;">⏱</span>
                             <span id="headerFocusTime">00:00</span>
                             <span style="opacity:0.4;">|</span>
@@ -262,12 +269,16 @@
                         </button>
 
                         <!-- Toggle 2: Focus Mode -->
-                        <button id="toggleFocusMode" class="header-toggle-btn" data-action="toggleFocusMode" title="Toggle Focus Mode" style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.8rem; cursor:pointer; transition:var(--transition); white-space:nowrap;">
+                        <button id="toggleFocusMode" class="header-toggle-btn" data-action="toggleFocusMode"
+                            title="Toggle Focus Mode"
+                            style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.8rem; cursor:pointer; transition:var(--transition); white-space:nowrap;">
                             🧘 Focus
                         </button>
 
                         <!-- Toggle 3: Theme -->
-                        <button id="toggleTheme" class="header-toggle-btn" data-action="toggleTheme" title="Toggle Dark/Light Mode" style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.85rem; cursor:pointer; transition:var(--transition); white-space:nowrap;">
+                        <button id="toggleTheme" class="header-toggle-btn" data-action="toggleTheme"
+                            title="Toggle Dark/Light Mode"
+                            style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.85rem; cursor:pointer; transition:var(--transition); white-space:nowrap;">
                             🌓
                         </button>
                     </div>
@@ -293,7 +304,8 @@
                         <h1>Dashboard</h1>
                     </div>
                     <div style="display:flex;gap:8px;align-items:center;">
-                        <button class="dashboard-customize-btn" data-action="toggleCardVisibility" title="Show/Hide dashboard cards">⚙️ Customize</button>
+                        <button class="dashboard-customize-btn" data-action="toggleCardVisibility"
+                            title="Show/Hide dashboard cards">⚙️ Customize</button>
                     </div>
                 </div>
                 <div class="dashboard-grid">
@@ -302,11 +314,13 @@
                     <div class="dash-card dash-banner" data-card-id="banner">
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
-                            <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h2 style="margin:0;font-size:1.8rem;font-weight:700;">Study systems online</h2>
                                 <div class="card-controls">
                                     <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="banner" title="Resize">⤡</button>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="banner"
+                                        title="Resize">⤡</button>
                                 </div>
                             </div>
                             <div class="banner-text">
@@ -326,30 +340,46 @@
                                 </div>
                             </div>
                             <!-- Daily Focus Goal -->
-                            <div id="dailyFocusGoal" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                            <div id="dailyFocusGoal"
+                                style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
                                 <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                                     <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
-                                        <svg viewBox="0 0 80 80" style="transform: rotate(-90deg); width: 100%; height: 100%;">
-                                            <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6" />
-                                            <circle id="focusGoalRing" cx="40" cy="40" r="35" fill="none" stroke="url(#focusGoalGradient)" stroke-width="6" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220" style="transition: stroke-dashoffset 0.5s ease;" />
+                                        <svg viewBox="0 0 80 80"
+                                            style="transform: rotate(-90deg); width: 100%; height: 100%;">
+                                            <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.06)"
+                                                stroke-width="6" />
+                                            <circle id="focusGoalRing" cx="40" cy="40" r="35" fill="none"
+                                                stroke="url(#focusGoalGradient)" stroke-width="6" stroke-linecap="round"
+                                                stroke-dasharray="220" stroke-dashoffset="220"
+                                                style="transition: stroke-dashoffset 0.5s ease;" />
                                             <defs>
-                                                <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%"
+                                                    y2="100%">
                                                     <stop offset="0%" style="stop-color:#7c6df0;stop-opacity:1" />
                                                     <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
                                                 </linearGradient>
                                             </defs>
                                         </svg>
-                                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                                            <span id="focusGoalPercent" style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">0%</span>
+                                        <div
+                                            style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                            <span id="focusGoalPercent"
+                                                style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">0%</span>
                                             <span style="font-size: 0.6rem; color: var(--text-muted);">of goal</span>
                                         </div>
                                     </div>
                                     <div style="flex: 1; min-width: 150px;">
-                                        <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;">Daily Focus Goal</div>
-                                        <div id="focusGoalText" style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 8px;">0h 0m / 4h 0m</div>
-                                        <div id="focusGoalMessage" style="font-size: 0.8rem; color: var(--accent-1); font-weight: 500;"></div>
+                                        <div
+                                            style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;">
+                                            Daily Focus Goal</div>
+                                        <div id="focusGoalText"
+                                            style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 8px;">
+                                            0h 0m / 4h 0m</div>
+                                        <div id="focusGoalMessage"
+                                            style="font-size: 0.8rem; color: var(--accent-1); font-weight: 500;"></div>
                                     </div>
-                                    <button id="editGoalBtn" class="matrix-btn" style="padding: 4px 12px; font-size: 0.75rem; white-space: nowrap;" title="Edit daily goal">⚙️ Set Goal</button>
+                                    <button id="editGoalBtn" class="matrix-btn"
+                                        style="padding: 4px 12px; font-size: 0.75rem; white-space: nowrap;"
+                                        title="Edit daily goal">⚙️ Set Goal</button>
                                 </div>
                             </div>
 
@@ -361,19 +391,24 @@
                     <div class="dash-card" data-card-id="sessions">
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
-                            <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;"><span class="pulse-dot"></span> Today's Sessions</h3>
                                 <div class="card-controls">
                                     <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="sessions" title="Resize">⤡</button>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="sessions"
+                                        title="Resize">⤡</button>
                                 </div>
                             </div>
-                            <button class="matrix-btn" data-action="showSessionDetailsModal" style="padding:4px 12px;font-size:0.75rem;">📊 View Details</button>
+                            <button class="matrix-btn" data-action="showSessionDetailsModal"
+                                style="padding:4px 12px;font-size:0.75rem;">📊 View Details</button>
                             <div id="allSessionsContainer" class="all-sessions-container">
                                 <div class="session-history-empty">
                                     <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
-                                    <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
-                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your progress</div>
+                                    <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today
+                                    </div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a
+                                        focus session to see your progress</div>
                                 </div>
                             </div>
                         </div>
@@ -383,15 +418,19 @@
                     <div class="dash-card" data-card-id="todo">
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
-                            <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;">Master To-Do</h3>
                                 <div class="card-controls">
                                     <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="todo" title="Resize">⤡</button>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="todo"
+                                        title="Resize">⤡</button>
                                 </div>
                             </div>
-                            <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task" style="padding:4px 12px;border-radius:99px;background:var(--accent-gradient);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+ Add Task</button>
-                    <ul class="strike-list" id="dashStrikeList"></ul>
+                            <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task"
+                                style="padding:4px 12px;border-radius:99px;background:var(--accent-gradient);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
+                                Add Task</button>
+                            <ul class="strike-list" id="dashStrikeList"></ul>
                         </div>
                     </div>
 
@@ -402,7 +441,8 @@
                             <div class="session-hub-header">
                                 <h3>🎛️ Session Hub</h3>
                                 <div class="session-hub-controls">
-                                    <button class="matrix-btn hub-reset-btn" data-action="resetDashboardLayout" title="Reset entire dashboard layout">↺ Reset Dashboard</button>
+                                    <button class="matrix-btn hub-reset-btn" data-action="resetDashboardLayout"
+                                        title="Reset entire dashboard layout">↺ Reset Dashboard</button>
                                 </div>
                             </div>
                             <div class="session-hub-grid" id="sessionHubGrid">
@@ -411,7 +451,8 @@
                                     <div class="hub-widget-header">
                                         <span class="hub-drag-handle" title="Drag to move">⠿</span>
                                         <span>System Status</span>
-                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="status" title="Resize">⤡</button>
+                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="status"
+                                            title="Resize">⤡</button>
                                     </div>
                                     <div class="hub-widget-content" id="hubStatusContent">
                                         <div class="session-status-indicator">
@@ -440,7 +481,8 @@
                                     <div class="hub-widget-header">
                                         <span class="hub-drag-handle" title="Drag to move">⠿</span>
                                         <span>Countdown</span>
-                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="countdown" title="Resize">⤡</button>
+                                        <button class="hub-resize-btn" data-action="resizeWidget"
+                                            data-widget="countdown" title="Resize">⤡</button>
                                     </div>
                                     <div class="hub-widget-content" id="hubCountdownContent">
                                         <div id="hubCountdownDisplay"></div>
@@ -452,12 +494,14 @@
                                     <div class="hub-widget-header">
                                         <span class="hub-drag-handle" title="Drag to move">⠿</span>
                                         <span>Today's Sessions</span>
-                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="sessions" title="Resize">⤡</button>
+                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="sessions"
+                                            title="Resize">⤡</button>
                                     </div>
                                     <div class="hub-widget-content" id="hubSessionsContent">
                                         <div class="session-history-empty">
                                             <div style="font-size: 1.5rem; margin-bottom: 6px;">📊</div>
-                                            <div style="color: var(--text-muted); font-size: 0.8rem;">No sessions yet</div>
+                                            <div style="color: var(--text-muted); font-size: 0.8rem;">No sessions yet
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -469,34 +513,55 @@
                     <div class="dash-card" data-card-id="widgets" style="grid-column: 1 / -1;">
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
-                            <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;">📦 Custom Widgets</h3>
                                 <div class="card-controls">
                                     <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="widgets" title="Resize">⤡</button>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="widgets"
+                                        title="Resize">⤡</button>
                                 </div>
                             </div>
-                    <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
-                    <div id="dashQuickLinks" class="dash-quick-links" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-                        <div style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
-                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">📂 Current Lesson</div>
-                            <div id="dashRecentLessons" style="font-size:0.9rem;color:var(--text-secondary);">No open lesson</div>
-                        </div>
-                        <div style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
-                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">🔗 Recent Bookmarks</div>
-                            <div id="dashRecentLibs" style="font-size:0.9rem;color:var(--text-secondary);">No bookmarks yet</div>
-                        </div>
-                    </div>
+                            <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
+                            <div id="dashQuickLinks" class="dash-quick-links"
+                                style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+                                <div
+                                    style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
+                                    <div
+                                        style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
+                                        📂 Current Lesson</div>
+                                    <div id="dashRecentLessons" style="font-size:0.9rem;color:var(--text-secondary);">No
+                                        open lesson</div>
+                                </div>
+                                <div
+                                    style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
+                                    <div
+                                        style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
+                                        🔗 Recent Bookmarks</div>
+                                    <div id="dashRecentLibs" style="font-size:0.9rem;color:var(--text-secondary);">No
+                                        bookmarks yet</div>
+                                </div>
+                            </div>
 
-                    <!-- Quick Notes Widget -->
-                    <div id="quickNotesWidget" style="margin-top: 18px; background: var(--bg-primary); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border-color);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">📝 Quick Notes</div>
-                            <button id="clearNotesBtn" class="matrix-btn" style="padding: 2px 8px; font-size: 0.7rem;" title="Clear all notes">Clear</button>
-                        </div>
-                        <textarea id="quickNotesInput" placeholder="Jot down quick thoughts, reminders, or ideas..." style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; font-family: inherit;"></textarea>
-                        <div id="quickNotesList" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
-                    </div>
+                            <!-- Quick Notes Widget -->
+                            <div id="quickNotesWidget"
+                                style="margin-top: 18px; background: var(--bg-primary); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border-color);">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <div
+                                        style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">
+                                        📝 Quick Notes</div>
+                                    <button id="clearNotesBtn" class="matrix-btn"
+                                        style="padding: 2px 8px; font-size: 0.7rem;"
+                                        title="Clear all notes">Clear</button>
+                                </div>
+                                <textarea id="quickNotesInput"
+                                    placeholder="Jot down quick thoughts, reminders, or ideas..."
+                                    style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; font-family: inherit;"></textarea>
+                                <div id="quickNotesList"
+                                    style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
+                                </div>
+                            </div>
 
                         </div>
                     </div>
@@ -508,16 +573,16 @@
                     <!-- ===== STATS ===== -->
                     <div class="dash-stats-container">
 
-                        <div class="dash-card stat-card" data-card-id="stat-tasks" data-action="switchView" data-view="todo-view"
-                            role="button" tabindex="0"
-                            aria-label="View Master To-Do">
+                        <div class="dash-card stat-card" data-card-id="stat-tasks" data-action="switchView"
+                            data-view="todo-view" role="button" tabindex="0" aria-label="View Master To-Do">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
                                     <span class="stat-icon">✓</span>
                                     <div class="card-controls">
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-tasks" title="Resize">⤡</button>
+                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-tasks"
+                                            title="Resize">⤡</button>
                                     </div>
                                 </div>
                                 <span class="stat-info">
@@ -527,16 +592,16 @@
                             </div>
                         </div>
 
-                        <div class="dash-card stat-card" data-card-id="stat-schedule" data-action="switchView" data-view="schedule-view"
-                            role="button"
-                            tabindex="0" aria-label="View Weekly Schedule">
+                        <div class="dash-card stat-card" data-card-id="stat-schedule" data-action="switchView"
+                            data-view="schedule-view" role="button" tabindex="0" aria-label="View Weekly Schedule">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
                                     <span class="stat-icon">▦</span>
                                     <div class="card-controls">
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-schedule" title="Resize">⤡</button>
+                                        <button class="card-resize-btn" data-action="resizeCard"
+                                            data-card="stat-schedule" title="Resize">⤡</button>
                                     </div>
                                 </div>
                                 <span class="stat-info">
@@ -546,16 +611,16 @@
                             </div>
                         </div>
 
-                        <div class="dash-card stat-card" data-card-id="stat-lessons" data-action="switchView" data-view="lessons-view"
-                            role="button"
-                            tabindex="0" aria-label="View Lessons">
+                        <div class="dash-card stat-card" data-card-id="stat-lessons" data-action="switchView"
+                            data-view="lessons-view" role="button" tabindex="0" aria-label="View Lessons">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
                                     <span class="stat-icon">▣</span>
                                     <div class="card-controls">
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-lessons" title="Resize">⤡</button>
+                                        <button class="card-resize-btn" data-action="resizeCard"
+                                            data-card="stat-lessons" title="Resize">⤡</button>
                                     </div>
                                 </div>
                                 <span class="stat-info">
@@ -565,16 +630,16 @@
                             </div>
                         </div>
 
-                        <div class="dash-card stat-card" data-card-id="stat-streak" data-action="switchView" data-view="analytics-view"
-                            role="button"
-                            tabindex="0" aria-label="View Analytics">
+                        <div class="dash-card stat-card" data-card-id="stat-streak" data-action="switchView"
+                            data-view="analytics-view" role="button" tabindex="0" aria-label="View Analytics">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
                                     <span class="stat-icon">🔥</span>
                                     <div class="card-controls">
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-streak" title="Resize">⤡</button>
+                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-streak"
+                                            title="Resize">⤡</button>
                                     </div>
                                 </div>
                                 <span class="stat-info">
@@ -595,7 +660,8 @@
                 <div class="card-visibility-overlay" id="cardVisibilityOverlay">
                     <div class="card-visibility-panel">
                         <h3>⚙️ Customize Dashboard</h3>
-                        <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 16px 0;">Toggle cards on/off. Hidden cards won't appear on the dashboard.</p>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 16px 0;">Toggle cards on/off.
+                            Hidden cards won't appear on the dashboard.</p>
                         <div id="cardVisibilityList"></div>
                         <button class="vis-close-btn" data-action="closeCardVisibility">Done</button>
                     </div>
@@ -653,7 +719,8 @@
                         <p class="view-kicker">Visualise Your Knowledge</p>
                         <h1>Knowledge Graph</h1>
                     </div>
-                    <button class="matrix-btn" data-action="renderKnowledgeGraph" title="Refresh graph">⟳ Refresh</button>
+                    <button class="matrix-btn" data-action="renderKnowledgeGraph" title="Refresh graph">⟳
+                        Refresh</button>
                 </div>
                 <div id="graphContainer"
                     style="width:100%; height:calc(100vh - 200px); background: var(--bg-primary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
@@ -701,7 +768,8 @@
                     </div>
                     <div class="ai-view-status-row">
                         <span id="ai-status-view" class="ai-status-pill">● offline</span>
-                        <button id="ai-settings-btn-view" class="matrix-btn" title="Configure local AI endpoint">⚙ Endpoint</button>
+                        <button id="ai-settings-btn-view" class="matrix-btn" title="Configure local AI endpoint">⚙
+                            Endpoint</button>
                         <button id="ai-clear-btn-view" class="matrix-btn" title="Clear conversation">🗑 Clear</button>
                     </div>
                 </div>
@@ -710,15 +778,18 @@
                     <!-- Chat column -->
                     <div class="ai-chat-panel">
                         <div id="ai-messages-view" class="ai-chat-messages">
-                            <div class="ai-empty-state">Ask me anything about your Workspace — tasks, habits, journal, reading list, and more.</div>
+                            <div class="ai-empty-state">Ask me anything about your Workspace — tasks, habits, journal,
+                                reading list, and more.</div>
                         </div>
                         <div class="ai-chat-inputrow">
-                            <input type="text" id="ai-input-view" placeholder="Ask, or tell me to add/complete/remove something..." autocomplete="off" />
+                            <input type="text" id="ai-input-view"
+                                placeholder="Ask, or tell me to add/complete/remove something..." autocomplete="off" />
                             <button id="ai-send-view" class="matrix-btn ai-send-btn">Send</button>
                         </div>
                         <div class="ai-chat-footer">
                             <span id="ai-model-name-view">no local AI detected</span>
-                            <label class="ai-actions-toggle" title="Let the assistant add, complete, or delete items on your behalf">
+                            <label class="ai-actions-toggle"
+                                title="Let the assistant add, complete, or delete items on your behalf">
                                 <input type="checkbox" id="ai-actions-enabled" checked />
                                 Allow actions
                             </label>
@@ -737,7 +808,8 @@
                             <li>Manage your reading list & library</li>
                             <li>Jump you to any section</li>
                         </ul>
-                        <p class="ai-context-note">Runs entirely against your local AI (Ollama / LM Studio / etc.) — nothing is sent anywhere else.</p>
+                        <p class="ai-context-note">Runs entirely against your local AI (Ollama / LM Studio / etc.) —
+                            nothing is sent anywhere else.</p>
                     </aside>
                 </div>
             </section>
@@ -782,12 +854,17 @@
 
                 <!-- Toolbar -->
                 <div class="reading-toolbar">
-                    <input type="text" id="readingSearch" class="reading-search" placeholder="🔍 Search reading list..." data-action="searchReadingList">
+                    <input type="text" id="readingSearch" class="reading-search" placeholder="🔍 Search reading list..."
+                        data-action="searchReadingList">
                     <div class="reading-filter-btns">
-                        <button class="reading-filter-btn active" data-filter="all" data-action="filterReadingList">All</button>
-                        <button class="reading-filter-btn" data-filter="to-read" data-action="filterReadingList">To Read</button>
-                        <button class="reading-filter-btn" data-filter="reading" data-action="filterReadingList">Reading</button>
-                        <button class="reading-filter-btn" data-filter="finished" data-action="filterReadingList">Finished</button>
+                        <button class="reading-filter-btn active" data-filter="all"
+                            data-action="filterReadingList">All</button>
+                        <button class="reading-filter-btn" data-filter="to-read" data-action="filterReadingList">To
+                            Read</button>
+                        <button class="reading-filter-btn" data-filter="reading"
+                            data-action="filterReadingList">Reading</button>
+                        <button class="reading-filter-btn" data-filter="finished"
+                            data-action="filterReadingList">Finished</button>
                     </div>
                     <button class="matrix-btn" data-action="toggleReadingForm">+ Add Item</button>
                 </div>
@@ -797,7 +874,8 @@
                     <div class="reading-form-grid">
                         <div class="reading-form-group">
                             <label class="reading-form-label">Title *</label>
-                            <input type="text" id="readingTitle" class="reading-form-input" placeholder="Book or article title" required>
+                            <input type="text" id="readingTitle" class="reading-form-input"
+                                placeholder="Book or article title" required>
                         </div>
                         <div class="reading-form-group">
                             <label class="reading-form-label">Author</label>
@@ -826,12 +904,14 @@
                         </div>
                         <div class="reading-form-group full-width">
                             <label class="reading-form-label">Notes</label>
-                            <textarea id="readingNotes" class="reading-form-textarea" placeholder="Your thoughts, key takeaways, or review..."></textarea>
+                            <textarea id="readingNotes" class="reading-form-textarea"
+                                placeholder="Your thoughts, key takeaways, or review..."></textarea>
                         </div>
                     </div>
                     <div class="reading-form-actions">
                         <button class="matrix-btn" data-action="cancelReadingEdit">Cancel</button>
-                        <button id="readingAddBtn" class="matrix-btn" data-action="saveReadingItem" style="background: var(--accent-gradient); color: #fff; border: none;">Add Item</button>
+                        <button id="readingAddBtn" class="matrix-btn" data-action="saveReadingItem"
+                            style="background: var(--accent-gradient); color: #fff; border: none;">Add Item</button>
                     </div>
                 </div>
 
@@ -850,20 +930,29 @@
                 </div>
 
                 <!-- Tutorial Hero -->
-                <div class="tutorial-hero" style="background: linear-gradient(135deg, rgba(124, 109, 240, 0.1) 0%, rgba(124, 109, 240, 0.05) 100%); border: 1px solid rgba(124, 109, 240, 0.2); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; text-align: center;">
-                    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">🎓 Interactive Tutorials</h2>
-                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Click any section below to start an interactive walkthrough. We'll guide you through each feature step-by-step!</p>
+                <div class="tutorial-hero"
+                    style="background: linear-gradient(135deg, rgba(124, 109, 240, 0.1) 0%, rgba(124, 109, 240, 0.05) 100%); border: 1px solid rgba(124, 109, 240, 0.2); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; text-align: center;">
+                    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">🎓
+                        Interactive Tutorials</h2>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Click any section below to
+                        start an interactive walkthrough. We'll guide you through each feature step-by-step!</p>
                 </div>
 
                 <!-- Tutorial Cards Grid (generated by JS) -->
-                <div id="tutorialCardsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;"></div>
+                <div id="tutorialCardsGrid"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                </div>
 
                 <!-- Quick Start Section -->
                 <div class="dash-card" style="margin-top: 24px; grid-column: span 2;">
                     <div class="card-inner" style="padding: 24px;">
-                        <h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">📖 Full Documentation</h3>
-                        <p style="margin: 0 0 16px 0; color: var(--text-secondary); font-size: 0.9rem;">For comprehensive documentation, tips, and advanced features, check out the complete guide.</p>
-                        <button class="matrix-btn" data-action="openTutorialGuide" style="background: var(--accent-gradient); color: #fff; border: none; padding: 12px 24px; font-size: 0.95rem;">
+                        <h3
+                            style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">
+                            📖 Full Documentation</h3>
+                        <p style="margin: 0 0 16px 0; color: var(--text-secondary); font-size: 0.9rem;">For
+                            comprehensive documentation, tips, and advanced features, check out the complete guide.</p>
+                        <button class="matrix-btn" data-action="openTutorialGuide"
+                            style="background: var(--accent-gradient); color: #fff; border: none; padding: 12px 24px; font-size: 0.95rem;">
                             📄 Open Full Guide in New Tab
                         </button>
                     </div>
@@ -880,7 +969,8 @@
                 </div>
 
                 <!-- ===== SESSION TRACKER (Auto‑linked to Schedule) ===== -->
-                <div id="sessionTracker" class="session-tracker-enhanced" style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+                <div id="sessionTracker" class="session-tracker-enhanced"
+                    style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
                     <div class="session-tracker-header">
                         <div class="session-tracker-title">Session Tracker</div>
                         <div class="task-selector-wrapper">
@@ -931,10 +1021,14 @@
                 </div>
 
                 <!-- ===== CURRENT SESSION TRACKER (Per-Task) ===== -->
-                <div id="currentSessionTracker" class="session-tracker-enhanced current-session-tracker" style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f97316;">
+                <div id="currentSessionTracker" class="session-tracker-enhanced current-session-tracker"
+                    style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f97316;">
                     <div class="session-tracker-header">
-                        <div class="session-tracker-title">Current Session <span style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">(resets per task)</span></div>
-                        <div class="current-session-task-info" id="currentSessionTaskInfo" style="font-size:0.85rem;color:var(--text-secondary);">
+                        <div class="session-tracker-title">Current Session <span
+                                style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">(resets per
+                                task)</span></div>
+                        <div class="current-session-task-info" id="currentSessionTaskInfo"
+                            style="font-size:0.85rem;color:var(--text-secondary);">
                             <span id="currentSessionTaskName">No active task</span>
                             <span id="currentSessionTaskTime" style="color:var(--text-muted);font-size:0.75rem;"></span>
                         </div>
@@ -961,7 +1055,8 @@
                 </div>
 
                 <!-- ===== SIMPLE COUNTDOWN TIMER ===== -->
-                <div class="simple-timer-card" style="max-width: 500px; margin: 0 auto; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
+                <div class="simple-timer-card"
+                    style="max-width: 500px; margin: 0 auto; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
 
                     <!-- Progress Ring -->
                     <div class="timer-progress-ring">
@@ -988,26 +1083,42 @@
                         <span id="timerStateText">Ready</span>
                     </div>
 
-                    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
-                        <button id="startBtn" style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: var(--accent-gradient); border: none; color: #fff; cursor: pointer; font-size: 1rem;">Start</button>
-                        <button id="pauseBtn" style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;" disabled>Pause</button>
-                        <button id="resetBtn" style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;">Reset</button>
+                    <div
+                        style="display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
+                        <button id="startBtn"
+                            style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: var(--accent-gradient); border: none; color: #fff; cursor: pointer; font-size: 1rem;">Start</button>
+                        <button id="pauseBtn"
+                            style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;"
+                            disabled>Pause</button>
+                        <button id="resetBtn"
+                            style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;">Reset</button>
                     </div>
 
-                    <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
-                        <button class="preset-btn" data-time="5" style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">5 min</button>
-                        <button class="preset-btn active" data-time="25" style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: var(--accent-gradient); color: #fff; border: none; cursor: pointer;">25 min</button>
-                        <button class="preset-btn" data-time="50" style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">50 min</button>
+                    <div
+                        style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
+                        <button class="preset-btn" data-time="5"
+                            style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">5
+                            min</button>
+                        <button class="preset-btn active" data-time="25"
+                            style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: var(--accent-gradient); color: #fff; border: none; cursor: pointer;">25
+                            min</button>
+                        <button class="preset-btn" data-time="50"
+                            style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">50
+                            min</button>
                     </div>
 
                     <!-- Custom Timers -->
-                    <div id="customTimersContainer" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;"></div>
+                    <div id="customTimersContainer"
+                        style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
+                    </div>
 
                     <!-- Add Custom Timer -->
-                    <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 16px;">
+                    <div
+                        style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 16px;">
                         <input type="number" id="customTimerInput" placeholder="Custom minutes..." min="1" max="999"
                             style="padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; width: 140px; text-align: center; outline: none;">
-                        <button id="addCustomTimerBtn" style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); border: 1px solid var(--accent-1); color: var(--accent-1); cursor: pointer; transition: var(--transition);">
+                        <button id="addCustomTimerBtn"
+                            style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); border: 1px solid var(--accent-1); color: var(--accent-1); cursor: pointer; transition: var(--transition);">
                             + Add Timer
                         </button>
                     </div>
@@ -1016,7 +1127,8 @@
                 </div>
 
                 <!-- ===== MODE TOGGLE (always visible) ===== -->
-                <div class="pomodoro-mode-toggle" style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
+                <div class="pomodoro-mode-toggle"
+                    style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
                     <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
                     <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
                 </div>
@@ -1050,7 +1162,8 @@
 
                     <div class="pomodoro-controls">
                         <button id="pomodoroStartBtn" class="pomodoro-btn pomodoro-btn-primary">Start</button>
-                        <button id="pomodoroPauseBtn" class="pomodoro-btn pomodoro-btn-secondary" style="display:none;">Pause</button>
+                        <button id="pomodoroPauseBtn" class="pomodoro-btn pomodoro-btn-secondary"
+                            style="display:none;">Pause</button>
                         <button id="pomodoroResetBtn" class="pomodoro-btn pomodoro-btn-secondary">Reset</button>
                     </div>
 
@@ -1069,7 +1182,8 @@
                         </div>
                     </div>
 
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">25 min focus · 5 min break · 15 min long break</p>
+                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">25 min focus · 5 min break ·
+                        15 min long break</p>
                 </div>
             </section>
 
@@ -1111,10 +1225,12 @@
                                 <h3>Momentum</h3>
                             </div>
                             <div class="todo-summary-grid">
-                                <div class="todo-summary-stat"> <strong id="todoCount">0</strong> <span>Tasks</span> </div>
+                                <div class="todo-summary-stat"> <strong id="todoCount">0</strong> <span>Tasks</span>
+                                </div>
                                 <div class="todo-summary-stat"> <strong id="todoDoneCount">0</strong> <span>Done</span>
                                 </div>
-                                <div class="todo-summary-stat"> <strong id="todoPercent">0%</strong> <span>Complete</span>
+                                <div class="todo-summary-stat"> <strong id="todoPercent">0%</strong>
+                                    <span>Complete</span>
                                 </div>
                             </div>
                         </div>
@@ -1133,13 +1249,14 @@
                         <button class="matrix-btn" data-action="exportBackup">Export Backup</button>
                         <button class="matrix-btn" data-action="exportPageAsMarkdown">📄 Export MD</button>
                         <button class="matrix-btn secondary" data-action="importBackup">Import Backup</button>
-                    <input id="backup-import-input" type="file" accept="application/json"
-                        data-action="importBackup" hidden>
+                        <input id="backup-import-input" type="file" accept="application/json" data-action="importBackup"
+                            hidden>
 
                     </div>
                 </div>
                 <div class="export-dropdown">
-                    <button class="matrix-btn export-toggle" data-action="toggleExportOptions">📤 Export / Print ▾</button>
+                    <button class="matrix-btn export-toggle" data-action="toggleExportOptions">📤 Export / Print
+                        ▾</button>
                     <div class="export-options" id="exportOptions" style="display:none;">
                         <button class="matrix-btn" data-action="exportBackup">💾 Export Backup</button>
                         <button class="matrix-btn" data-action="exportPageAsMarkdown">📄 Export MD</button>
@@ -1306,8 +1423,7 @@
             </section>
 
             <!-- ===== FLOATING QUICK ADD BUTTON ===== -->
-            <button id="quickAddBtn" class="fab-btn" data-action="quickAdd"
-                title="Quick Add Task for Today"
+            <button id="quickAddBtn" class="fab-btn" data-action="quickAdd" title="Quick Add Task for Today"
                 aria-label="Quick Add Task for Today">
                 +
             </button>
@@ -1319,8 +1435,9 @@
             </button>
 
             <!-- ===== HELP MODE TOGGLE BUTTON ===== -->
-            <button id="helpModeBtn" class="fab-btn" title="Click-to-explain: click any part of the app to learn what it does"
-                aria-label="Toggle help mode" style="bottom:230px; right:10px; z-index:998; font-size:22px;">
+            <button id="helpModeBtn" class="fab-btn"
+                title="Click-to-explain: click any part of the app to learn what it does" aria-label="Toggle help mode"
+                style="bottom:230px; right:10px; z-index:998; font-size:22px;">
                 ❓
             </button>
 
@@ -1445,17 +1562,25 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <div>
                     <h3 style="margin:0; font-size:1.1rem; font-weight:600; color:var(--text-primary);">✨ New Task</h3>
-                    <p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-muted);">Add a new task to your master to-do list</p>
+                    <p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-muted);">Add a new task to your
+                        master to-do list</p>
                 </div>
-                <button class="close-btn" data-action="closeTaskModal" style="width:32px; height:32px; font-size:1.5rem;">✕</button>
+                <button class="close-btn" data-action="closeTaskModal"
+                    style="width:32px; height:32px; font-size:1.5rem;">✕</button>
             </div>
             <div style="margin-bottom:16px;">
-                <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Task Description</label>
-                <input type="text" id="taskAddInput" placeholder="What needs to be done?" style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; transition:var(--transition);" autofocus />
+                <label
+                    style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Task
+                    Description</label>
+                <input type="text" id="taskAddInput" placeholder="What needs to be done?"
+                    style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; transition:var(--transition);"
+                    autofocus />
             </div>
             <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:24px;">
                 <button class="matrix-btn" data-action="closeTaskModal" style="min-width:80px;">Cancel</button>
-                <button class="matrix-btn" data-action="confirmAddTask" style="min-width:80px; background:var(--accent-gradient); color:#fff; border:none; font-weight:600;">✨ Add Task</button>
+                <button class="matrix-btn" data-action="confirmAddTask"
+                    style="min-width:80px; background:var(--accent-gradient); color:#fff; border:none; font-weight:600;">✨
+                    Add Task</button>
             </div>
         </div>
     </div>
@@ -1481,7 +1606,7 @@
                     <span>Continuous Rain Layer</span>
                     <button id="rainPlayBtn" data-action="toggleRainSound">Play Rain</button>
                 </div>
-                    <input type="range" id="rainVolume" min="0" max="1" step="0.1" value="0.5"
+                <input type="range" id="rainVolume" min="0" max="1" step="0.1" value="0.5"
                     data-action="changeRainVolume">
             </div>
         </div>
@@ -1498,9 +1623,12 @@
             <textarea id="journalEditorTextarea" class="journal-editor-textarea"
                 placeholder="What's on your mind today?"></textarea>
 
-            <div id="journalEditorError" style="display:none; padding:10px 14px; margin-bottom:12px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:var(--radius-sm); color:#ef4444; font-size:0.85rem;"></div>
+            <div id="journalEditorError"
+                style="display:none; padding:10px 14px; margin-bottom:12px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:var(--radius-sm); color:#ef4444; font-size:0.85rem;">
+            </div>
 
-            <div style="margin-bottom: 8px; font-size: 0.85rem; color: var(--text-secondary);">How are you feeling?</div>
+            <div style="margin-bottom: 8px; font-size: 0.85rem; color: var(--text-secondary);">How are you feeling?
+            </div>
             <div class="journal-mood-selector">
                 <div class="journal-mood-option" data-mood="😊">😊</div>
                 <div class="journal-mood-option" data-mood="😢">😢</div>
@@ -1569,6 +1697,7 @@
     <script type="text/javascript" src="WorkspaceFeatures/ai-assistant/ai-assistant.js"></script>
     <!-- app.js loads last -->
     <script type="text/javascript" src="WorkspaceCore/app.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/command-palette/command-palette.js"></script>
 
 
     <!-- ===== PWA Service Worker Registration (relative path) ===== -->
