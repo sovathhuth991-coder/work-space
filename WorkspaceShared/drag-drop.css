@@ -1,0 +1,82 @@
+/* ============================================================
+   DRAG & DROP ENHANCEMENTS
+   ============================================================ */
+
+/* Drag handle for timeline items */
+.drag-handle {
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    padding: 0 6px;
+    user-select: none;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.timeline-item:hover .drag-handle {
+    opacity: 1;
+}
+
+/* Dragging state */
+.timeline-item.dragging {
+    opacity: 0.4 !important;
+    transform: scale(0.98) !important;
+    box-shadow: 0 8px 24px rgba(124, 109, 240, 0.4) !important;
+}
+
+/* Drop target states */
+.day.drop-target {
+    border-color: var(--accent-1) !important;
+    background: rgba(124, 109, 240, 0.15) !important;
+    transform: scale(1.02);
+    box-shadow: 0 0 0 2px var(--accent-1), 0 8px 24px rgba(124, 109, 240, 0.3) !important;
+}
+
+.graph-cell.drop-target {
+    background: rgba(124, 109, 240, 0.2) !important;
+    border: 2px dashed var(--accent-1) !important;
+    position: relative;
+}
+
+.graph-cell.drop-target::after {
+    content: 'Drop here';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--accent-1);
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.timeline-item.drop-target {
+    border-color: var(--accent-1) !important;
+    background: rgba(124, 109, 240, 0.15) !important;
+}
+
+/* Drag ghost is handled via JS */
+#dragGhost {
+    pointer-events: none;
+}
+
+/* Time indicator for graph drops */
+#graphTimeIndicator {
+    pointer-events: none;
+}
+
+/* Make timeline items draggable */
+.timeline-item[draggable="true"] {
+    cursor: grab;
+}
+
+.timeline-item[draggable="true"]:active {
+    cursor: grabbing;
+}
