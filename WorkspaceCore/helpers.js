@@ -108,7 +108,6 @@ window.getTimeMetrics = getTimeMetrics;
 window.timeToMinutes = timeToMinutes;
 window.getTodayEventsSorted = getTodayEventsSorted;
 window.formatTime = formatTime;
-window.getInitialTheme = getInitialTheme;
 window.saveToLocalStorage = saveToLocalStorage;
 window.loadFromLocalStorage = loadFromLocalStorage;
 window.generateId = generateId;

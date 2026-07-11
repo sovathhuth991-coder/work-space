@@ -347,8 +347,7 @@ window.switchView = function(targetViewId) {
             localStorage.setItem('activeView', targetViewId);
         } catch (_) { /* ignore */ }
 
-        const sidebar = document.getElementById('hubSidebar');
-        if (sidebar && window.innerWidth <= 850) {
+        if (window.innerWidth < 850) {
             closeSidebarMenu();
         }
     } catch (error) {
@@ -924,16 +923,17 @@ async function clearAllData(clearCache = false) {
 // Backward compatibility
 window.clearAllDataAndCache = () => clearAllData(true);
 
-// ============================================================
-// SIDEBAR TOGGLE – with backdrop overlay
-// ============================================================
-// Single source of truth for closing the mobile sidebar. Removes the
-// open state, hides the backdrop, resets the burger + body scroll lock.
+// Full mobile-sidebar cleanup, shared by the Escape key, switchView(), and the
+// resize handler below — previously each of these did its own partial reset,
+// and switchView() in particular only removed the sidebar's 'open' class
+// without hiding the backdrop, resetting the burger icon, or restoring body
+// scroll. That meant tapping any nav link on mobile left the dimmed backdrop
+// covering the screen (still intercepting taps) and body scroll locked, so
+// the app looked broken immediately after the first use of the menu.
 function closeSidebarMenu() {
     const sidebar = document.getElementById('hubSidebar');
     const burger = document.getElementById('burgerToggle');
     const backdrop = document.getElementById('sidebarBackdrop');
-
     if (sidebar) sidebar.classList.remove('open');
     if (burger) {
         burger.classList.remove('active');
@@ -944,46 +944,42 @@ function closeSidebarMenu() {
 }
 window.closeSidebarMenu = closeSidebarMenu;
 
+// ============================================================
+// SIDEBAR TOGGLE – with backdrop overlay
+// ============================================================
 function toggleSidebarMenu() {
-    try {
-        const shell = document.querySelector('.hub-shell');
-        const sidebar = document.getElementById('hubSidebar');
-        const burger = document.getElementById('burgerToggle');
-        const backdrop = document.getElementById('sidebarBackdrop');
+    const shell = document.querySelector('.hub-shell');
+    const sidebar = document.getElementById('hubSidebar');
+    const burger = document.getElementById('burgerToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
 
-        if (!shell || !sidebar || !burger) {
-            console.warn('[Sidebar] Missing required elements:', { shell: !!shell, sidebar: !!sidebar, burger: !!burger });
-            return;
+    if (!shell || !sidebar || !burger) return;
+
+    const isMobile = window.innerWidth <= 850;
+
+    if (isMobile) {
+        // Mobile: toggle 'open' class on sidebar (transform)
+        const isOpen = sidebar.classList.toggle('open');
+        burger.classList.toggle('active');
+        burger.setAttribute('aria-expanded', isOpen);
+
+        // Toggle backdrop
+        if (backdrop) {
+            backdrop.style.display = isOpen ? 'block' : 'none';
         }
 
-        const isMobile = window.innerWidth <= 850;
+        // Prevent body scroll when sidebar is open
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    } else {
+        // Desktop: toggle 'sidebar-collapsed' on the shell
+        const isCollapsed = shell.classList.toggle('sidebar-collapsed');
+        burger.classList.toggle('active');
+        burger.setAttribute('aria-expanded', !isCollapsed);
 
-        if (isMobile) {
-            // Mobile: toggle 'open' class on sidebar (transform)
-            const isOpen = sidebar.classList.toggle('open');
-            burger.classList.toggle('active');
-            burger.setAttribute('aria-expanded', isOpen);
-
-            // Toggle backdrop
-            if (backdrop) {
-                backdrop.style.display = isOpen ? 'block' : 'none';
-            }
-
-            // Prevent body scroll when sidebar is open
-            document.body.style.overflow = isOpen ? 'hidden' : '';
-        } else {
-            // Desktop: toggle 'sidebar-collapsed' on the shell
-            const isCollapsed = shell.classList.toggle('sidebar-collapsed');
-            burger.classList.toggle('active');
-            burger.setAttribute('aria-expanded', !isCollapsed);
-
-            // No backdrop on desktop
-            if (backdrop) {
-                backdrop.style.display = 'none';
-            }
+        // No backdrop on desktop
+        if (backdrop) {
+            backdrop.style.display = 'none';
         }
-    } catch (error) {
-        console.error('[Sidebar] Error toggling sidebar menu:', error);
     }
 }
 
@@ -991,36 +987,6 @@ function toggleSidebarMenu() {
 window.addEventListener('resize', function() {
     if (window.innerWidth > 850) {
         closeSidebarMenu();
-    }
-});
-
-// ============================================================
-// BURGER DIRECT CLICK HANDLER (bypasses delegated event system)
-// ============================================================
-// The burger sits inside the sticky header (z-index: 9998) but the
-// mobile sidebar is position:fixed at z-index:10000 covering the
-// entire screen. The delegated data-action handler may not fire
-// because the sidebar intercepts clicks. A direct listener ensures
-// clicks always reach toggleSidebarMenu() regardless of stacking.
-document.addEventListener('DOMContentLoaded', function() {
-    const burger = document.getElementById('burgerToggle');
-    if (burger) {
-        burger.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (typeof toggleSidebarMenu === 'function') {
-                toggleSidebarMenu();
-            }
-        });
-    }
-
-    // Also ensure the sidebar backdrop click closes the sidebar
-    const backdrop = document.getElementById('sidebarBackdrop');
-    if (backdrop) {
-        backdrop.addEventListener('click', function(e) {
-            if (typeof closeSidebarMenu === 'function') {
-                closeSidebarMenu();
-            }
-        });
     }
 });
 

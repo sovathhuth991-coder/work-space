@@ -142,9 +142,15 @@ function getStoredTheme() {
 function getInitialTheme() {
     const stored = getStoredTheme();
     if (stored && THEME_MAP[stored]) return stored;
-    // If no stored theme, use system preference
-    const system = getSystemTheme();
-    return SYSTEM_THEME_MAP[system] || 'cyberpunk';
+    // NOTE: this used to fall back to the OS/browser's light/dark preference
+    // (via getSystemTheme() + SYSTEM_THEME_MAP), which meant anyone whose
+    // phone or browser reports light mode silently got dropped into the
+    // 'minimal' theme instead of the actual designed cyberpunk look —
+    // with no card glow, no aurora background, and washed-out contrast in
+    // several views, since 'minimal' hasn't had the same polish pass.
+    // Always default new visitors to cyberpunk; they can still switch to
+    // minimal manually from the theme selector if they want it.
+    return 'cyberpunk';
 }
 
 let currentTheme = getInitialTheme();
@@ -162,15 +168,18 @@ function applyTheme(themeName) {
 }
 
 // Listen for system theme changes
+// Disabled: this used to silently flip the whole app to 'minimal' any time
+// the OS/browser's light/dark setting changed mid-session, undoing the
+// user's actual theme. Left here (inert) in case a real auto-theme feature
+// gets built later with a proper opt-in.
 const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
-darkModeMedia.addEventListener('change', (e) => {
-    // Only auto-switch if the user hasn't manually selected a theme
-    if (!localStorage.getItem('currentTheme')) {
-        const newTheme = e.matches ? 'cyberpunk' : 'minimal';
-        applyTheme(newTheme);
-        showToast('🌗 Theme auto‑switched to ' + newTheme, 'info');
-    }
-});
+// darkModeMedia.addEventListener('change', (e) => {
+//     if (!localStorage.getItem('currentTheme')) {
+//         const newTheme = e.matches ? 'cyberpunk' : 'minimal';
+//         applyTheme(newTheme);
+//         showToast('🌗 Theme auto‑switched to ' + newTheme, 'info');
+//     }
+// });
 
 function updateThemeSelector() {
     document.querySelectorAll('#schedule-theme-selector, #lessons-theme-selector, #globalThemeSelector')

@@ -1456,14 +1456,23 @@
                 <div class="slash-item" data-type="divider">— Divider</div>
             </div>
 
-            <!-- Backdrop moved outside hub-shell to avoid clipping -->
         </main>
-    </div>
 
-    <!-- ===== BACKDROP OVERLAY (for mobile sidebar) ===== -->
-    <div id="sidebarBackdrop"
-        style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);"
-        data-action="toggleSidebarMenu"></div>
+        <!-- ===== BACKDROP OVERLAY (for mobile sidebar) =====
+             Lives inside .hub-shell on purpose: .hub-shell establishes its own
+             stacking context (position:relative + z-index:1, needed to sit above
+             the fixed aurora background). A backdrop placed *outside* hub-shell
+             would compare its z-index against hub-shell's z-index:1 as a whole
+             box, which meant it painted above the sidebar too (10000 doesn't
+             escape a 1) and silently ate every tap on the open menu. Sitting
+             inside hub-shell lets it stack correctly: above .hub-content
+             (unstyled/near-0), below the sticky header (9998) and the sidebar
+             itself (10000 on mobile), so the burger and nav links stay clickable
+             while the backdrop is showing. -->
+        <div id="sidebarBackdrop"
+            style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);"
+            data-action="toggleSidebarMenu"></div>
+    </div>
 
     <!-- ============================================================
     CUSTOM MODAL (for folder/page creation & renaming)

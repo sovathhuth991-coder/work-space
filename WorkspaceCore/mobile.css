@@ -34,12 +34,6 @@ body {
 
 /* ---- Sidebar backdrop overlay (mobile) ---- */
 @media (max-width: 850px) {
-    /* Prevent accidental horizontal scroll from wide inline-styled rows.
-       The fixed sidebar is viewport-positioned and unaffected by this. */
-    html, body {
-        overflow-x: hidden;
-    }
-
     .hub-sidebar::before {
         content: '';
         position: fixed;
@@ -62,26 +56,14 @@ body {
         height: 48px;
     }
 
-    /* Keep burger clickable ABOVE the full-screen sidebar so it can close it.
-       Sidebar is position:fixed z-index:10000. The burger stays in the
-       sticky header (z-index:9998) so we use a direct click listener in JS
-       instead of relying on stacking context. */
-    .burger-toggle {
-        position: relative;
-        z-index: 10001;
-        background: var(--bg-secondary);
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
     .burger-line {
         width: 24px;
         height: 2.5px;
     }
 
-    /* Header adjustments - the !important version below handles padding */
+    /* Header adjustments */
     .hub-content>div:first-child {
-        flex-wrap: nowrap;
+        padding: 12px 16px;
     }
 
     /* "Workspace Hub" title: allow it to shrink and truncate instead of
@@ -364,12 +346,6 @@ body {
 
 @media (max-width: 480px) {
 
-    /* Hide the "Workspace Hub" title label to free header space for the
-       burger + Actions controls on small phones. */
-    .hub-content>div:first-child>span:first-of-type {
-        display: none;
-    }
-
     /* Further reduce padding on very small screens */
     #sessionTracker,
     #currentSessionTracker {
@@ -457,10 +433,15 @@ body {
 }
 
 /* ---- High DPI displays ---- */
-/* NOTE: A previous mask-composite override here (source-in / add) broke the
-   conic-gradient border mask on high-DPI phones, causing the glow to fill the
-   whole button instead of tracing the edge. The correct xor / exclude values
-   live in layout.css and dashboard.css and now apply on all devices. */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+
+    .nav-glow-border,
+    .card-glow-border {
+        -webkit-mask-composite: source-in;
+        mask-composite: add;
+    }
+}
 
 /* ---- Dark mode preference (system) ---- */
 @media (prefers-color-scheme: dark) {
