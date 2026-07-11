@@ -337,6 +337,9 @@
         });
     }
 
+    // Expose so the inline delete button's onclick can reach it (same pattern as pomodoro.js)
+    window.deleteCustomTimer = deleteCustomTimer;
+
     // ----- INITIALIZE -----
     loadCustomTimers();
     initProgressRing();
