@@ -42,12 +42,31 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', function(e) {
         const label = e.target.closest('.hub-menu-label');
         if (!label) return;
-        const group = Array.from(label.nextElementSibling?.nextElementSibling?.children || [])
-            .filter(el => el.classList.contains('nav-btn'));
-        const isCollapsed = group[0]?.style.display === 'none';
-        group.forEach(btn => btn.style.display = isCollapsed ? 'flex' : 'none');
-        label.style.opacity = isCollapsed ? '0.6' : '1';
+        const groupEl = label.nextElementSibling;
+        if (!groupEl || !groupEl.classList.contains('hub-menu-group')) return;
+        const isCollapsed = groupEl.classList.contains('collapsed');
+        groupEl.classList.toggle('collapsed', !isCollapsed);
+        label.classList.toggle('collapsed', !isCollapsed);
+        try {
+            const collapsedGroups = JSON.parse(localStorage.getItem('collapsedNavGroups') || '[]');
+            const labelText = label.textContent.trim();
+            const next = isCollapsed
+                ? collapsedGroups.filter(l => l !== labelText)
+                : [...new Set([...collapsedGroups, labelText])];
+            localStorage.setItem('collapsedNavGroups', JSON.stringify(next));
+        } catch (_) { /* ignore */ }
     });
+
+    // Restore collapsed nav groups from last session
+    try {
+        const collapsedGroups = JSON.parse(localStorage.getItem('collapsedNavGroups') || '[]');
+        document.querySelectorAll('.hub-menu-label').forEach(label => {
+            if (collapsedGroups.includes(label.textContent.trim())) {
+                label.classList.add('collapsed');
+                label.nextElementSibling?.classList.add('collapsed');
+            }
+        });
+    } catch (_) { /* ignore */ }
 
     // ============================================================
     // MARK INITIAL RENDER TO PREVENT RE-ANIMATION
@@ -320,6 +339,7 @@ window.switchView = function(targetViewId) {
             'lessons-view': [() => refreshWorkspace?.()],
             'weather-view': [() => renderWeatherView?.()],
             'dashboard-view': [() => updateDashboardLiveSession?.(), () => updateDashProgress?.(false), () => updateDailyStats?.()],
+            'ai-view': [() => renderContextPanel?.(), () => document.getElementById('ai-input-view')?.focus()],
             'graph-view': [() => setTimeout(() => renderKnowledgeGraph?.(), 100)],
             'analytics-view': [() => renderAnalytics?.(), () => renderFocusHistory?.(), () => renderHeatmap?.()]
         };

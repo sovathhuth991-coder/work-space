@@ -1,5 +1,5 @@
-// Service Worker for Workspace Hub PWA
-const CACHE_NAME = 'workspace-hub-v8';
+﻿// Service Worker for Workspace Hub PWA
+const CACHE_NAME = 'workspace-hub-v9';
 const STATIC_ASSETS = [
   'Workspace.html',
   'TUTORIAL.md',
@@ -58,7 +58,10 @@ const STATIC_ASSETS = [
   'WorkspaceShared/interactive-tutorial.js',
   'WorkspaceShared/help-mode.js',
   'WorkspaceShared/ux-enhancements.js',
-  'WorkspaceShared/ai-assistant.js',
+  'WorkspaceFeatures/ai-assistant/ai-assistant.css',
+  'WorkspaceFeatures/ai-assistant/ai-assistant.js',
+  'WorkspaceFeatures/ai-assistant/ai-context.js',
+  'WorkspaceFeatures/ai-assistant/ai-tools.js',
   'WorkspaceFeatures/journal/journal-ui.js',
   'WorkspaceCore/app.js',
 

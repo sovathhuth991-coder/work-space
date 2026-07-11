@@ -70,6 +70,7 @@
     <link rel="stylesheet" href="WorkspaceFeatures/journal/journal.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/date-countdown/date-countdown.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/reading/reading.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/ai-assistant/ai-assistant.css" />
     <link rel="stylesheet" href="WorkspaceShared/fab-buttons.css" />
     <link rel="stylesheet" href="WorkspaceCore/mobile.css" />
 </head>
@@ -97,94 +98,93 @@
         <!-- Navigation -->
         <nav class="hub-menu" aria-label="Workspace sections">
             <p class="hub-menu-label">Main</p>
-            <button class="nav-btn hub-menu-item active" data-view="dashboard-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">⌂</span>
-                <span>Dashboard</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="schedule-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">▦</span>
-                <span>Schedule</span>
-            </button>
+            <div class="hub-menu-group">
+                <button class="nav-btn hub-menu-item active" data-view="dashboard-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">⌂</span>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="ai-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">🧠</span>
+                    <span>AI Assistant</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="schedule-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">▦</span>
+                    <span>Schedule</span>
+                </button>
+            </div>
 
             <p class="hub-menu-label">Tools</p>
-            <button class="nav-btn hub-menu-item" data-view="timer-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">◴</span>
-                <span>Focus Timer</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="weather-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">🌤️</span>
-                <span>Weather</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="todo-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">☑</span>
-                <span>To‑Do</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="analytics-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">📊</span>
-                <span>Analytics</span>
-            </button>
+            <div class="hub-menu-group">
+                <button class="nav-btn hub-menu-item" data-view="timer-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">◴</span>
+                    <span>Focus Timer</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="weather-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">🌤️</span>
+                    <span>Weather</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="todo-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">☑</span>
+                    <span>To‑Do</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="analytics-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">📊</span>
+                    <span>Analytics</span>
+                </button>
+            </div>
+
             <p class="hub-menu-label">Knowledge</p>
-            <button class="nav-btn hub-menu-item" data-view="lessons-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">▣</span>
-                <span>Lessons</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="library-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">📚</span>
-                <span>Library</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="graph-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">✦</span>
-                <span>Knowledge Graph</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="habits-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">✅</span>
-                <span>Habits</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="journal-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">📔</span>
-                <span>Journal</span>
-            </button>
-            <button class="nav-btn hub-menu-item" data-view="reading-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">📚</span>
-                <span>Reading List</span>
-            </button>
+            <div class="hub-menu-group">
+                <button class="nav-btn hub-menu-item" data-view="lessons-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">▣</span>
+                    <span>Lessons</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="library-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">📚</span>
+                    <span>Library</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="graph-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">✦</span>
+                    <span>Knowledge Graph</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="habits-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">✅</span>
+                    <span>Habits</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="journal-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">📔</span>
+                    <span>Journal</span>
+                </button>
+                <button class="nav-btn hub-menu-item" data-view="reading-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">📚</span>
+                    <span>Reading List</span>
+                </button>
+            </div>
+
             <p class="hub-menu-label">Help</p>
-            <button class="nav-btn hub-menu-item" data-view="tutorial-view">
-                <span class="nav-glow-border"></span>
-                <span class="menu-icon">📖</span>
-                <span>Tutorial</span>
-            </button>
+            <div class="hub-menu-group">
+                <button class="nav-btn hub-menu-item" data-view="tutorial-view">
+                    <span class="nav-glow-border"></span>
+                    <span class="menu-icon">📖</span>
+                    <span>Tutorial</span>
+                </button>
+            </div>
         </nav>
         <!-- Footer -->
         <div class="hub-sidebar-footer">
-            <!-- AI Assistant -->
-            <div class="sidebar-ai" style="border-top:1px solid var(--border-color); padding-top:12px; margin-bottom:10px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span style="font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">🧠 AI Assistant</span>
-                    <span id="ai-status-side" style="font-size:9px; color:#555;">● offline</span>
-                </div>
-                <div id="ai-messages-side" style="max-height:120px; overflow-y:auto; background:var(--bg-primary); border-radius:6px; padding:6px 8px; font-size:12px; color:var(--text-secondary); border:1px solid var(--border-color); margin-bottom:6px; min-height:40px;">
-                    <div style="text-align:center; opacity:0.4; padding:6px 0; font-size:11px;">Ask me anything.</div>
-                </div>
-                <div style="display:flex; gap:4px;">
-                    <input type="text" id="ai-input-side" placeholder="Type a question..." style="flex:1; padding:4px 8px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); font-size:12px; outline:none;" />
-                    <button id="ai-send-side" style="background:var(--accent-gradient); border:none; color:#fff; padding:4px 12px; border-radius:4px; font-weight:600; font-size:12px; cursor:pointer;">Send</button>
-                </div>
-                <div style="font-size:8px; color:var(--text-muted); text-align:right; margin-top:3px;" id="ai-model-name-side">qwen2.5:7b</div>
-            </div>
-
             <!-- Progress Ring -->
             <div class="sidebar-progress">
                 <svg width="44" height="44" viewBox="0 0 48 48" style="transform: rotate(-90deg);">
@@ -690,6 +690,56 @@
 
                 <!-- ===== DATE COUNTDOWN PANEL ===== -->
                 <div id="dateCountdownPanel" style="display: none; margin-top: 24px;"></div>
+            </section>
+
+            <!-- ===== AI ASSISTANT VIEW ===== -->
+            <section id="ai-view" class="hub-view">
+                <div class="view-header">
+                    <div>
+                        <p class="view-kicker">Synced with your Workspace</p>
+                        <h1>AI Assistant</h1>
+                    </div>
+                    <div class="ai-view-status-row">
+                        <span id="ai-status-view" class="ai-status-pill">● offline</span>
+                        <button id="ai-settings-btn-view" class="matrix-btn" title="Configure local AI endpoint">⚙ Endpoint</button>
+                        <button id="ai-clear-btn-view" class="matrix-btn" title="Clear conversation">🗑 Clear</button>
+                    </div>
+                </div>
+
+                <div class="ai-view-layout">
+                    <!-- Chat column -->
+                    <div class="ai-chat-panel">
+                        <div id="ai-messages-view" class="ai-chat-messages">
+                            <div class="ai-empty-state">Ask me anything about your Workspace — tasks, habits, journal, reading list, and more.</div>
+                        </div>
+                        <div class="ai-chat-inputrow">
+                            <input type="text" id="ai-input-view" placeholder="Ask, or tell me to add/complete/remove something..." autocomplete="off" />
+                            <button id="ai-send-view" class="matrix-btn ai-send-btn">Send</button>
+                        </div>
+                        <div class="ai-chat-footer">
+                            <span id="ai-model-name-view">no local AI detected</span>
+                            <label class="ai-actions-toggle" title="Let the assistant add, complete, or delete items on your behalf">
+                                <input type="checkbox" id="ai-actions-enabled" checked />
+                                Allow actions
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Site-sync context panel -->
+                    <aside class="ai-context-panel">
+                        <h3>What I can see</h3>
+                        <div id="ai-context-summary" class="ai-context-summary">Loading site snapshot…</div>
+                        <h3>What I can do</h3>
+                        <ul class="ai-capabilities-list">
+                            <li>Add / complete / delete tasks</li>
+                            <li>Add / delete habits, mark today done</li>
+                            <li>Write journal entries</li>
+                            <li>Manage your reading list & library</li>
+                            <li>Jump you to any section</li>
+                        </ul>
+                        <p class="ai-context-note">Runs entirely against your local AI (Ollama / LM Studio / etc.) — nothing is sent anywhere else.</p>
+                    </aside>
+                </div>
             </section>
 
             <!-- ===== HABITS VIEW ===== -->
@@ -1508,12 +1558,15 @@
     <script type="text/javascript" src="WorkspaceShared/interactive-tutorial.js"></script>
     <script type="text/javascript" src="WorkspaceShared/help-mode.js"></script>
     <script type="text/javascript" src="WorkspaceShared/ux-enhancements.js"></script>
-    <script type="text/javascript" src="WorkspaceShared/ai-assistant.js"></script>
     <!-- Journal scripts must load BEFORE app.js -->
     <script type="text/javascript" src="WorkspaceFeatures/journal/journal.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/journal/journal-ui.js"></script>
     <!-- Reading List engine -->
     <script type="text/javascript" src="WorkspaceFeatures/reading/reading.js"></script>
+    <!-- AI Assistant: context reader + tool executors must load before the assistant UI script -->
+    <script type="text/javascript" src="WorkspaceFeatures/ai-assistant/ai-context.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/ai-assistant/ai-tools.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/ai-assistant/ai-assistant.js"></script>
     <!-- app.js loads last -->
     <script type="text/javascript" src="WorkspaceCore/app.js"></script>
 

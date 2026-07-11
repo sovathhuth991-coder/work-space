@@ -1,4 +1,4 @@
-.widget-card {
+﻿.widget-card {
     background: rgba(15, 23, 42, 0.7);
     border: 1px solid #1e293b;
     border-radius: 10px;
@@ -333,19 +333,4 @@
 }
 
 /* ============================================================
-   AUTO-SUGGESTION BADGE STYLING
-   ============================================================ */
-.sidebar-ai .msg-assistant .bubble:has(.auto-badge) {
-    border-left: 3px solid #f1c40f;
-    background: rgba(241, 196, 15, 0.08);
-}
-
-.msg-assistant .bubble .auto-badge {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #f1c40f;
-    margin-right: 6px;
-    opacity: 0.7;
-    font-weight: 600;
 }

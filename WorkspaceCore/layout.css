@@ -253,11 +253,12 @@ body {
 
 .hub-menu {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-/* Menu labels */
+/* Menu labels (act as collapsible group headers) */
 .hub-menu-label {
     font-size: 0.6rem;
     font-weight: 700;
@@ -269,10 +270,39 @@ body {
     cursor: pointer;
     user-select: none;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 10px;
+}
+
+.hub-menu-label::after {
+    content: '⌄';
+    font-size: 0.85rem;
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+}
+
+.hub-menu-label.collapsed::after {
+    transform: rotate(-90deg);
 }
 
 .hub-menu-label:hover {
     opacity: 1 !important;
+}
+
+/* Nav item groups — collapse smoothly to reclaim vertical space */
+.hub-menu-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+    max-height: 600px;
+    transition: max-height 0.25s ease;
+}
+
+.hub-menu-group.collapsed {
+    max-height: 0;
 }
 
 /* ============================================================
@@ -355,6 +385,9 @@ body {
 /* ===== Navigation item color variations ===== */
 .nav-btn[data-view="dashboard-view"] {
     --nav-color: var(--nav-dashboard);
+}
+.nav-btn[data-view="ai-view"] {
+    --nav-color: var(--nav-ai);
 }
 .nav-btn[data-view="schedule-view"] {
     --nav-color: var(--nav-schedule);
