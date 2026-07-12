@@ -47,6 +47,7 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
     <!-- ===== CSS Modules ===== -->
     <link rel="stylesheet" href="WorkspaceCore/reset.css" />
@@ -239,9 +240,16 @@
                     <span class="burger-line"></span>
                 </button>
                 <span style="font-size:1.1rem; font-weight:600; color:var(--text-secondary);">Workspace Hub</span>
+                <!-- Account / Sign in -->
+                <button id="accountButton" data-action="openAccountModal" data-signed-in="false"
+                    title="Sign in to sync across devices (optional)"
+                    style="margin-left:auto; padding:6px 14px; border-radius:99px; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); font-size:0.75rem; font-weight:600; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px;">
+                    <span>👤</span>
+                    <span id="accountButtonLabel">Sign in</span>
+                </button>
                 <!-- Sideways Dropdown Toggle -->
                 <div id="headerToggleContainer"
-                    style="position:relative; margin-left:auto; display:inline-flex; align-items:center; overflow:visible;">
+                    style="position:relative; display:inline-flex; align-items:center; overflow:visible;">
                     <!-- Main Toggle Button -->
                     <button id="headerToggleMain" class="header-toggle-main" title="Quick Actions"
                         style="padding:6px 12px; border-radius:99px; background:var(--accent-gradient); border:none; color:#fff; font-size:0.75rem; font-weight:600; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(124, 109, 240, 0.3);">
@@ -1595,6 +1603,99 @@
     </div>
 
     <!-- ============================================================
+    ACCOUNT MODAL (Phase 1: accounts only, no data sync yet)
+    ============================================================ -->
+    <div id="accountModal" style="display:none; position:fixed; inset:0; z-index:var(--z-modal);
+            background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
+            align-items:center; justify-content:center;">
+        <div class="custom-modal-content" style="background:var(--bg-secondary);
+                border:1px solid var(--border-color); border-radius:var(--radius-lg);
+                padding:32px 40px; max-width:420px; width:90%;
+                box-shadow:var(--shadow-elevated); animation:modalZoomIn 0.25s ease;">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h3 style="margin:0; font-size:1.1rem; font-weight:600; color:var(--text-primary);">👤 Account</h3>
+                <button class="close-btn" data-action="closeAccountModal"
+                    style="width:32px; height:32px; font-size:1.5rem;">✕</button>
+            </div>
+
+            <!-- Signed-out: tabs for sign in / sign up / magic link -->
+            <div id="accountSignedOutView">
+                <p style="margin:0 0 18px 0; font-size:0.85rem; color:var(--text-muted);">
+                    Optional \u2014 the app works fully without an account.
+                    Sign in only if you want your data to follow you across devices.
+                </p>
+
+                <div style="display:flex; gap:6px; margin-bottom:18px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                    <button id="accountTab_signin" class="matrix-btn active" data-action="switchAccountTab" data-tab="signin"
+                        style="flex:1; font-size:0.8rem; padding:8px;">Sign in</button>
+                    <button id="accountTab_signup" class="matrix-btn" data-action="switchAccountTab" data-tab="signup"
+                        style="flex:1; font-size:0.8rem; padding:8px;">Sign up</button>
+                    <button id="accountTab_magiclink" class="matrix-btn" data-action="switchAccountTab" data-tab="magiclink"
+                        style="flex:1; font-size:0.8rem; padding:8px;">Magic link</button>
+                </div>
+
+                <!-- Sign in panel -->
+                <div id="accountPanel_signin">
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
+                        <input type="email" id="accountSignInEmail" placeholder="you@example.com"
+                            style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Password</label>
+                        <input type="password" id="accountSignInPassword" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
+                            style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
+                    </div>
+                    <button class="matrix-btn" data-action="handleAccountSignIn"
+                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Sign in</button>
+                </div>
+
+                <!-- Sign up panel -->
+                <div id="accountPanel_signup" style="display:none;">
+                    <div style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
+                        <input type="email" id="accountSignUpEmail" placeholder="you@example.com"
+                            style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Password</label>
+                        <input type="password" id="accountSignUpPassword" placeholder="At least 6 characters"
+                            style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
+                    </div>
+                    <button class="matrix-btn" data-action="handleAccountSignUp"
+                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Create account</button>
+                </div>
+
+                <!-- Magic link panel -->
+                <div id="accountPanel_magiclink" style="display:none;">
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
+                        <input type="email" id="accountMagicLinkEmail" placeholder="you@example.com"
+                            style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
+                    </div>
+                    <button class="matrix-btn" data-action="handleAccountMagicLink"
+                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Send magic link</button>
+                    <p style="margin:10px 0 0 0; font-size:0.78rem; color:var(--text-muted);">No password \u2014 we'll email you a one-time sign-in link instead.</p>
+                </div>
+
+                <p id="accountModalMessage" style="display:none; margin:16px 0 0 0; font-size:0.82rem; text-align:center;"></p>
+            </div>
+
+            <!-- Signed-in view -->
+            <div id="accountSignedInView" style="display:none;">
+                <p style="margin:0 0 4px 0; font-size:0.85rem; color:var(--text-muted);">Signed in as</p>
+                <p id="accountSignedInEmail" style="margin:0 0 20px 0; font-size:1rem; font-weight:600; color:var(--text-primary);"></p>
+                <p style="margin:0 0 20px 0; font-size:0.8rem; color:var(--text-muted);">
+                    Cross-device sync isn't wired up yet \u2014 this only confirms your account works.
+                </p>
+                <button class="matrix-btn" data-action="handleAccountSignOut"
+                    style="width:100%; padding:12px;">Sign out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
     AMBIENT MUSIC WIDGET
     ============================================================ -->
     <div class="lofi-widget" id="lofiWidget">
@@ -1663,6 +1764,9 @@
     ============================================================ -->
     <script type="text/javascript" src="WorkspaceCore/init-globals.js"></script>
     <script type="text/javascript" src="WorkspaceCore/config.js"></script>
+    <!-- Accounts (Phase 1) — see docs/SYNC-PLAN.md. Config must load before sync.js. -->
+    <script type="text/javascript" src="WorkspaceCore/supabase-config.js"></script>
+    <script type="text/javascript" src="WorkspaceShared/sync.js"></script>
     <script type="text/javascript" src="WorkspaceCore/helpers.js"></script>
     <script type="text/javascript" src="WorkspaceShared/theme.js"></script>
     <script type="text/javascript" src="WorkspaceShared/notifications.js"></script>
@@ -1707,7 +1811,7 @@
     <!-- app.js loads last -->
     <script type="text/javascript" src="WorkspaceCore/app.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/command-palette/command-palette.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
     <!-- ===== PWA Service Worker Registration (relative path) ===== -->
     <script type="text/javascript">
         if ('serviceWorker' in navigator) {

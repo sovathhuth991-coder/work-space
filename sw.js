@@ -1,5 +1,5 @@
 ﻿// Service Worker for Workspace Hub PWA
-const CACHE_NAME = 'workspace-hub-v11';
+const CACHE_NAME = 'workspace-hub-v12';
 const STATIC_ASSETS = [
   'index.html',
   'TUTORIAL.md',
@@ -35,6 +35,8 @@ const STATIC_ASSETS = [
   // JS - core
   'WorkspaceCore/init-globals.js',
   'WorkspaceCore/config.js',
+  'WorkspaceCore/supabase-config.js',
+  'WorkspaceShared/sync.js',
   'WorkspaceCore/helpers.js',
 
   // JS - ui

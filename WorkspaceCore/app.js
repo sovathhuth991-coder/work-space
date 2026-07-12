@@ -182,7 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
             'deleteReadingItem': () => {
                 const id = parseInt(actionBtn.dataset.id);
                 ReadingListEngine?.handleDelete(id);
-            }
+            },
+            'openAccountModal': () => window.openAccountModal?.(),
+            'closeAccountModal': () => window.closeAccountModal?.(),
+            'switchAccountTab': () => window.switchAccountTab?.(actionBtn.dataset.tab),
+            'handleAccountSignIn': () => window.handleAccountSignIn?.(),
+            'handleAccountSignUp': () => window.handleAccountSignUp?.(),
+            'handleAccountMagicLink': () => window.handleAccountMagicLink?.(),
+            'handleAccountSignOut': () => window.handleAccountSignOut?.()
         };
 
         const handler = actionHandlers[action];
