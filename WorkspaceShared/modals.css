@@ -273,8 +273,9 @@
     font-variant-numeric: tabular-nums;
     min-width: 36px;
     text-align: center;
-    appearance: none;
     -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .time-select option {
@@ -309,11 +310,6 @@
 .time-select::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
-}
-
-.time-select {
-    -moz-appearance: textfield;
-    appearance: textfield;
 }
 
 /* Small screen adjustments */

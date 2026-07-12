@@ -7,15 +7,25 @@ body {
     overflow-x: hidden;
 }
 
-/* ---- Hub shell ---- */
+/* ---- Hub shell ----
+   Consolidated from three separate rules that used to live at different
+   points in this file (one plain, one grouped with .app-layout-container,
+   one grouped with .hub-view/.hub-sidebar) — searching for just ".hub-shell"
+   used to only find a third of what actually applied to it. Everything
+   that affects .hub-shell now lives here. */
 .hub-shell {
     display: grid !important;
     grid-template-columns: var(--sidebar-width) 1fr;
     height: 100vh;
+    width: 100vw;
     background: rgba(10, 10, 18, 0.92);
     transition: grid-template-columns 0.3s ease;
     overflow: hidden;
     overflow-x: hidden !important;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
 }
 
 /* When sidebar is collapsed on desktop */
@@ -130,11 +140,11 @@ body {
     flex-direction: column;
     height: 100vh;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     width: var(--sidebar-width);
     flex-shrink: 0;
     position: relative;
-    z-index: 50;
+    z-index: var(--z-raised);
     transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
     scrollbar-width: thin;
     scrollbar-color: var(--accent-1) transparent;
@@ -190,7 +200,7 @@ body {
         top: 0;
         width: 280px;
         height: 100%;
-        z-index: 10000;
+        z-index: var(--z-modal);
         transform: translateX(-100%);
         transition: transform 0.3s ease, opacity 0.3s ease;
         opacity: 1;
@@ -372,15 +382,8 @@ body {
     z-index: 2;
 }
 
-/* Active button background + accent border */
-.nav-btn.active {
-    color: #fff;
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.nav-btn.active .menu-icon {
-    opacity: 1;
-}
+/* Active button background + accent border (see the color-mix version
+   below, near the --nav-color variables, for the full merged rule) */
 
 /* ===== Navigation item color variations ===== */
 .nav-btn[data-view="dashboard-view"] {
@@ -437,11 +440,14 @@ body {
 
 /* Apply nav color to active state */
 .nav-btn.active {
+    color: #fff;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     background: color-mix(in srgb, var(--nav-color) 12%, transparent);
     border-left: 2.5px solid var(--nav-color);
 }
 
 .nav-btn.active .menu-icon {
+    opacity: 1;
     color: var(--nav-color);
 }
 
@@ -454,17 +460,16 @@ body {
             transparent 360deg);
 }
 
-/* Apply nav color to hover state */
-.nav-btn:hover {
-    background: color-mix(in srgb, var(--nav-color) 4%, transparent);
-    color: var(--text-primary);
-}
-
-.nav-btn:hover .menu-icon {
-    color: var(--nav-color);
-}
-
-/* Hover */
+/* Apply nav color to hover state
+   NOTE: there used to be two separate .nav-btn:hover rules here. This one
+   originally set a per-item tinted background using --nav-color (matching
+   the .active state below), but a second, more generic rule further down
+   silently overrode its background with a flat white overlay (later rule,
+   same specificity = wins). That second rule is almost certainly what
+   you've actually been seeing. Kept that as the real behavior below;
+   if you actually want hover to show each nav item's own color (like
+   .active does), swap the background back to
+   color-mix(in srgb, var(--nav-color) 4%, transparent). */
 .nav-btn:hover {
     background: rgba(255, 255, 255, 0.04);
     color: var(--text-primary);
@@ -472,6 +477,7 @@ body {
 }
 
 .nav-btn:hover .menu-icon {
+    color: var(--nav-color);
     opacity: 1;
     transform: scale(1.1);
 }
@@ -598,7 +604,7 @@ body {
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
-    z-index: 9998;
+    z-index: var(--z-sticky-header);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     overflow: visible !important;
@@ -822,8 +828,7 @@ body {
 }
 
 /* ===== Ensure the app container starts at the very top ===== */
-.app-layout-container,
-.hub-shell {
+.app-layout-container {
     position: relative;
     z-index: 1;
     margin: 0;
@@ -943,23 +948,6 @@ body::before {
             radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
             var(--bg-primary);
     }
-}
-
-/* ---- Prevent horizontal scrolling on all containers ---- */
-.hub-content,
-.hub-view,
-.hub-sidebar,
-.hub-shell {
-    overflow-x: hidden !important;
-}
-
-/* Allow dropdown to overflow */
-#headerToggleContainer {
-    overflow: visible !important;
-}
-
-#headerToggleDropdown {
-    overflow: visible !important;
 }
 
 * {
@@ -1268,6 +1256,7 @@ body.minimal-ui .nav-btn:hover {
    ============================================================ */
 #headerToggleContainer {
     position: relative;
+    overflow: visible !important;
 }
 
 .header-toggle-main {
@@ -1290,6 +1279,7 @@ body.minimal-ui .nav-btn:hover {
     right: 100%;
     transform: translateY(-50%) translateX(8px);
     display: none;
+    overflow: visible !important;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 99px;

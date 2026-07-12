@@ -1470,14 +1470,14 @@
              itself (10000 on mobile), so the burger and nav links stay clickable
              while the backdrop is showing. -->
         <div id="sidebarBackdrop"
-            style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);"
+            style="display:none; position:fixed; inset:0; z-index:var(--z-overlay); background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);"
             data-action="toggleSidebarMenu"></div>
     </div>
 
     <!-- ============================================================
     CUSTOM MODAL (for folder/page creation & renaming)
     ============================================================ -->
-    <div id="customModal" style="display:none; position:fixed; inset:0; z-index:10000;
+    <div id="customModal" style="display:none; position:fixed; inset:0; z-index:var(--z-modal);
             background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
             align-items:center; justify-content:center;">
         <div class="custom-modal-content" style="background:var(--bg-secondary);
@@ -1511,7 +1511,7 @@
     <!-- ============================================================
     COLOR PICKER MODAL
     ============================================================ -->
-    <div id="colorPickerModal" style="display:none; position:fixed; inset:0; z-index:10000;
+    <div id="colorPickerModal" style="display:none; position:fixed; inset:0; z-index:var(--z-modal);
             background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
             align-items:center; justify-content:center;">
         <div class="custom-modal-content" style="background:var(--bg-secondary);
@@ -1540,7 +1540,7 @@
     <!-- ============================================================
     LANGUAGE PICKER MODAL
     ============================================================ -->
-    <div id="languagePickerModal" style="display:none; position:fixed; inset:0; z-index:10000;
+    <div id="languagePickerModal" style="display:none; position:fixed; inset:0; z-index:var(--z-modal);
             background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
             align-items:center; justify-content:center;">
         <div class="custom-modal-content" style="background:var(--bg-secondary);
@@ -1561,7 +1561,7 @@
     <!-- ============================================================
     TASK ADD MODAL
     ============================================================ -->
-    <div id="taskAddModal" style="display:none; position:fixed; inset:0; z-index:10000;
+    <div id="taskAddModal" style="display:none; position:fixed; inset:0; z-index:var(--z-modal);
             background:rgba(0,0,0,0.7); backdrop-filter:blur(12px);
             align-items:center; justify-content:center;">
         <div class="custom-modal-content" style="background:var(--bg-secondary);

@@ -25,7 +25,14 @@
     padding: 0;
     box-shadow: none;
     overflow: hidden;
-    transition: order 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.3s ease, order 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dash-card.card-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* ---- THE GLOWING BORDER (MOVING) ---- */
@@ -572,7 +579,8 @@
     border: none;
     color: var(--text-muted);
     font-size: 1.1rem;
-    cursor: pointer;
+    cursor: nwse-resize;
+    touch-action: none;
     padding: 2px 6px;
     border-radius: 4px;
     transition: all 0.2s;
@@ -582,11 +590,6 @@
 .card-resize-btn:hover {
     color: var(--accent-1);
     background: rgba(124, 109, 240, 0.1);
-}
-
-.card-resize-btn {
-    cursor: nwse-resize;
-    touch-action: none;
 }
 
 .card-minimize-btn {
@@ -891,7 +894,8 @@
 /* Widget: Sessions */
 .session-history-empty {
     text-align: center;
-    padding: 20px 10px;
+    padding: 40px 20px;
+    color: var(--text-muted);
 }
 
 .session-history-empty > div:first-child {
@@ -1173,12 +1177,6 @@ body {
 .session-history-list::-webkit-scrollbar-thumb {
     background: var(--accent-1);
     border-radius: 99px;
-}
-
-.session-history-empty {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-muted);
 }
 
 .session-history-item {
@@ -1568,16 +1566,6 @@ body {
 /* ============================================================
    FEATURE: CARD ENTRANCE ANIMATIONS
    ============================================================ */
-.dash-card {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.3s ease, order 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dash-card.card-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
 
 /* Stagger delays for each card */
 .dash-card:nth-child(1) { transition-delay: 0s; }

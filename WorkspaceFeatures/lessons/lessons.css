@@ -718,29 +718,7 @@
     margin-right: 2px;
 }
 
-/* ---- Explorer dropdown ---- */
-.explorer-dropdown-menu {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    min-width: 160px;
-    padding: 4px 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-}
-
-.explorer-dropdown-menu .menu-item {
-    padding: 8px 16px;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.explorer-dropdown-menu .menu-item:hover {
-    background: rgba(124, 109, 240, 0.15);
-    color: var(--text-primary);
-}
+/* ---- Explorer dropdown: see .explorer-dropdown-menu definition near the top of this file ---- */
 
 /* ---- Always show burger toggle (for sidebar hide/show) ---- */
 .burger-toggle {

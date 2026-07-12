@@ -64,6 +64,22 @@
     --text-3xl: 1.8rem;
     --text-4xl: 2.4rem;
     --text-display: 4rem;
+
+    /* Layering scale — replaces ad-hoc z-index numbers scattered across
+       the CSS with no naming, several of which collided by accident
+       (multiple unrelated elements sharing 1000, others sharing 9999).
+       That kind of collision is exactly what caused the mobile sidebar
+       bug: a backdrop and the sidebar it was meant to sit behind ended
+       up fighting over stacking order with no documented relationship
+       between their numbers. New z-index needs should reach for one of
+       these instead of guessing a bigger number than whatever's
+       currently winning. */
+    --z-raised: 50;
+    --z-dropdown: 1000;
+    --z-overlay: 9000;
+    --z-sticky-header: 9998;
+    --z-modal: 10000;
+    --z-toast: 10001;
 }
 
 /* Custom scrollbar – will be applied globally */
