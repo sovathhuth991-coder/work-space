@@ -320,346 +320,276 @@
 
                     <!-- ===== BANNER ===== -->
                     <div class="dash-card dash-banner" data-card-id="banner">
-                        <div class="card-glow-border"></div>
                         <div class="card-inner">
-                            <div class="card-header-drag"
-                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                <span class="card-eyebrow" style="margin:0">COMMAND CENTER</span>
-                                <div class="card-controls" style="margin-left:auto">
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="banner"
-                                        title="Resize">⤡</button>
-                                </div>
+                            <div class="dash-header-section">
+                                <p class="dash-header-eyebrow">COMMAND CENTER</p>
+                                <h2 class="dash-header-title">Dashboard</h2>
+                                <p class="dash-header-subtitle" id="dashGreetingDate">Welcome back! Let's be productive today.</p>
                             </div>
-                            <div class="banner-text">
-                                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                                    <h2>Study systems online</h2>
-                                    <div id="streakDisplay" style="margin-top:0;"></div>
+                            <div class="dash-banner-right">
+                                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                                    <span class="streak-inline-badge" id="streakDisplay">
+                                        <span class="streak-emoji">🔥</span>
+                                        <span class="streak-label" id="statStreak">0</span>
+                                        <span style="font-weight:400;opacity:0.6;">day streak</span>
+                                    </span>
+                                    <div id="dashProgressPercent" style="font-size:0.85rem;font-weight:600;color:var(--accent-1);">0%</div>
                                 </div>
-                                <p id="dashGreetingDate">System metrics nominal.</p>
-                            </div>
-                            <div class="banner-progress">
-                                <div class="progress-label">
-                                    <span>Daily completion</span>
-                                    <span id="dashProgressPercent">0%</span>
-                                </div>
-                                <div class="progress-bar-bg">
-                                    <div class="progress-bar-fill" id="dashProgressBar"></div>
-                                </div>
-                            </div>
-                            <!-- Daily Focus Goal -->
-                            <div id="dailyFocusGoal"
-                                style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
-                                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                                    <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
-                                        <svg viewBox="0 0 80 80"
-                                            style="transform: rotate(-90deg); width: 100%; height: 100%;">
-                                            <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.06)"
-                                                stroke-width="6" />
-                                            <circle id="focusGoalRing" cx="40" cy="40" r="35" fill="none"
-                                                stroke="url(#focusGoalGradient)" stroke-width="6" stroke-linecap="round"
-                                                stroke-dasharray="220" stroke-dashoffset="220"
-                                                style="transition: stroke-dashoffset 0.5s ease;" />
-                                            <defs>
-                                                <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%"
-                                                    y2="100%">
-                                                    <stop offset="0%" style="stop-color:#5b8def;stop-opacity:1" />
-                                                    <stop offset="100%" style="stop-color:#5b8def;stop-opacity:1" />
-                                                </linearGradient>
-                                            </defs>
-                                        </svg>
-                                        <div
-                                            style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                                            <span id="focusGoalPercent"
-                                                style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">0%</span>
-                                            <span style="font-size: 0.6rem; color: var(--text-muted);">of goal</span>
-                                        </div>
+                                <div class="banner-progress">
+                                    <div class="progress-label">
+                                        <span>Daily completion</span>
+                                        <span>0%</span>
                                     </div>
-                                    <div style="flex: 1; min-width: 150px;">
-                                        <div
-                                            style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;">
-                                            Daily Focus Goal</div>
-                                        <div id="focusGoalText"
-                                            style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 8px;">
-                                            0h 0m / 4h 0m</div>
-                                        <div id="focusGoalMessage"
-                                            style="font-size: 0.8rem; color: var(--accent-1); font-weight: 500;"></div>
-                                    </div>
-                                    <button id="editGoalBtn" class="matrix-btn"
-                                        style="padding: 4px 12px; font-size: 0.75rem; white-space: nowrap;"
-                                        title="Edit daily goal">⚙️ Set Goal</button>
-                                </div>
-                            </div>
-
-                            <!-- ===== DATE COUNTDOWN ===== -->
-                            <div id="dashDateCountdown" style="display: none; margin-top: 16px;"></div>
-                        </div>
-                    </div>
-                    <!-- ===== ACTIVE SESSION ===== -->
-                    <div class="dash-card" data-card-id="sessions">
-                        <div class="card-glow-border"></div>
-                        <div class="card-inner">
-                            <p class="card-eyebrow">SESSIONS &middot; LIVE</p>
-                            <div class="card-header-drag"
-                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                <h3 style="margin:0;"><span class="pulse-dot"></span> Today's Sessions</h3>
-                                <div class="card-controls">
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="sessions"
-                                        title="Resize">⤡</button>
-                                </div>
-                            </div>
-                            <button class="matrix-btn" data-action="showSessionDetailsModal"
-                                style="padding:4px 12px;font-size:0.75rem;">📊 View Details</button>
-                            <div id="allSessionsContainer" class="all-sessions-container">
-                                <div class="session-history-empty">
-                                    <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
-                                    <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today
-                                    </div>
-                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a
-                                        focus session to see your progress</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ===== MASTER TO-DO ===== -->
-                    <div class="dash-card" data-card-id="todo">
-                        <div class="card-glow-border"></div>
-                        <div class="card-inner">
-                            <p class="card-eyebrow" id="dashTodoEyebrow">TASKS</p>
-                            <div class="card-header-drag"
-                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                <h3 style="margin:0;">Master To-Do</h3>
-                                <div class="card-controls">
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="todo"
-                                        title="Resize">⤡</button>
-                                </div>
-                            </div>
-                            <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task"
-                                style="padding:4px 12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
-                                Add Task</button>
-                            <ul class="strike-list" id="dashStrikeList"></ul>
-                        </div>
-                    </div>
-
-                    <!-- ===== SESSION HUB ===== -->
-                    <div class="dash-card session-hub-card" style="grid-column: 1 / -1;">
-                        <div class="card-glow-border"></div>
-                        <div class="card-inner">
-                            <div class="session-hub-header">
-                                <h3>🎛️ Session Hub</h3>
-                                <div class="session-hub-controls">
-                                    <button class="matrix-btn hub-reset-btn" data-action="resetDashboardLayout"
-                                        title="Reset entire dashboard layout">↺ Reset Dashboard</button>
-                                </div>
-                            </div>
-                            <div class="session-hub-grid" id="sessionHubGrid">
-                                <!-- Widget: System Status -->
-                                <div class="hub-widget" data-widget="status" style="grid-area: status;">
-                                    <div class="hub-widget-header">
-                                        <span class="hub-drag-handle" title="Drag to move">⠿</span>
-                                        <span>System Status</span>
-                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="status"
-                                            title="Resize">⤡</button>
-                                    </div>
-                                    <div class="hub-widget-content" id="hubStatusContent">
-                                        <div class="session-status-indicator">
-                                            <span class="pulse-dot"></span>
-                                            <span id="hubSystemStatus">System Online</span>
-                                        </div>
-                                        <div class="session-metrics">
-                                            <div class="metric">
-                                                <span class="metric-label">Focus</span>
-                                                <span class="metric-value" id="hubFocusTime">00:00</span>
-                                            </div>
-                                            <div class="metric">
-                                                <span class="metric-label">Break</span>
-                                                <span class="metric-value" id="hubBreakTime">00:00</span>
-                                            </div>
-                                            <div class="metric">
-                                                <span class="metric-label">Idle</span>
-                                                <span class="metric-value" id="hubIdleTime">00:00</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Widget: Countdown -->
-                                <div class="hub-widget" data-widget="countdown" style="grid-area: countdown;">
-                                    <div class="hub-widget-header">
-                                        <span class="hub-drag-handle" title="Drag to move">⠿</span>
-                                        <span>Countdown</span>
-                                        <button class="hub-resize-btn" data-action="resizeWidget"
-                                            data-widget="countdown" title="Resize">⤡</button>
-                                    </div>
-                                    <div class="hub-widget-content" id="hubCountdownContent">
-                                        <div id="hubCountdownDisplay"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Widget: Today's Sessions -->
-                                <div class="hub-widget" data-widget="sessions" style="grid-area: sessions;">
-                                    <div class="hub-widget-header">
-                                        <span class="hub-drag-handle" title="Drag to move">⠿</span>
-                                        <span>Today's Sessions</span>
-                                        <button class="hub-resize-btn" data-action="resizeWidget" data-widget="sessions"
-                                            title="Resize">⤡</button>
-                                    </div>
-                                    <div class="hub-widget-content" id="hubSessionsContent">
-                                        <div class="session-history-empty">
-                                            <div style="font-size: 1.5rem; margin-bottom: 6px;">📊</div>
-                                            <div style="color: var(--text-muted); font-size: 0.8rem;">No sessions yet
-                                            </div>
-                                        </div>
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" id="dashProgressBar"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- ===== WIDGETS ===== -->
-                    <div class="dash-card" data-card-id="widgets" style="grid-column: 1 / -1;">
-                        <div class="card-glow-border"></div>
-                        <div class="card-inner">
-                            <div class="card-header-drag"
-                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                <h3 style="margin:0;">📦 Custom Widgets</h3>
-                                <div class="card-controls">
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="widgets"
-                                        title="Resize">⤡</button>
-                                </div>
-                            </div>
-                            <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
-                            <div id="dashQuickLinks" class="dash-quick-links"
-                                style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-                                <div
-                                    style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
-                                    <div
-                                        style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
-                                        📂 Current Lesson</div>
-                                    <div id="dashRecentLessons" style="font-size:0.9rem;color:var(--text-secondary);">No
-                                        open lesson</div>
-                                </div>
-                                <div
-                                    style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
-                                    <div
-                                        style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
-                                        🔗 Recent Bookmarks</div>
-                                    <div id="dashRecentLibs" style="font-size:0.9rem;color:var(--text-secondary);">No
-                                        bookmarks yet</div>
-                                </div>
-                            </div>
-
-                            <!-- Quick Notes Widget -->
-                            <div id="quickNotesWidget"
-                                style="margin-top: 18px; background: var(--bg-primary); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border-color);">
-                                <div
-                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <div
-                                        style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">
-                                        📝 Quick Notes</div>
-                                    <button id="clearNotesBtn" class="matrix-btn"
-                                        style="padding: 2px 8px; font-size: 0.7rem;"
-                                        title="Clear all notes">Clear</button>
-                                </div>
-                                <textarea id="quickNotesInput"
-                                    placeholder="Jot down quick thoughts, reminders, or ideas..."
-                                    style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; font-family: inherit;"></textarea>
-                                <div id="quickNotesList"
-                                    style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- The live weather widget now renders in its own draggable/resizable
-                         dash-card, created dynamically by live-widgets.js so it fits the
-                         same drag/resize/minimize system as the rest of the dashboard. -->
 
                     <!-- ===== STATS ===== -->
                     <div class="dash-stats-container">
-
                         <div class="dash-card stat-card" data-card-id="stat-tasks" data-action="switchView"
                             data-view="todo-view" role="button" tabindex="0" aria-label="View Master To-Do">
-                            <div class="card-glow-border"></div>
                             <div class="card-inner">
-                                <div class="card-header-drag" style="margin-bottom:8px;">
-                                    <span class="stat-icon">✓</span>
-                                    <div class="card-controls">
-                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-tasks"
-                                            title="Resize">⤡</button>
-                                    </div>
-                                </div>
+                                <span class="stat-icon">✓</span>
                                 <span class="stat-info">
                                     <span class="stat-value" id="statTasksDone">0 / 0</span>
                                     <span class="stat-title">Tasks Done</span>
                                 </span>
                             </div>
                         </div>
-
                         <div class="dash-card stat-card" data-card-id="stat-schedule" data-action="switchView"
                             data-view="schedule-view" role="button" tabindex="0" aria-label="View Weekly Schedule">
-                            <div class="card-glow-border"></div>
                             <div class="card-inner">
-                                <div class="card-header-drag" style="margin-bottom:8px;">
-                                    <span class="stat-icon">▦</span>
-                                    <div class="card-controls">
-                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard"
-                                            data-card="stat-schedule" title="Resize">⤡</button>
-                                    </div>
-                                </div>
+                                <span class="stat-icon">▦</span>
                                 <span class="stat-info">
                                     <span class="stat-value" id="statTodayTasks">0</span>
                                     <span class="stat-title">Today's Tasks</span>
                                 </span>
                             </div>
                         </div>
-
                         <div class="dash-card stat-card" data-card-id="stat-lessons" data-action="switchView"
                             data-view="lessons-view" role="button" tabindex="0" aria-label="View Lessons">
-                            <div class="card-glow-border"></div>
                             <div class="card-inner">
-                                <div class="card-header-drag" style="margin-bottom:8px;">
-                                    <span class="stat-icon">▣</span>
-                                    <div class="card-controls">
-                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard"
-                                            data-card="stat-lessons" title="Resize">⤡</button>
-                                    </div>
-                                </div>
+                                <span class="stat-icon">▣</span>
                                 <span class="stat-info">
                                     <span class="stat-value" id="statLessonFolders">0</span>
                                     <span class="stat-title">Lesson Folders</span>
                                 </span>
                             </div>
                         </div>
-
                         <div class="dash-card stat-card" data-card-id="stat-streak" data-action="switchView"
                             data-view="analytics-view" role="button" tabindex="0" aria-label="View Analytics">
-                            <div class="card-glow-border"></div>
                             <div class="card-inner">
-                                <div class="card-header-drag" style="margin-bottom:8px;">
-                                    <span class="stat-icon">🔥</span>
-                                    <div class="card-controls">
-                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-streak"
-                                            title="Resize">⤡</button>
-                                    </div>
-                                </div>
+                                <span class="stat-icon">🔥</span>
                                 <span class="stat-info">
                                     <span class="stat-value" id="statStreak">0</span>
                                     <span class="stat-title">Day Streak</span>
                                 </span>
                             </div>
                         </div>
-
                     </div>
+
+                    <!-- ===== MAIN TWO-COLUMN LAYOUT ===== -->
+                    <div class="dash-main-grid">
+                        <!-- LEFT COLUMN -->
+                        <div class="dash-left-col">
+                            <!-- Today's Focus Card -->
+                            <div class="dash-card" data-card-id="focus">
+                                <div class="card-inner">
+                                    <div class="card-header-drag"
+                                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                        <h3 style="margin:0;font-size:clamp(0.9rem,1.1vw,1rem);font-weight:600;">🎯 Today's Focus</h3>
+                                        <div class="card-controls">
+                                            <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                            <button class="card-minimize-btn" data-action="minimizeCard" data-card="focus" title="Minimize">−</button>
+                                        </div>
+                                    </div>
+                                    <div id="dailyFocusGoal">
+                                        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                            <div style="position: relative; width: 64px; height: 64px; flex-shrink: 0;">
+                                                <svg viewBox="0 0 64 64"
+                                                    style="transform: rotate(-90deg); width: 100%; height: 100%;">
+                                                    <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.06)"
+                                                        stroke-width="5" />
+                                                    <circle id="focusGoalRing" cx="32" cy="32" r="28" fill="none"
+                                                        stroke="url(#focusGoalGradient)" stroke-width="5" stroke-linecap="round"
+                                                        stroke-dasharray="176" stroke-dashoffset="176"
+                                                        style="transition: stroke-dashoffset 0.5s ease;" />
+                                                    <defs>
+                                                        <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%"
+                                                            y2="100%">
+                                                            <stop offset="0%" style="stop-color:#5b8def;stop-opacity:1" />
+                                                            <stop offset="100%" style="stop-color:#5b8def;stop-opacity:1" />
+                                                        </linearGradient>
+                                                    </defs>
+                                                </svg>
+                                                <div
+                                                    style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                                    <span id="focusGoalPercent"
+                                                        style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">0%</span>
+                                                    <span style="font-size: 0.5rem; color: var(--text-muted);">goal</span>
+                                                </div>
+                                            </div>
+                                            <div style="flex: 1; min-width: 120px;">
+                                                <div id="focusGoalText"
+                                                    style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;">
+                                                    0h 0m / 4h 0m</div>
+                                                <div id="focusGoalMessage"
+                                                    style="font-size: 0.75rem; color: var(--accent-1); font-weight: 500;"></div>
+                                            </div>
+                                            <button id="editGoalBtn" class="matrix-btn"
+                                                style="padding: 4px 12px; font-size: 0.7rem; white-space: nowrap;"
+                                                title="Edit daily goal">⚙️ Set Goal</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Master To-Do -->
+                            <div class="dash-card" data-card-id="todo">
+                                <div class="card-inner">
+                                    <div class="card-header-drag"
+                                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                        <h3 style="margin:0;font-size:clamp(0.9rem,1.1vw,1rem);font-weight:600;">✓ Master To-Do</h3>
+                                        <div class="card-controls">
+                                            <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                            <button class="card-minimize-btn" data-action="minimizeCard" data-card="todo" title="Minimize">−</button>
+                                        </div>
+                                    </div>
+                                    <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task"
+                                        style="padding:4px 12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
+                                        Add Task</button>
+                                    <ul class="strike-list" id="dashStrikeList"></ul>
+                                </div>
+                            </div>
+
+                            <!-- Session Hub (moved inside left column) -->
+                            <div class="dash-card session-hub-card" data-card-id="hub">
+                                <div class="card-inner">
+                                    <div class="session-hub-header">
+                                        <h3 style="font-size:0.9rem;font-weight:600;">🎛️ Session Hub</h3>
+                                        <div class="session-hub-controls">
+                                            <button class="matrix-btn hub-reset-btn" data-action="resetDashboardLayout"
+                                                title="Reset entire dashboard layout" style="font-size:0.7rem;padding:4px 10px;">↺ Reset</button>
+                                        </div>
+                                    </div>
+                                    <div class="session-hub-grid" id="sessionHubGrid">
+                                        <div class="hub-widget" data-widget="status" style="grid-area: status;">
+                                            <div class="hub-widget-header">
+                                                <span>System Status</span>
+                                            </div>
+                                            <div class="hub-widget-content" id="hubStatusContent">
+                                                <div class="session-status-indicator">
+                                                    <span class="pulse-dot"></span>
+                                                    <span id="hubSystemStatus" style="font-size:0.8rem;">System Online</span>
+                                                </div>
+                                                <div class="session-metrics" style="gap:4px;">
+                                                    <div class="metric" style="padding:4px 8px;">
+                                                        <span class="metric-label" style="font-size:0.65rem;">Focus</span>
+                                                        <span class="metric-value" style="font-size:0.8rem;" id="hubFocusTime">00:00</span>
+                                                    </div>
+                                                    <div class="metric" style="padding:4px 8px;">
+                                                        <span class="metric-label" style="font-size:0.65rem;">Break</span>
+                                                        <span class="metric-value" style="font-size:0.8rem;" id="hubBreakTime">00:00</span>
+                                                    </div>
+                                                    <div class="metric" style="padding:4px 8px;">
+                                                        <span class="metric-label" style="font-size:0.65rem;">Idle</span>
+                                                        <span class="metric-value" style="font-size:0.8rem;" id="hubIdleTime">00:00</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="hub-widget" data-widget="countdown" style="grid-area: countdown;">
+                                            <div class="hub-widget-header">
+                                                <span>Countdown</span>
+                                            </div>
+                                            <div class="hub-widget-content" id="hubCountdownContent">
+                                                <div id="hubCountdownDisplay"></div>
+                                            </div>
+                                        </div>
+                                        <div class="hub-widget" data-widget="sessions" style="grid-area: sessions;">
+                                            <div class="hub-widget-header">
+                                                <span>Sessions</span>
+                                            </div>
+                                            <div class="hub-widget-content" id="hubSessionsContent">
+                                                <div class="session-history-empty" style="padding:20px;">
+                                                    <div style="font-size:1.2rem;margin-bottom:4px;">📊</div>
+                                                    <div style="color:var(--text-muted);font-size:0.75rem;">No sessions yet</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN -->
+                        <div class="dash-right-col">
+                            <!-- Quick Notes -->
+                            <div class="dash-card" data-card-id="quicknotes">
+                                <div class="card-inner" style="min-height:auto;">
+                                    <div class="card-header-drag"
+                                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                        <h3 style="margin:0;font-size:clamp(0.9rem,1.1vw,1rem);font-weight:600;">📝 Quick Notes</h3>
+                                        <div class="card-controls">
+                                            <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                            <button class="card-minimize-btn" data-action="minimizeCard" data-card="quicknotes" title="Minimize">−</button>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;flex-direction:column;gap:6px;">
+                                        <textarea id="quickNotesInput"
+                                            placeholder="Jot down quick thoughts..."
+                                            style="width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:0.82rem;resize:vertical;min-height:50px;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+                                        <div style="display:flex;justify-content:flex-end;">
+                                            <button id="clearNotesBtn" class="matrix-btn"
+                                                style="padding:2px 8px;font-size:0.7rem;"
+                                                title="Clear all notes">🗑️ Clear</button>
+                                        </div>
+                                    </div>
+                                    <div id="quickNotesList"
+                                        style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Current Lesson -->
+                            <div class="dash-card" data-card-id="lesson">
+                                <div class="card-inner" style="min-height:auto;">
+                                    <div class="card-header-drag"
+                                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                        <h3 style="margin:0;font-size:clamp(0.9rem,1.1vw,1rem);font-weight:600;">📂 Current Lesson</h3>
+                                        <div class="card-controls">
+                                            <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                        </div>
+                                    </div>
+                                    <div id="dashRecentLessons" style="font-size:0.85rem;color:var(--text-secondary);">No open lesson</div>
+                                </div>
+                            </div>
+
+                            <!-- Bookmarks -->
+                            <div class="dash-card" data-card-id="bookmarks">
+                                <div class="card-inner" style="min-height:auto;">
+                                    <div class="card-header-drag"
+                                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                        <h3 style="margin:0;font-size:clamp(0.9rem,1.1vw,1rem);font-weight:600;">🔗 Recent Bookmarks</h3>
+                                        <div class="card-controls">
+                                            <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                        </div>
+                                    </div>
+                                    <div id="dashRecentLibs" style="font-size:0.85rem;color:var(--text-secondary);">No bookmarks yet</div>
+                                </div>
+                            </div>
+
+                            <!-- Weather (placeholder, populated dynamically) -->
+                            <div id="weatherDashboardWidget" data-card-id="weather" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== DATE COUNTDOWN (hidden by default) ===== -->
+                    <div id="dashDateCountdown" style="display: none; margin-top: 16px;"></div>
 
                 </div>
 

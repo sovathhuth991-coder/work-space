@@ -36,6 +36,7 @@ function renderDashTodos() {
         });
     });
 
+    // Update optional eyebrow if it exists
     const dashEyebrow = document.getElementById('dashTodoEyebrow');
     if (dashEyebrow) {
         const openCount = dashTodos.filter(t => !t.done).length;
@@ -763,14 +764,20 @@ function updateStreakDisplay() {
     const emoji = getStreakEmoji(streak);
     const color = getStreakColor(streak);
     const label = streak === 0 ? 'No streak yet' : `${streak}-day streak`;
-    container.innerHTML = `
-        <div class="streak-badge" style="color:${color};">
-            <span class="streak-emoji">${emoji}</span>
-            <span class="streak-label">${label}</span>
-        </div>
-    `;
+    // Update inline badge for the new dashboard layout
+    const streakLabelEl = container.querySelector('.streak-label');
+    const streakEmojiEl = container.querySelector('.streak-emoji');
+    if (streakLabelEl) {
+        streakLabelEl.textContent = streak;
+    }
+    if (streakEmojiEl) {
+        streakEmojiEl.textContent = emoji;
+    }
+    // Also update stat card
     const statStreak = document.getElementById('statStreak');
     if (statStreak) statStreak.textContent = streak;
+    // Style the badge
+    container.style.color = color;
 }
 
 function updateSidebarProgress() {
