@@ -36,9 +36,14 @@ function insertLiveWidgetCard(card) {
     const grid = document.querySelector('.dashboard-grid');
     if (!grid) return false;
     if (grid.querySelector(`.dash-card[data-card-id="${card.dataset.cardId}"]`)) return false;
-    const statsContainer = grid.querySelector('.dash-stats-container');
-    if (statsContainer) grid.insertBefore(card, statsContainer);
-    else grid.appendChild(card);
+    const slot = document.getElementById('liveWidgetsSlot');
+    if (slot) {
+        slot.appendChild(card);
+    } else {
+        const statsContainer = grid.querySelector('.dash-stats-container');
+        if (statsContainer) grid.insertBefore(card, statsContainer);
+        else grid.appendChild(card);
+    }
     return true;
 }
 

@@ -36,7 +36,6 @@ function renderDashTodos() {
         });
     });
 
-    // Update optional eyebrow if it exists
     const dashEyebrow = document.getElementById('dashTodoEyebrow');
     if (dashEyebrow) {
         const openCount = dashTodos.filter(t => !t.done).length;
@@ -114,22 +113,33 @@ function updateDashProgress(saveFromDom = true) {
     const fill = document.getElementById("dashProgressBar");
     const pctLabel = document.getElementById("dashProgressPercent");
     const stat = document.getElementById("statTasksDone");
+    const count = document.getElementById("todoCount");
+    const doneCount = document.getElementById("todoDoneCount");
+    const pctEl = document.getElementById("todoPercent");
+    const ring = document.getElementById("momentumRing");
+    const leftCount = document.getElementById("todoLeftCount");
     if (fill) fill.style.width = `${pct}%`;
     if (pctLabel) pctLabel.textContent = `${pct}%`;
     if (stat) stat.textContent = label;
+    if (count) count.textContent = String(total);
+    if (doneCount) doneCount.textContent = String(done);
+    if (pctEl) pctEl.textContent = `${pct}%`;
+    if (ring) ring.style.setProperty("--momentum-pct", pct);
+    if (leftCount) leftCount.textContent = String(Math.max(total - done, 0));
     if (typeof updateStreakDisplay === 'function') {
-        clearTimeout(window.__streakTimeout);
-        window.__streakTimeout = setTimeout(updateStreakDisplay, 50);
+        setTimeout(updateStreakDisplay, 50);
     }
 }
 
 function updateDashboardLiveSession() {
     const { current, next, todayEvents } = getSessionSnapshot();
+    renderAllSessions(current, next, todayEvents);
     updateHubSessionsWidget(current, next, todayEvents);
     updateQuickJumpLinks();
     if (typeof updateFocusTimerTaskLink === 'function') updateFocusTimerTaskLink();
     updateDashboardStats();
     updateDashProgress(false);
+    if (typeof updateDailyStats === 'function') updateDailyStats();
 }
 
 function updateHubSessionsWidget(current, next, todayEvents) {
@@ -201,6 +211,112 @@ function updateHubSessionsWidget(current, next, todayEvents) {
     container.innerHTML = html;
 }
 
+function renderAllSessions(current, next, todayEvents) {
+    const container = document.getElementById('allSessionsContainer');
+    if (!container) return;
+    const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+    const today = new Date().toDateString();
+    const todaySessions = completedSessions.filter(session => {
+        const sessionDate = new Date(session.timestamp).toDateString();
+        return sessionDate === today;
+    });
+    todaySessions.sort((a, b) => b.timestamp - a.timestamp);
+    const formatTime = (sec) => {
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+        return `${m}m ${String(s).padStart(2, '0')}s`;
+    };
+    const formatTimeShort = (sec) => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    };
+    const formatTimeRange = (timestamp) => {
+        const time = new Date(timestamp);
+        const hours = time.getHours();
+        const minutes = time.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12;
+        const formattedMinutes = String(minutes).padStart(2, '0');
+        const timeStr = `${formattedHours}:${formattedMinutes} ${ampm}`;
+        const session = todaySessions.find(s => s.timestamp === timestamp);
+        if (session && session.totalSeconds) {
+            const endTime = new Date(timestamp + (session.totalSeconds * 1000));
+            const endHours = endTime.getHours();
+            const endMinutes = endTime.getMinutes();
+            const endAmpm = endHours >= 12 ? 'PM' : 'AM';
+            const endFormattedHours = endHours % 12 || 12;
+            const endFormattedMinutes = String(endMinutes).padStart(2, '0');
+            return `${timeStr} – ${endFormattedHours}:${endFormattedMinutes} ${endAmpm}`;
+        }
+        return timeStr;
+    };
+    let html = '';
+    if (current) {
+        const currentStart = current.start || 'Now';
+        const currentEnd = current.end || '';
+        const timeRange = currentEnd ? `${currentStart} – ${currentEnd}` : currentStart;
+        html += `
+            <div class="session-item current-session" data-action="showSessionDetailsModal" title="Click to view current session details">
+                <div class="session-time-range">${timeRange}</div>
+                <div class="session-info">
+                    <div class="session-name">${escapeHtml(current.title)}</div>
+                    <div class="session-stats">
+                        <span class="session-stat focus">⏱ Active</span>
+                    </div>
+                </div>
+                <span class="session-badge">NOW</span>
+                <div class="session-arrow">→</div>
+            </div>
+        `;
+    }
+    if (todaySessions.length > 0) {
+        todaySessions.forEach((session, index) => {
+            const timeRange = formatTimeRange(session.timestamp);
+            const taskName = session.taskName || 'Untitled Session';
+            const focusTime = formatTimeShort(session.focusSeconds || 0);
+            const breakTime = formatTimeShort(session.breakSeconds || 0);
+            const totalDuration = formatTimeShort(session.totalSeconds || 0);
+            html += `
+                <div class="session-item" data-session-timestamp="${session.timestamp}" data-session-index="${index}" title="Click to view session details">
+                    <div class="session-time-range">${timeRange}</div>
+                    <div class="session-info">
+                        <div class="session-name">${escapeHtml(taskName)}</div>
+                        <div class="session-stats">
+                            <span class="session-stat focus">⏱ ${focusTime}</span>
+                            <span class="session-stat break">☕ ${breakTime}</span>
+                            <span class="session-stat total">⏳ ${totalDuration}</span>
+                        </div>
+                    </div>
+                    <div class="session-arrow">→</div>
+                </div>
+            `;
+        });
+    }
+    if (!current && todaySessions.length === 0) {
+        html = `
+            <div class="session-history-empty">
+                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your progress</div>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+    container.querySelectorAll('.session-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const timestamp = this.dataset.sessionTimestamp;
+            if (timestamp) {
+                showSessionDetailsModal(parseInt(timestamp));
+            } else {
+                showSessionDetailsModal();
+            }
+        });
+    });
+}
+
 function updateQuickJumpLinks() {
     const recentLessons = document.getElementById("dashRecentLessons");
     const recentLibs = document.getElementById("dashRecentLibs");
@@ -218,10 +334,219 @@ function updateQuickJumpLinks() {
 function updateDashboardStats() {
     const folderStat = document.getElementById("statLessonFolders");
     const todayStat = document.getElementById("statTodayTasks");
+    const libStat = document.getElementById("statLibraryItems");
     const todayEvents = (events || []).filter(e => e.day === getTimeMetrics().todayName);
     if (folderStat && typeof hubState !== 'undefined') folderStat.textContent = String(hubState.folders.length);
     if (todayStat) todayStat.textContent = String(todayEvents.length);
+    if (libStat) libStat.textContent = String(libraryItems.length);
 }
+
+function updateDailyStats() {
+    const el = document.getElementById('daily-stats');
+    if (!el) return;
+    const todayEvents = (events || []).filter(e => e.day === getTimeMetrics().todayName);
+    const safeEvents = Array.isArray(todayEvents) ? todayEvents : [];
+    const total = safeEvents.length;
+    const done = safeEvents.filter(e => e && e.completed).length;
+    const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+    el.style.display = 'inline-flex';
+    el.style.visibility = 'visible';
+    el.style.opacity = '1';
+    el.style.minWidth = '180px';
+    el.style.textAlign = 'center';
+    if (total === 0) {
+        el.textContent = 'No tasks scheduled for today';
+    } else {
+        el.textContent = `⭐ ${pct}% complete · ${done}/${total} today`;
+    }
+}
+
+function renderSessionHistory() {
+    const container = document.getElementById('sessionHistoryList');
+    if (!container) return;
+    const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+    const today = new Date().toDateString();
+    const todaySessions = completedSessions.filter(session => {
+        const sessionDate = new Date(session.timestamp).toDateString();
+        return sessionDate === today;
+    });
+    todaySessions.sort((a, b) => b.timestamp - a.timestamp);
+    if (todaySessions.length === 0) {
+        container.innerHTML = `
+            <div class="session-history-empty">
+                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">No completed sessions yet today</div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your history</div>
+            </div>
+        `;
+        return;
+    }
+    const formatTimeShort = (sec) => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    };
+    container.innerHTML = todaySessions.map((session, index) => {
+        const time = new Date(session.timestamp);
+        const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const taskName = session.taskName || 'Untitled Session';
+        const focusTime = formatTimeShort(session.focusSeconds || 0);
+        const breakTime = formatTimeShort(session.breakSeconds || 0);
+        const totalDuration = formatTimeShort(session.totalSeconds || 0);
+        return `
+            <div class="session-history-item" data-session-timestamp="${session.timestamp}" data-session-index="${index}" title="Click to view details">
+                <div class="session-history-time">${timeStr}</div>
+                <div class="session-history-info">
+                    <div class="session-history-task-name">${escapeHtml(taskName)}</div>
+                    <div class="session-history-duration">
+                        <span class="focus-time">⏱ ${focusTime}</span>
+                        <span class="break-time">☕ ${breakTime}</span>
+                        <span>⏳ ${totalDuration}</span>
+                    </div>
+                </div>
+                <div class="session-history-arrow">→</div>
+            </div>
+        `;
+    }).join('');
+    container.querySelectorAll('.session-history-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const timestamp = parseInt(this.dataset.sessionTimestamp);
+            showSessionDetailsModal(timestamp);
+        });
+    });
+}
+
+// showSessionDetailsModal: shows a specific session's detail view when a
+// timestamp is passed, otherwise falls through to today's aggregate stats.
+window.showSessionDetailsModal = function(sessionTimestamp) {
+    const modal = document.getElementById('sessionDetailsModal');
+    const content = document.getElementById('sessionDetailsContent');
+    if (!modal || !content) return;
+    const history = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
+    const today = new Date().toDateString();
+    const todaySessions = history.filter(s => {
+        const sessionDate = new Date(s.timestamp).toDateString();
+        return sessionDate === today;
+    });
+    const savedTime = localStorage.getItem('accumulatedFocusTime');
+    let currentFocus = 0, currentBreak = 0, currentIdle = 0;
+    if (savedTime) {
+        try {
+            const data = JSON.parse(savedTime);
+            const savedDate = new Date(data.timestamp).toDateString();
+            if (savedDate === today) {
+                currentFocus = data.focusSeconds || 0;
+                currentBreak = data.breakSeconds || 0;
+                currentIdle = data.idleSeconds || 0;
+            }
+        } catch (e) {
+            console.warn('Could not parse accumulated time:', e);
+        }
+    }
+    if (sessionTimestamp) {
+        const clickedSession = todaySessions.find(s => s.timestamp === sessionTimestamp);
+        if (!clickedSession) return;
+        const formatTimeShort = (sec) => {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        };
+        const time = new Date(clickedSession.timestamp);
+        const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const efficiency = clickedSession.scheduled > 0 ? Math.round((clickedSession.focusSeconds / (clickedSession.scheduled * 60)) * 100) : 0;
+        const totalDuration = clickedSession.focusSeconds + clickedSession.breakSeconds + clickedSession.idleSeconds;
+        const focusPercentage = totalDuration > 0 ? Math.round((clickedSession.focusSeconds / totalDuration) * 100) : 0;
+        let html = `
+            <div style="background: var(--bg-primary); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">${escapeHtml(clickedSession.taskName)}</div>
+                <div style="font-size: 0.9rem; color: var(--text-muted);">${timeStr}</div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                <div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Focus Time</div>
+                    <div style="font-size: 1.6rem; font-weight: 700; color: #34d399;">${formatTimeShort(clickedSession.focusSeconds)}</div>
+                </div>
+                <div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Break Time</div>
+                    <div style="font-size: 1.6rem; font-weight: 700; color: #fbbf24;">${formatTimeShort(clickedSession.breakSeconds)}</div>
+                </div>
+                <div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Idle Time</div>
+                    <div style="font-size: 1.6rem; font-weight: 700; color: #95a5a6;">${formatTimeShort(clickedSession.idleSeconds || 0)}</div>
+                </div>
+                <div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Total Duration</div>
+                    <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary);">${formatTimeShort(totalDuration)}</div>
+                </div>
+            </div>
+            <div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+                <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Focus Efficiency</div>
+                <div style="font-size: 1.6rem; font-weight: 700; color: var(--accent-1);">${focusPercentage}%</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">of total session time</div>
+            </div>
+        `;
+        content.innerHTML = html;
+        modal.style.display = 'flex';
+        return;
+    }
+    const totalFocusToday = todaySessions.reduce((sum, s) => sum + (s.focusSeconds || 0), 0) + currentFocus;
+    const totalBreakToday = todaySessions.reduce((sum, s) => sum + (s.breakSeconds || 0), 0) + currentBreak;
+    const totalIdleToday = todaySessions.reduce((sum, s) => sum + (s.idleSeconds || 0), 0) + currentIdle;
+    const totalSessions = todaySessions.length + (currentFocus > 0 || currentBreak > 0 ? 1 : 0);
+    const totalTimeToday = totalFocusToday + totalBreakToday + totalIdleToday;
+    const focusPercentage = totalTimeToday > 0 ? Math.round((totalFocusToday / totalTimeToday) * 100) : 0;
+    const breakPercentage = totalTimeToday > 0 ? Math.round((totalBreakToday / totalTimeToday) * 100) : 0;
+    const avgSessionDuration = totalSessions > 0 ? Math.round(totalFocusToday / totalSessions) : 0;
+    let html = '';
+    html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px;">`;
+    html += `<div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;"><div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Total Focus</div><div style="font-size: 1.6rem; font-weight: 700; color: #34d399;">${formatTimeShort(totalFocusToday)}</div><div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">${focusPercentage}% of total</div></div>`;
+    html += `<div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;"><div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Total Break</div><div style="font-size: 1.6rem; font-weight: 700; color: #fbbf24;">${formatTimeShort(totalBreakToday)}</div><div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">${breakPercentage}% of total</div></div>`;
+    html += `<div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;"><div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Idle Time</div><div style="font-size: 1.6rem; font-weight: 700; color: #95a5a6;">${formatTimeShort(totalIdleToday)}</div></div>`;
+    html += `<div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;"><div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Sessions</div><div style="font-size: 1.6rem; font-weight: 700; color: var(--accent-1);">${totalSessions}</div><div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">~${formatTimeShort(avgSessionDuration)} avg</div></div>`;
+    html += `<div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;"><div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Total Time</div><div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary);">${formatTimeShort(totalTimeToday)}</div></div>`;
+    html += `</div>`;
+    if (todaySessions.length > 0 || (currentFocus > 0 || currentBreak > 0)) {
+        html += `<h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">📋 Session Timeline</h3>`;
+        html += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
+        todaySessions.slice().reverse().forEach((session, index) => {
+            const time = new Date(session.timestamp);
+            const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const efficiency = session.scheduled > 0 ? Math.round((session.focusSeconds / (session.scheduled * 60)) * 100) : 0;
+            const category = session.category || 'study';
+            const sessionDuration = session.focusSeconds + session.breakSeconds;
+            const catColors = { study: '#7c6df0', assignment: '#f472b6', class: '#34d399', break: '#fbbf24', fitness: '#fb923c' };
+            const catColor = catColors[category] || '#7c6df0';
+            html += `<div style="background: var(--bg-primary); padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); border-left: 3px solid ${catColor}; display: flex; align-items: center; gap: 12px;">`;
+            html += `<div style="min-width: 100px; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">${timeStr}</div>`;
+            html += `<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(session.label)}</div>`;
+            html += `<div style="display: flex; gap: 12px; font-size: 0.75rem; align-items: center; flex-wrap: wrap;">`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏱</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.focusSeconds)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">☕</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.breakSeconds)}</span></div>`;
+            if (session.idleSeconds > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.idleSeconds)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏳</span><span style="color: var(--text-secondary); font-variant-numeric: tabular-nums;">${formatTimeShort(sessionDuration)}</span></div>`;
+            if (efficiency > 0) html += `<div style="margin-left: auto; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); color: var(--accent-1);">${efficiency}%</div>`;
+            html += `</div></div></div>`;
+        });
+        if (currentFocus > 0 || currentBreak > 0) {
+            const currentDuration = currentFocus + currentBreak + currentIdle;
+            const currentEfficiency = currentDuration > 0 ? Math.round((currentFocus / currentDuration) * 100) : 0;
+            html += `<div style="background: rgba(124, 109, 240, 0.05); padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--accent-1); border-left: 3px solid var(--accent-1); display: flex; align-items: center; gap: 12px;">`;
+            html += `<div style="min-width: 100px; font-size: 0.8rem; color: var(--accent-1); font-weight: 600;">NOW</div>`;
+            html += `<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">🟢 Current Session</div>`;
+            html += `<div style="display: flex; gap: 12px; font-size: 0.75rem; align-items: center; flex-wrap: wrap;">`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏱</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentFocus)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">☕</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentBreak)}</span></div>`;
+            if (currentIdle > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentIdle)}</span></div>`;
+            html += `<div style="margin-left: auto; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; background: rgba(52, 211, 153, 0.15); color: #34d399;">${currentEfficiency}% focus</div>`;
+            html += `</div></div></div>`;
+        }
+        html += `</div>`;
+    } else {
+        html += `<div style="text-align: center; padding: 48px 16px; color: var(--text-muted);"><div style="font-size: 3rem; margin-bottom: 16px;">📊</div><div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No sessions yet today</div><div style="font-size: 0.9rem;">Start a focus session to see your progress here</div></div>`;
+    }
+    content.innerHTML = html;
+    modal.style.display = 'flex';
+};
 
 function closeSessionDetailsModal() {
     const modal = document.getElementById('sessionDetailsModal');
@@ -339,6 +664,8 @@ function initDashboardEngine() {
     updateDashboardLiveSession();
     renderAnalytics();
     updateSidebarProgress();
+    updateDailyStats();
+    renderSessionHistory();
     if (typeof initWeather === 'function') initWeather();
     updateFocusGoalDisplay();
     renderQuickNotes();
@@ -346,14 +673,17 @@ function initDashboardEngine() {
     window.__dashboardLiveInterval = setInterval(() => {
         if (document.getElementById('dashboard-view')?.classList.contains('active')) {
             updateDashboardLiveSession();
+            renderSessionHistory();
         }
     }, 10000);
     window.addEventListener('focus', () => {
         if (document.getElementById('dashboard-view')?.classList.contains('active')) {
             updateDashboardLiveSession();
+            renderSessionHistory();
         }
     });
     document.addEventListener('sessionCompleted', () => {
+        renderSessionHistory();
         updateFocusGoalDisplay();
     });
     const editGoalBtn = document.getElementById('editGoalBtn');
@@ -433,20 +763,14 @@ function updateStreakDisplay() {
     const emoji = getStreakEmoji(streak);
     const color = getStreakColor(streak);
     const label = streak === 0 ? 'No streak yet' : `${streak}-day streak`;
-    // Update inline badge for the new dashboard layout
-    const streakLabelEl = container.querySelector('.streak-label');
-    const streakEmojiEl = container.querySelector('.streak-emoji');
-    if (streakLabelEl) {
-        streakLabelEl.textContent = streak;
-    }
-    if (streakEmojiEl) {
-        streakEmojiEl.textContent = emoji;
-    }
-    // Also update stat card
+    container.innerHTML = `
+        <div class="streak-badge" style="color:${color};">
+            <span class="streak-emoji">${emoji}</span>
+            <span class="streak-label">${label}</span>
+        </div>
+    `;
     const statStreak = document.getElementById('statStreak');
     if (statStreak) statStreak.textContent = streak;
-    // Style the badge
-    container.style.color = color;
 }
 
 function updateSidebarProgress() {
@@ -481,7 +805,21 @@ function animateCardsIn() {
         });
     });
 }
-
+function renderDashEmptyState(container, icon, title, subtitle, actionLabel, actionCallback) {
+    if (!container) return;
+    container.innerHTML = `
+        <div class="empty-state-card">
+            <div class="empty-icon">${icon}</div>
+            <div class="empty-title">${title}</div>
+            <div class="empty-subtitle">${subtitle}</div>
+            ${actionLabel ? `<button class="empty-action-btn" data-empty-action="true">${actionLabel}</button>` : ''}
+        </div>
+    `;
+    if (actionCallback) {
+        const btn = container.querySelector('[data-empty-action]');
+        if (btn) btn.addEventListener('click', actionCallback);
+    }
+}
 function updateLastUpdated(elementId, label) {
     const el = document.getElementById(elementId);
     if (!el) return;
@@ -515,12 +853,12 @@ function initLastUpdatedTimestamps() {
     }
 }
 const DEFAULT_CARD_VISIBILITY = {
-    'banner': true, 'sessions': true, 'todo': true, 'hub': true, 'widgets': true,
+    'banner': true, 'todo': true, 'widgets': true,
     'stat-tasks': true, 'stat-schedule': true, 'stat-lessons': true, 'stat-streak': true
 };
 const CARD_LABELS = {
-    'banner': '📋 Banner', 'sessions': '⏱ Today\'s Sessions', 'todo': '☑ Master To-Do',
-    'hub': '🎛️ Session Hub', 'widgets': '📦 Custom Widgets', 'stat-tasks': '✓ Tasks Done',
+    'banner': '🎯 Today\'s Focus', 'todo': '☑ Master To-Do',
+    'widgets': '📦 Custom Widgets', 'stat-tasks': '✓ Tasks Done',
     'stat-schedule': '▦ Today\'s Tasks', 'stat-lessons': '▣ Lesson Folders', 'stat-streak': '🔥 Day Streak'
 };
 function loadCardVisibility() {
@@ -707,9 +1045,14 @@ function initMiniCalendar() {
             <div id="dashMiniCalendar"></div>
         </div>
     `;
-    const statsContainer = grid.querySelector('.dash-stats-container');
-    if (statsContainer) grid.insertBefore(calendarCard, statsContainer);
-    else grid.appendChild(calendarCard);
+    const slot = document.getElementById('liveWidgetsSlot');
+    if (slot) {
+        slot.appendChild(calendarCard);
+    } else {
+        const statsContainer = grid.querySelector('.dash-stats-container');
+        if (statsContainer) grid.insertBefore(calendarCard, statsContainer);
+        else grid.appendChild(calendarCard);
+    }
     renderMiniCalendar();
 }
 function toggleDashboardFocusMode() {
@@ -724,7 +1067,7 @@ function toggleDashboardFocusMode() {
     } else {
         grid.classList.add('focus-mode');
         if (badge) badge.classList.add('active');
-        ['banner', 'sessions', 'todo'].forEach(id => {
+        ['banner', 'todo'].forEach(id => {
             const card = document.querySelector(`.dash-card[data-card-id="${id}"]`);
             if (card) card.classList.add('keep-in-focus');
         });
@@ -751,9 +1094,7 @@ window.initDashboardEngine = function() {
     initDashboardEnhancements();
 };
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        initDashboardEnhancements();
-    });
+    document.addEventListener('DOMContentLoaded', () => {});
 } else {
     setTimeout(initDashboardEnhancements, 200);
 }

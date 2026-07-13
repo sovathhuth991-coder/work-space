@@ -3,14 +3,50 @@
    ============================================================ */
 
 .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: clamp(14px, 1.8vw, 28px);
     padding: clamp(10px, 1.5vw, 24px);
     max-width: 100%;
     width: 100%;
     box-sizing: border-box;
     position: relative;
+}
+
+/* ============================================================
+   MAIN TWO-COLUMN LAYOUT – left column is what you act on
+   (focus tracking, tasks), right column is glanceable
+   secondary info (mini-widgets, notes, quick links). Cards
+   inside each column use flexbox, so per-card drag-reorder
+   (via inline `order`) still works exactly as before, just
+   scoped to its own column instead of the whole dashboard.
+   ============================================================ */
+.dashboard-main-row {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: clamp(14px, 1.8vw, 28px);
+    align-items: start;
+    width: 100%;
+}
+
+.dashboard-col-main,
+.dashboard-col-side {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 1.8vw, 28px);
+    min-width: 0;
+}
+
+.dash-header-greeting {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+}
+
+@media (max-width: 900px) {
+    .dashboard-main-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ============================================================
@@ -164,96 +200,56 @@
 
 .dash-banner .card-inner {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: clamp(16px, 2vw, 24px);
-    padding: clamp(20px, 2.5vw, 32px);
+    padding: clamp(24px, 3vw, 40px);
     border-left: 4px solid var(--status-live);
     background: var(--bg-card);
+    background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
     position: relative;
     overflow: hidden;
 }
 
-/* Dashboard redesigned header */
-.dash-header-section {
-    text-align: left;
-    margin-bottom: 0;
-}
-
-.dash-header-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    color: var(--status-live);
-    text-transform: uppercase;
-    margin-bottom: 4px;
-    font-weight: 600;
-}
-
-.dash-header-title {
-    font-size: clamp(1.4rem, 2.5vw, 2rem);
+.banner-text h2 {
+    font-size: clamp(1.3rem, 2.5vw, 2rem);
     font-weight: 700;
     margin: 0;
-    color: var(--text-primary);
+    position: relative;
+    z-index: 1;
 }
 
-.dash-header-subtitle {
-    font-size: clamp(0.78rem, 1vw, 0.88rem);
-    color: var(--text-muted);
-    margin: 4px 0 0;
+.banner-text p {
+    font-size: clamp(0.85rem, 1.2vw, 1.05rem);
+    color: var(--text-secondary);
+    margin: 6px 0 0;
+    position: relative;
+    z-index: 1;
 }
 
-/* Dashboard two-column layout below header */
-.dash-main-grid {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: clamp(14px, 1.8vw, 28px);
-    width: 100%;
-}
-
-.dash-left-col {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(14px, 1.8vw, 28px);
-}
-
-.dash-right-col {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(14px, 1.8vw, 28px);
-}
-
-.dash-banner-right {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 200px;
+.banner-progress {
+    min-width: 150px;
     flex: 1;
     max-width: 360px;
 }
 
-.banner-progress {
-    width: 100%;
-}
-
 .progress-label {
-    font-size: clamp(0.7rem, 0.8vw, 0.78rem);
-    color: var(--text-muted);
+    font-size: clamp(0.8rem, 1vw, 0.9rem);
+    color: var(--text-secondary);
     margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .progress-bar-bg {
-    height: 6px;
+    height: 10px;
     background: rgba(255, 255, 255, 0.06);
     border-radius: 99px;
     overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .progress-bar-fill {
@@ -263,21 +259,6 @@
     transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     border-radius: 99px;
     position: relative;
-}
-
-/* Streak display inline with progress */
-.streak-inline-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 10px 2px 8px;
-    border-radius: 99px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    white-space: nowrap;
 }
 
 /* ---- Card headers ---- */
@@ -436,7 +417,7 @@
 .dash-stats-container {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
     gap: clamp(12px, 1.5vw, 20px);
     width: 100%;
 }
@@ -445,7 +426,7 @@
     display: flex;
     align-items: center;
     gap: clamp(14px, 2vw, 18px);
-    padding: clamp(14px, 1.8vw, 22px);
+    padding: clamp(18px, 2vw, 28px);
     cursor: pointer;
     border-radius: var(--radius-md);
     background: var(--bg-card);
@@ -454,7 +435,6 @@
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
-    border-left: 3px solid var(--stat-color, var(--border-color));
 }
 
 .stat-card:active .card-inner {
@@ -677,230 +657,6 @@
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Full-width cards */
-.dash-card[data-card-id="banner"],
-.dash-card[data-card-id="hub"],
-.dash-card[data-card-id="widgets"] {
-    grid-column: 1 / -1;
-}
-
-/* ============================================================
-    SESSION HUB
-    ============================================================ */
-.session-hub-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: clamp(18px, 2vw, 24px);
-    box-shadow: var(--shadow-elevated);
-}
-
-.session-hub-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.session-hub-header h3 {
-    margin: 0;
-    font-size: clamp(1rem, 1.2vw, 1.2rem);
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.session-hub-controls {
-    display: flex;
-    gap: 8px;
-}
-
-.hub-reset-btn {
-    padding: 6px 14px;
-    font-size: 0.75rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    border-radius: 99px;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.hub-reset-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--border-color-hover);
-    color: var(--text-primary);
-}
-
-.session-hub-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(12px, 1.5vw, 16px);
-}
-
-.hub-widget {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: clamp(14px, 1.5vw, 16px);
-    transition: all 0.2s ease;
-    position: relative;
-    min-height: 120px;
-}
-
-.hub-widget:hover {
-    border-color: var(--border-color-hover);
-    box-shadow: var(--shadow-soft);
-}
-
-.hub-widget.dragging {
-    opacity: 0.7;
-    transform: scale(1.02);
-    box-shadow: 0 8px 24px rgba(124, 109, 240, 0.3);
-    z-index: 100;
-    cursor: grabbing;
-}
-
-.hub-widget-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    cursor: default;
-}
-
-.hub-drag-handle {
-    cursor: grab;
-    color: var(--text-muted);
-    font-size: 1.2rem;
-    user-select: none;
-    padding: 2px 4px;
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-
-.hub-drag-handle:hover {
-    color: var(--accent-1);
-    background: rgba(124, 109, 240, 0.1);
-}
-
-.hub-drag-handle:active {
-    cursor: grabbing;
-}
-
-.hub-widget-header > span:not(.hub-drag-handle):not(.hub-resize-btn) {
-    flex: 1;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.hub-resize-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
-    transition: all 0.2s;
-    line-height: 1;
-}
-
-.hub-resize-btn:hover {
-    color: var(--accent-1);
-    background: rgba(124, 109, 240, 0.1);
-}
-
-.hub-widget-content {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-/* Widget: System Status */
-.session-status-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.session-status-indicator .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: #34d399;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-    box-shadow: 0 0 8px #34d399;
-}
-
-#hubSystemStatus {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.session-metrics {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.metric {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 10px;
-    background: var(--bg-primary);
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.metric-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.metric-value {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-}
-
-/* Widget: Countdown */
-#hubCountdownDisplay {
-    font-size: 0.85rem;
-}
-
-#hubCountdownDisplay .dash-countdown-card {
-    background: var(--bg-primary);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-}
-
-#hubCountdownDisplay .dash-countdown-header {
-    margin-bottom: 8px;
-}
-
-#hubCountdownDisplay .dash-countdown-value {
-    font-size: 1rem;
-}
-
-#hubCountdownDisplay .matrix-btn {
-    margin-top: 8px;
-    padding: 4px 12px;
-    font-size: 0.7rem;
-}
-
 /* Widget: Sessions */
 .session-history-empty {
     text-align: center;
@@ -916,18 +672,6 @@
 .session-history-empty > div:nth-child(2) {
     color: var(--text-muted);
     font-size: 0.8rem;
-}
-
-/* Widget Large Size */
-.hub-widget.widget-large {
-    grid-column: span 2;
-    grid-row: span 2;
-    min-height: 280px;
-}
-
-.hub-widget.widget-large .hub-widget-content {
-    max-height: 200px;
-    overflow-y: auto;
 }
 
 /* ============================================================
@@ -1257,8 +1001,8 @@ body {
 }
 
 /* ============================================================
-    DAILY FOCUS GOAL TRACKER
-    ============================================================ */
+   SESSION HISTORY LIST
+   ============================================================ */
 .session-history-list {
     display: flex;
     flex-direction: column;
@@ -2075,16 +1819,6 @@ body {
 /* ============================================================
    RESPONSIVE – small screens
    ============================================================ */
-@media (max-width: 1100px) {
-    .dash-main-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .dash-stats-container {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
 @media (max-width: 1000px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
@@ -2105,7 +1839,7 @@ body {
     }
 
     .dash-stats-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
         gap: 14px;
     }
 
