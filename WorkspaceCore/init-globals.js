@@ -58,6 +58,7 @@ let events = [];
     });
 
     window.events = scheduleEvents;
+    window.getWeekId = getWeekId;
     window.libraryItems = window.libraryItems || safeParse('libraryItems', []);
     window.habits = window.habits || safeParse('habits', []);
     window.myTasks = window.myTasks || safeParse('myTasks', []);

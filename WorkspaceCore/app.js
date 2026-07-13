@@ -986,6 +986,24 @@ function toggleMinimalUI() {
 }
 window.toggleMinimalUI = toggleMinimalUI;
 
+function toggleLofiConsole() {
+    const widget = document.getElementById('lofiWidget');
+    const body = document.getElementById('lofiBody');
+    const btn = document.getElementById('lofiToggleBtn');
+    if (!widget || !body) return;
+    const hidden = widget.dataset.lofiHidden === '1';
+    if (hidden) {
+        body.style.display = '';
+        widget.dataset.lofiHidden = '0';
+        if (btn) btn.textContent = '−';
+    } else {
+        body.style.display = 'none';
+        widget.dataset.lofiHidden = '1';
+        if (btn) btn.textContent = '+';
+    }
+}
+window.toggleLofiConsole = toggleLofiConsole;
+
 window.toggleSidebarMenu = toggleSidebarMenu;
 
 window.quickAddTask = quickAddTask;
@@ -993,7 +1011,6 @@ window.quickAddTask = quickAddTask;
 window.showShortcuts = showShortcuts;
 
 // Expose globally
-window.toggleLofiConsole = toggleLofiConsole;
 window.toggleRainSound = toggleRainSound;
 window.changeRainVolume = changeRainVolume;
 
