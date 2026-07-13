@@ -324,8 +324,8 @@
                         <div class="card-inner">
                             <div class="card-header-drag"
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                <h2 style="margin:0;font-size:1.8rem;font-weight:700;">Study systems online</h2>
-                                <div class="card-controls">
+                                <span class="card-eyebrow" style="margin:0">COMMAND CENTER</span>
+                                <div class="card-controls" style="margin-left:auto">
                                     <span class="card-drag-handle" title="Drag to move">⠿</span>
                                     <button class="card-resize-btn" data-action="resizeCard" data-card="banner"
                                         title="Resize">⤡</button>
@@ -363,8 +363,8 @@
                                             <defs>
                                                 <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%"
                                                     y2="100%">
-                                                    <stop offset="0%" style="stop-color:#7c6df0;stop-opacity:1" />
-                                                    <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+                                                    <stop offset="0%" style="stop-color:#5b8def;stop-opacity:1" />
+                                                    <stop offset="100%" style="stop-color:#5b8def;stop-opacity:1" />
                                                 </linearGradient>
                                             </defs>
                                         </svg>
@@ -399,6 +399,7 @@
                     <div class="dash-card" data-card-id="sessions">
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
+                            <p class="card-eyebrow">SESSIONS &middot; LIVE</p>
                             <div class="card-header-drag"
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;"><span class="pulse-dot"></span> Today's Sessions</h3>
@@ -426,6 +427,7 @@
                     <div class="dash-card" data-card-id="todo">
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
+                            <p class="card-eyebrow" id="dashTodoEyebrow">TASKS</p>
                             <div class="card-header-drag"
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;">Master To-Do</h3>
@@ -436,7 +438,7 @@
                                 </div>
                             </div>
                             <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task"
-                                style="padding:4px 12px;border-radius:99px;background:var(--accent-gradient);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
+                                style="padding:4px 12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
                                 Add Task</button>
                             <ul class="strike-list" id="dashStrikeList"></ul>
                         </div>

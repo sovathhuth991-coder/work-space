@@ -513,6 +513,10 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
             if (resizeBtn) {
                 resizeBtn.addEventListener('mousedown', (e) => startResize(e, card));
                 resizeBtn.addEventListener('touchstart', (e) => startResize(e, card), { passive: false });
+                // Permanently stop this button's click from bubbling to the document
+                // delegated handler (stat cards use switchView), so resizing/cycling a
+                // stat card never navigates away. Harmless otherwise.
+                resizeBtn.addEventListener('click', (e) => e.stopPropagation());
             }
 
             ensureMinimizeButton(card);
@@ -555,6 +559,9 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
                 grid.appendChild(dropZoneIndicator);
             }
         }
+
+        // Tag every card with width/height size classes so the inner UI can adapt.
+        updateCardSizeClasses();
     }
 
     // ---- MINIMIZE ----
@@ -581,6 +588,9 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
         const btn = card.querySelector('.card-minimize-btn');
         if (btn) { btn.textContent = minimized ? '+' : '−'; btn.title = minimized ? 'Restore' : 'Minimize'; }
         saveLayout();
+        // Neighbors reflow to fill/relinquish space, so recompute their size classes
+        // on BOTH minimize and un-minimize (skips minimized cards internally).
+        updateCardSizeClasses();
     }
 
     function startDrag(e, card) {
@@ -727,8 +737,53 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
     let resizeStartY = 0;
     let resizeStartSpan = 1;
     let resizeStartHeight = 0;
+    let resizeWasClick = true;
+    let pendingResizeRaf = null;
     const RESIZE_STEP_PX = 140; // horizontal drag distance per +1 grid-column span
     const NO_RESIZE_CARDS = new Set(['banner', 'widgets', 'hub']);
+
+    // Single source of truth for the grid-column span cap. Used by both the
+    // drag-resize path and the click-cycle.
+    function getMaxSpan() {
+        const g = document.querySelector('.dashboard-grid');
+        return g ? Math.max(1, Math.min(3, Math.round(g.getBoundingClientRect().width / 420))) : 1;
+    }
+
+    // Measure each card's real pixel size and tag it with width/height classes
+    // so the inner UI can re-densify (compact when small, roomy when large).
+    function updateCardSizeClasses() {
+        const cards = document.querySelectorAll('.dashboard-grid .dash-card[data-card-id]');
+        cards.forEach(card => {
+            if (card.style.display === 'none') return;
+            if (card.classList.contains('card-minimized')) return;
+            const rect = card.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            const wClass = w < 300 ? 'xs' : w < 440 ? 'sm' : w < 640 ? 'md' : 'lg';
+            const hClass = h < 240 ? 'short' : h < 460 ? 'normal' : 'tall';
+            card.dataset.w = wClass;
+            card.dataset.h = hClass;
+        });
+    }
+
+    // Cycle a card through sm -> md -> lg -> sm on a plain click (no drag).
+    // Uses a deterministic data-size-preset attribute rather than parsing the
+    // rendered width (data-w) or inline styles.
+    function cycleCardSize(card) {
+        const SIZES = ['sm', 'md', 'lg'];
+        const PRESETS = {
+            sm: { span: '1', minHeight: '200px' },
+            md: { span: '1', minHeight: '360px' },
+            lg: { span: String(Math.min(2, getMaxSpan())), minHeight: '540px' }
+        };
+        const cur = card.dataset.sizePreset || 'sm';
+        const next = SIZES[(SIZES.indexOf(cur) + 1) % SIZES.length];
+        const preset = PRESETS[next];
+        card.style.gridColumn = `span ${preset.span}`;
+        card.style.minHeight = preset.minHeight;
+        card.dataset.sizePreset = next;
+        updateCardSizeClasses();
+    }
 
     function currentSpan(card) {
         const match = /span\s+(\d+)/.exec(card.style.gridColumn || '');
@@ -746,6 +801,7 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
         e.stopPropagation();
 
         resizingCard = card;
+        resizeWasClick = true;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         resizeStartX = clientX;
@@ -766,22 +822,40 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
         const deltaX = clientX - resizeStartX;
         const deltaY = clientY - resizeStartY;
 
-        const grid = document.querySelector('.dashboard-grid');
-        const maxSpan = grid ? Math.max(1, Math.min(3, Math.round(grid.getBoundingClientRect().width / 420))) : 2;
+        // A real drag (not a click) means the card becomes a custom size, so drop
+        // any preset so the next click-cycle starts cleanly from sm.
+        if (Math.abs(deltaX) + Math.abs(deltaY) > 4) {
+            resizeWasClick = false;
+            delete resizingCard.dataset.sizePreset;
+        }
+
+        const maxSpan = getMaxSpan();
         const stepChange = Math.round(deltaX / RESIZE_STEP_PX);
         const newSpan = Math.min(maxSpan, Math.max(1, resizeStartSpan + stepChange));
         const newHeight = Math.min(760, Math.max(160, resizeStartHeight + deltaY));
 
         resizingCard.style.gridColumn = `span ${newSpan}`;
         resizingCard.style.minHeight = `${newHeight}px`;
+
+        // Live-adapt the inner UI while dragging (throttled to one frame).
+        if (pendingResizeRaf) cancelAnimationFrame(pendingResizeRaf);
+        pendingResizeRaf = requestAnimationFrame(() => {
+            pendingResizeRaf = null;
+            updateCardSizeClasses();
+        });
     }
 
     function onResizeEnd() {
         if (!resizingCard) return;
         resizingCard.classList.remove('resizing');
         document.body.style.cursor = '';
+        const card = resizingCard;
         resizingCard = null;
+        if (resizeWasClick) {
+            cycleCardSize(card);
+        }
         saveLayout();
+        updateCardSizeClasses();
     }
 
     function saveLayout() {
@@ -819,8 +893,7 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
             // the CURRENT viewport can actually support (same formula used
             // when resizing) and clamp to it; on mobile that's always 1, i.e.
             // full-width, which matches the natural single-column layout.
-            const grid = document.querySelector('.dashboard-grid');
-            const maxSpan = grid ? Math.max(1, Math.min(3, Math.round(grid.getBoundingClientRect().width / 420))) : 1;
+            const maxSpan = getMaxSpan();
 
             Object.keys(layout).forEach(cardId => {
                 const card = document.querySelector(`.dash-card[data-card-id="${cardId}"]`);
@@ -878,6 +951,8 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
         }
 
         showToast('🔄 Layout reset to default', 'info');
+        // Recompute size classes for the restored (default) layout.
+        updateCardSizeClasses();
     }
 
     // Initialize when DOM is ready
@@ -887,9 +962,17 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
         initDashboardCards();
     }
 
+    // Re-tag size classes on viewport changes (debounced) so cards reflow density.
+    let dashWindowResizeTimer = null;
+    window.addEventListener('resize', () => {
+        if (dashWindowResizeTimer) clearTimeout(dashWindowResizeTimer);
+        dashWindowResizeTimer = setTimeout(() => updateCardSizeClasses(), 150);
+    });
+
     // Expose globally
     window.initDashboardCards = initDashboardCards;
     window.resetDashboardLayout = resetLayout;
     window.renumberDashboardCards = renumberAllCards;
+    window.updateCardSizeClasses = updateCardSizeClasses;
 
 })();

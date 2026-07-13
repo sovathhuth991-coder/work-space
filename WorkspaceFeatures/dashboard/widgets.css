@@ -1,6 +1,13 @@
-﻿.widget-card {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid #1e293b;
+﻿/* This file previously used its own hardcoded slate/sky palette
+   (#1e293b, #38bdf8, #f8fafc...) instead of the shared tokens in
+   variables.css — a leftover from before that token system existed.
+   It rendered a visibly different blue than the rest of the
+   dashboard. Migrated to tokens below, plus mono for the timer
+   readout to match the other numeric displays. */
+.widget-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 2px solid var(--status-live);
     border-radius: 10px;
     padding: 16px;
     display: flex;
@@ -16,14 +23,14 @@
 
 .widget-title {
     font-weight: 600;
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 .widget-actions button {
-    color: #475569;
+    color: var(--text-muted);
     padding: 4px 6px;
     border-radius: 4px;
-    transition: 0.2s;
+    transition: var(--transition-fast);
 }
 
 .widget-actions button:hover {
@@ -32,9 +39,10 @@
 }
 
 .widget-timer-display {
+    font-family: var(--font-mono);
     font-size: 2rem;
     font-weight: 700;
-    color: #38bdf8;
+    color: var(--status-live);
     text-align: center;
     padding: 10px;
 }
@@ -48,23 +56,23 @@
 .widget-timer-btn {
     padding: 6px 16px;
     border-radius: 6px;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid #38bdf8;
-    color: #38bdf8;
+    background: color-mix(in srgb, var(--status-live) 12%, transparent);
+    border: 1px solid var(--status-live);
+    color: var(--status-live);
     font-weight: 600;
     cursor: pointer;
 }
 
 .widget-quote {
     font-style: italic;
-    color: #e2e8f0;
+    color: var(--text-secondary);
     padding: 8px 0;
 }
 
 .widget-quote-author {
     margin-top: 8px;
     font-style: normal;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-weight: 600;
 }
 
@@ -76,13 +84,14 @@
 }
 
 .widget-weather-temp {
+    font-family: var(--font-mono);
     font-size: 1.8rem;
     font-weight: 700;
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 .widget-weather-desc {
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 /* ============================================================
@@ -137,7 +146,7 @@
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     border: none;
     color: #fff;
     cursor: pointer;
@@ -191,7 +200,7 @@
 
 .custom-audio-player .audio-progress-fill {
     height: 100%;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     border-radius: 99px;
     width: 0%;
     transition: width 0.1s linear;
@@ -286,7 +295,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     cursor: pointer;
     box-shadow: 0 0 12px rgba(124, 109, 240, 0.3);
 }
@@ -314,7 +323,7 @@
 }
 .widget-chart-fill {
     height: 100%;
-    background: var(--accent-gradient);
+    background: var(--accent-solid);
     border-radius: 99px;
     transition: width 0.6s ease;
 }

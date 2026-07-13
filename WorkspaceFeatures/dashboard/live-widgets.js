@@ -262,6 +262,9 @@ function initLiveWidgets() {
     }
     if (typeof applyCardVisibility === 'function') applyCardVisibility();
     if (typeof initDashboardCards === 'function') initDashboardCards();
+    // initDashboardCards() already tails with updateCardSizeClasses(), but recompute
+    // explicitly in case the cards were just inserted (idempotent).
+    if (typeof window.updateCardSizeClasses === 'function') window.updateCardSizeClasses();
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeLiveWidgetModal();

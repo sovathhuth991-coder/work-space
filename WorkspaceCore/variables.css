@@ -48,6 +48,15 @@
        which meant it ignored every theme preset below. */
     --status-online: #10b981;
 
+    /* Dashboard "mission control" system — cards read as live/nominal
+       (cyan) or needing attention (amber) instead of uniform purple glow.
+       Reuses --nav-schedule/--nav-lessons rather than inventing new hex,
+       so the dashboard accent language stays tied to the nav palette. */
+    --status-live: var(--nav-schedule);
+    --status-attention: var(--nav-journal);
+    --bracket-color: rgba(255, 255, 255, 0.22);
+    --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
     /* Type scale — replaces 15 one-off font-size values that had
        crept in over time (including a literal duplicate: 0.8rem
        and 0.80rem used for two different elements). Named so future

@@ -14,7 +14,13 @@
 }
 
 /* ============================================================
-   DASHBOARD CARDS – BRIGHT MOVING GLOW (inside the card)
+   DASHBOARD CARDS – mission-control chrome
+   Hairline border + corner brackets + a status-colored edge,
+   in place of the old animated conic-gradient glow border.
+   Replaces: @property --border-angle, .card-glow-border,
+   @keyframes rotate-border, and the three per-card-type glow
+   duration overrides (banner/stat-card/#dashWidgetsGrid) that
+   existed only to tune that animation.
    ============================================================ */
 
 .dash-card {
@@ -24,10 +30,10 @@
     border-radius: var(--radius-lg);
     padding: 0;
     box-shadow: none;
-    overflow: hidden;
+    overflow: visible;
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.3s ease, order 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.4s ease, transform 0.4s ease, order 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dash-card.card-visible {
@@ -35,7 +41,45 @@
     transform: translateY(0);
 }
 
-/* ---- THE GLOWING BORDER (MOVING) ---- */
+/* ---- Corner brackets (HUD-style card signature) ---- */
+.dash-card::before,
+.dash-card::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--bracket-color);
+    z-index: 3;
+    pointer-events: none;
+    transition: border-color var(--transition-fast);
+}
+
+.dash-card::before {
+    top: -1px;
+    left: -1px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.dash-card::after {
+    bottom: -1px;
+    right: -1px;
+    border-left: none;
+    border-top: none;
+}
+
+.dash-card:hover::before,
+.dash-card:hover::after {
+    border-color: var(--status-live);
+}
+
+/* ---- Legacy glow border: kept ONLY for .tutorial-card ----
+   This implementation is shared cross-file: layout.css tunes its
+   opacity for .tutorial-card, mobile.css freezes/recolors it at
+   max-width:850px, and it's rendered into markup by dashboard.js,
+   live-widgets.js and app.js alike. Deleting it outright would have
+   silently broken the tutorial view, so it stays here (its original
+   home) — dash-card just opts out below instead. */
 @property --border-angle {
     syntax: '<angle>';
     initial-value: 0deg;
@@ -64,11 +108,6 @@
         linear-gradient(#fff 0 0);
     mask-composite: exclude;
     animation: rotate-border 3s linear infinite;
-    opacity: 1;
-}
-
-.dash-card:hover .card-glow-border {
-    opacity: 1;
 }
 
 @keyframes rotate-border {
@@ -77,47 +116,45 @@
     }
 }
 
-.dash-banner .card-glow-border {
-    animation-duration: 5s;
-    opacity: 1;
+/* Dashboard cards use the corner-bracket system above instead. */
+.dash-card .card-glow-border {
+    display: none;
 }
 
-.stat-card .card-glow-border {
-    animation-duration: 3s;
-    opacity: 1;
+/* ---- CARD CONTENT ---- */
+.card-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--status-live);
+    margin: 0 0 10px;
+    text-transform: uppercase;
 }
 
-#dashWidgetsGrid .dash-card .card-glow-border {
-    animation-duration: 4.5s;
-    opacity: 1;
-}
-
-/* ---- CARD CONTENT (sits above glow) ---- */
 .card-inner {
     position: relative;
     z-index: 2;
     background: var(--bg-card);
     border-radius: var(--radius-lg);
     padding: clamp(18px, 2.5vw, 32px);
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    border: 1px solid var(--border-color);
+    border-left: 2px solid var(--status-live);
     height: 100%;
     min-height: 180px;
     box-shadow: var(--shadow-card);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .dash-card:hover .card-inner {
-    transform: translateY(-6px) scale(1.01);
-    border-color: transparent;
+    transform: translateY(-3px);
+    border-color: var(--border-color-hover);
+    border-left-color: var(--status-live);
     background: var(--bg-card-hover);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(124, 109, 240, 0.2);
+    box-shadow: var(--shadow-elevated);
 }
 
 .dash-card:active .card-inner {
-    transform: translateY(-2px) scale(0.99);
+    transform: translateY(-1px);
 }
 
 /* ---- Banner card special styles ---- */
@@ -132,22 +169,13 @@
     justify-content: space-between;
     gap: clamp(16px, 2vw, 24px);
     padding: clamp(24px, 3vw, 40px);
-    border-left: 4px solid var(--accent-1);
-    background: linear-gradient(135deg, rgba(124, 109, 240, 0.08) 0%, rgba(249, 115, 22, 0.04) 100%);
+    border-left: 4px solid var(--status-live);
+    background: var(--bg-card);
+    background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
     position: relative;
     overflow: hidden;
-}
-
-.dash-banner .card-inner::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(124, 109, 240, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
 }
 
 .banner-text h2 {
@@ -190,23 +218,11 @@
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #7c6df0 0%, #f97316 100%);
+    background: var(--status-live);
     width: 0%;
     transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     border-radius: 99px;
     position: relative;
-    box-shadow: 0 0 20px rgba(124, 109, 240, 0.6);
-}
-
-.progress-bar-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: shimmer 2s infinite;
 }
 
 /* ---- Card headers ---- */
@@ -221,12 +237,11 @@
 }
 
 .pulse-dot {
-    width: 10px;
-    height: 10px;
-    background: #34d399;
+    width: 6px;
+    height: 6px;
+    background: var(--status-live);
     border-radius: 50%;
     animation: pulse 2s infinite;
-    box-shadow: 0 0 12px #34d399;
 }
 
 /* ---- Session display ---- */
@@ -237,29 +252,19 @@
 }
 
 .current-session-box {
-    background: linear-gradient(135deg, rgba(124, 109, 240, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    background: var(--bg-secondary);
     border-radius: var(--radius-sm);
     padding: clamp(18px, 2vw, 24px);
-    border: 1px solid rgba(124, 109, 240, 0.2);
-    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    border-top: 2px solid var(--status-live);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
     position: relative;
-    overflow: hidden;
-}
-
-.current-session-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent-1), transparent);
-    opacity: 0.5;
 }
 
 .current-session-box:hover {
-    border-color: rgba(124, 109, 240, 0.4);
-    background: linear-gradient(135deg, rgba(124, 109, 240, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+    border-color: var(--border-color-hover);
+    border-top-color: var(--status-live);
+    background: var(--bg-card-hover);
 }
 
 .session-time {
@@ -396,100 +401,49 @@
     overflow: hidden;
 }
 
-.stat-card .card-inner::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent 0%, rgba(124, 109, 240, 0.1) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    border-radius: inherit;
-}
-
-.stat-card:hover .card-inner::before {
-    opacity: 1;
-}
-
 .stat-card:active .card-inner {
-    transform: scale(0.95);
+    transform: scale(0.97);
 }
 
 .stat-card:hover .card-inner {
-    transform: translateY(-8px);
-    border-color: transparent;
-    box-shadow: 0 16px 32px rgba(124, 109, 240, 0.25), 0 0 30px rgba(124, 109, 240, 0.15);
+    transform: translateY(-4px);
+    border-color: var(--stat-color, var(--border-color-hover));
 }
 
 .stat-card:hover .stat-icon {
-    transform: scale(1.25) rotate(-8deg);
-    filter: drop-shadow(0 0 16px rgba(124, 109, 240, 0.8));
+    transform: scale(1.1);
 }
 
 .stat-icon {
     font-size: clamp(1.6rem, 2.5vw, 2rem);
-    background: linear-gradient(135deg, rgba(124, 109, 240, 0.2) 0%, rgba(249, 115, 22, 0.1) 100%);
+    background: var(--bg-secondary);
     padding: clamp(10px, 1.5vw, 12px);
     border-radius: var(--radius-sm);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform var(--transition-fast);
     position: relative;
     z-index: 1;
     flex-shrink: 0;
 }
 
-/* Color-coded stat cards */
-.stat-card[data-view="todo-view"] .stat-icon {
-    background: linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(52, 211, 153, 0.05) 100%);
-    box-shadow: 0 0 20px rgba(52, 211, 153, 0.1);
-}
-.stat-card[data-view="todo-view"]:hover .stat-icon {
-    filter: drop-shadow(0 0 16px rgba(52, 211, 153, 0.8));
-}
-.stat-card[data-view="todo-view"]:hover .card-inner {
-    box-shadow: 0 16px 32px rgba(52, 211, 153, 0.2), 0 0 30px rgba(52, 211, 153, 0.1);
-}
+/* Color-coded stat cards — each sets --stat-color once and every
+   rule below (icon tint, hover border, value readout) derives from
+   it, instead of repeating the same hex three times per category. */
+.stat-card[data-view="todo-view"] { --stat-color: #10b981; }
+.stat-card[data-view="schedule-view"] { --stat-color: #5b8def; }
+.stat-card[data-view="lessons-view"] { --stat-color: #f59e0b; }
+.stat-card[data-view="analytics-view"] { --stat-color: #8b5cf6; }
 
-.stat-card[data-view="schedule-view"] .stat-icon {
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(56, 189, 248, 0.05) 100%);
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
-}
-.stat-card[data-view="schedule-view"]:hover .stat-icon {
-    filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.8));
-}
-.stat-card[data-view="schedule-view"]:hover .card-inner {
-    box-shadow: 0 16px 32px rgba(56, 189, 248, 0.2), 0 0 30px rgba(56, 189, 248, 0.1);
-}
-
-.stat-card[data-view="lessons-view"] .stat-icon {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.25) 0%, rgba(251, 191, 36, 0.05) 100%);
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.1);
-}
-.stat-card[data-view="lessons-view"]:hover .stat-icon {
-    filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.8));
-}
-.stat-card[data-view="lessons-view"]:hover .card-inner {
-    box-shadow: 0 16px 32px rgba(251, 191, 36, 0.2), 0 0 30px rgba(251, 191, 36, 0.1);
-}
-
-.stat-card[data-view="analytics-view"] .stat-icon {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.05) 100%);
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
-}
-.stat-card[data-view="analytics-view"]:hover .stat-icon {
-    filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.8));
-}
-.stat-card[data-view="analytics-view"]:hover .card-inner {
-    box-shadow: 0 16px 32px rgba(168, 85, 247, 0.2), 0 0 30px rgba(168, 85, 247, 0.1);
+.stat-card[data-view] .stat-icon {
+    background: color-mix(in srgb, var(--stat-color) 16%, transparent);
+    color: var(--stat-color);
 }
 
 .stat-value {
+    font-family: var(--font-mono);
     font-size: clamp(1.3rem, 2vw, 1.8rem);
     font-weight: 700;
     color: var(--text-primary);
     display: block;
-    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .stat-title {
@@ -862,7 +816,7 @@
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-primary);
-    font-family: 'Inter', monospace;
+    font-family: var(--font-mono);
 }
 
 /* Widget: Countdown */
@@ -1456,17 +1410,18 @@ body {
 }
 
 #focusGoalRing {
-    filter: drop-shadow(0 0 8px rgba(124, 109, 240, 0.4));
     transition: stroke-dashoffset 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-#focusGoalPercent {
+#focusGoalPercent,
+#dashProgressPercent {
+    font-family: var(--font-mono);
     transition: all 0.3s ease;
 }
 
 #focusGoalText {
     font-variant-numeric: tabular-nums;
-    font-family: 'Inter', monospace;
+    font-family: var(--font-mono);
 }
 
 #focusGoalMessage {

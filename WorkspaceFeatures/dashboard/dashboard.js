@@ -35,6 +35,12 @@ function renderDashTodos() {
             }
         });
     });
+
+    const dashEyebrow = document.getElementById('dashTodoEyebrow');
+    if (dashEyebrow) {
+        const openCount = dashTodos.filter(t => !t.done).length;
+        dashEyebrow.textContent = `TASKS · ${openCount} OPEN`;
+    }
 }
 
 function toggleDashTodo(id) {
