@@ -149,38 +149,34 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Stale-while-revalidate: serve the cached asset immediately (instant
+  // load + offline support) and refresh the cache from the network in the
+  // background. This means edits to cached files (CSS/JS/HTML/icons) show up
+  // after a reload WITHOUT needing to bump CACHE_NAME — the background fetch
+  // picks up the new file and the next load serves it.
   event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          // Return cached version
-          return cachedResponse;
-        }
-
-        // Not in cache, fetch from network
-        return fetch(request)
+    caches.open(CACHE_NAME).then((cache) => {
+      return caches.match(request).then((cachedResponse) => {
+        const networkResponse = fetch(request)
           .then((response) => {
-            // Don't cache non-successful responses
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
+            // Only cache successful same-origin responses
+            if (response && response.status === 200 && response.type === 'basic') {
+              cache.put(request, response.clone());
             }
-
-            // Clone the response to cache
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(request, responseToCache);
-              });
-
             return response;
           })
           .catch(() => {
-            // If both cache and network fail, return offline page for navigation requests
+            // Network failed — fall back to the offline page for navigations
             if (request.mode === 'navigate') {
               return caches.match('index.html');
             }
           });
-      })
+
+        // Return the cached response right away if we have one; otherwise wait
+        // for the network. The background network fetch still runs to refresh cache.
+        return cachedResponse || networkResponse;
+      });
+    })
   );
 });
 
