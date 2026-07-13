@@ -8,6 +8,7 @@ function saveEvents() {
     localStorage.setItem("scheduleEvents", JSON.stringify(events));
     if (typeof updateDashboardLiveSession === 'function') updateDashboardLiveSession();
     if (typeof updateDashboardStats === 'function') updateDashboardStats();
+    if (typeof updateDailyStats === 'function') updateDailyStats();
 }
 
 function autoCompletePastEvents() {
@@ -40,6 +41,15 @@ function autoCompletePastEvents() {
     });
     if (changed) saveEvents();
     return changed;
+}
+
+// Generate a unique week identifier (year + week number)
+function getWeekId(date) {
+    const year = date.getFullYear();
+    const firstDayOfYear = new Date(year, 0, 1);
+    const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+    const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+    return `${year}-W${weekNumber}`;
 }
 
 function deleteEvent(id) {

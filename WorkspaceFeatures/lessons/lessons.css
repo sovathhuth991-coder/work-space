@@ -6,8 +6,6 @@
     display: flex;
     gap: 24px;
     align-items: flex-start;
-    flex: 1;
-    min-height: 0;
 }
 
 .lesson-menu-panel {
@@ -20,8 +18,9 @@
     height: fit-content;
     max-height: calc(100vh - 160px);
     overflow-y: auto;
-    position: sticky;
-    top: 0;
+    transition: flex 0.25s ease, opacity 0.25s ease;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-1) transparent;
 }
 
 .lesson-menu-panel::-webkit-scrollbar {
@@ -94,8 +93,6 @@
     padding: 4px 0;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    max-height: 60vh;
-    overflow-y: auto;
 }
 
 .explorer-dropdown-menu .menu-item {
@@ -210,6 +207,7 @@
     display: none;
     flex-direction: column;
     gap: 1px;
+    transition: display 0.2s ease;
 }
 
 .lesson-folder.expanded .folder-content {
@@ -241,7 +239,7 @@
 
 .lesson-leaf-node.active {
     background: rgba(124, 109, 240, 0.15);
-    box-shadow: inset 2px 0 0 var(--accent-1);
+    border-left: 2px solid var(--accent-1);
 }
 
 .lesson-leaf-node .leaf-icon {
@@ -265,27 +263,6 @@
     border-radius: var(--radius-md);
     padding: 24px 28px;
     min-height: 400px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-1) transparent;
-}
-
-.lesson-document-panel::-webkit-scrollbar {
-    width: 4px;
-}
-
-.lesson-document-panel::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.lesson-document-panel::-webkit-scrollbar-thumb {
-    background: var(--accent-1);
-    border-radius: 99px;
-}
-
-.lesson-document-panel ::selection {
-    background: rgba(124, 109, 240, 0.3);
-    color: var(--text-primary);
 }
 
 .workspace-utility-bar {
@@ -393,7 +370,7 @@
     border-radius: var(--radius-sm);
     transition: background 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     border: 1px solid transparent;
-    cursor: text;
+    cursor: default;
     position: relative;
 }
 
@@ -497,7 +474,7 @@
 }
 
 .notion-row-node[data-type="callout"] .editable-line {
-    background: var(--callout-bg, rgba(124, 109, 240, 0.1));
+    background: rgba(124, 109, 240, 0.1);
     padding: 8px 12px;
     border-radius: 8px;
     border-left: 3px solid var(--accent-1);
@@ -595,7 +572,6 @@
     color: var(--text-primary);
     white-space: pre-wrap;
     word-break: break-all;
-    tab-size: 2;
 }
 
 .code-block code {
@@ -744,8 +720,8 @@
 
 /* ---- Explorer dropdown: see .explorer-dropdown-menu definition near the top of this file ---- */
 
-/* ---- Always show burger toggle (for sidebar hide/show) in lessons view ---- */
-.lessons-view .burger-toggle {
+/* ---- Always show burger toggle (for sidebar hide/show) ---- */
+.burger-toggle {
     display: flex !important;
 }
 

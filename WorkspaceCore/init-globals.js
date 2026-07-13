@@ -1,5 +1,4 @@
 // Temporary initializer for missing globals (prevents ReferenceError in dev)
-let events = [];
 (function(){
     function safeParse(key, fallback) {
         try {
@@ -57,8 +56,7 @@ let events = [];
         return event;
     });
 
-    window.events = scheduleEvents;
-    window.getWeekId = getWeekId;
+    window.events = window.events || scheduleEvents;
     window.libraryItems = window.libraryItems || safeParse('libraryItems', []);
     window.habits = window.habits || safeParse('habits', []);
     window.myTasks = window.myTasks || safeParse('myTasks', []);

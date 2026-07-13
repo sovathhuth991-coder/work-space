@@ -45,8 +45,11 @@ function getGoalProgress(goal) {
     today.setHours(0, 0, 0, 0);
 
     if (goal.period === 'daily') {
-        const todayName = (typeof DAYS !== 'undefined' ? DAYS : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'])[new Date().getDay()];
-        const todayEvents = events.filter(e => e.day === todayName);
+        const todayEvents = events.filter(e => {
+            const eventDate = new Date(e.day);
+            eventDate.setHours(0, 0, 0, 0);
+            return eventDate.getTime() === today.getTime();
+        });
 
         if (goal.unit === 'tasks') {
             const completed = todayEvents.filter(e => e.completed).length;
@@ -62,13 +65,7 @@ function getGoalProgress(goal) {
     } else if (goal.period === 'weekly') {
         const weekStart = new Date(today);
         weekStart.setDate(today.getDate() - today.getDay());
-        const weekDayNames = new Set();
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(weekStart);
-            d.setDate(weekStart.getDate() + i);
-            weekDayNames.add((typeof DAYS !== 'undefined' ? DAYS : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'])[d.getDay()]);
-        }
-        const weekEvents = events.filter(e => weekDayNames.has(e.day));
+        const weekEvents = events.filter(e => new Date(e.day) >= weekStart);
 
         if (goal.unit === 'days') {
             const streak = calculateStreak();
@@ -173,26 +170,11 @@ function getComparisonData() {
     const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
-    const DAYS_ARR = (typeof DAYS !== 'undefined' ? DAYS : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']);
+    const currentWeekEvents = events.filter(e => new Date(e.day) >= currentWeekStart && new Date(e.day) <= currentWeekEnd);
+    const previousWeekEvents = events.filter(e => new Date(e.day) >= previousWeekStart && new Date(e.day) <= previousWeekEnd);
 
-    function getWeekDayNames(startDate) {
-        const names = new Set();
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(startDate);
-            d.setDate(startDate.getDate() + i);
-            names.add(DAYS_ARR[d.getDay()]);
-        }
-        return names;
-    }
-
-    const currentWeekDayNames = getWeekDayNames(currentWeekStart);
-    const previousWeekDayNames = getWeekDayNames(previousWeekStart);
-
-    const currentWeekEvents = events.filter(e => currentWeekDayNames.has(e.day));
-    const previousWeekEvents = events.filter(e => previousWeekDayNames.has(e.day));
-
-    const currentMonthEvents = [...events];
-    const previousMonthEvents = [...events];
+    const currentMonthEvents = events.filter(e => new Date(e.day) >= currentMonthStart && new Date(e.day) <= currentMonthEnd);
+    const previousMonthEvents = events.filter(e => new Date(e.day) >= previousMonthStart && new Date(e.day) <= previousMonthEnd);
 
     const calculateStats = (eventList) => {
         const completed = eventList.filter(e => e.completed).length;

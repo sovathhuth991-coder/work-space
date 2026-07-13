@@ -2,7 +2,7 @@ let analyticsCache = null;
 let analyticsCacheKey = '';
 
 function getAnalytics() {
-    const cacheKey = events.map(e => `${e.id}:${e.completed}:${e.category}`).join('|');
+    const cacheKey = events.length + '-' + events.map(e => e.id + e.completed + e.category).join('-');
     if (analyticsCache && analyticsCacheKey === cacheKey) {
         return analyticsCache;
     }
@@ -11,14 +11,8 @@ function getAnalytics() {
     const weekStart = new Date(now);
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const weekDayNames = new Set();
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(weekStart);
-        d.setDate(weekStart.getDate() + i);
-        weekDayNames.add((typeof DAYS !== 'undefined' ? DAYS : ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'])[d.getDay()]);
-    }
-    const weekEvents = events.filter(e => weekDayNames.has(e.day));
-    const monthEvents = [...events];
+    const weekEvents = events.filter(e => new Date(e.day) >= weekStart);
+    const monthEvents = events.filter(e => new Date(e.day) >= monthStart);
     const categoryBreakdown = {};
     events.forEach(e => { const cat = e.category || 'study'; categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + 1; });
     const totalStudyTime = events.filter(e => !e.completed).reduce((total, e) => {

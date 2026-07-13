@@ -341,12 +341,24 @@ window.switchView = function(targetViewId) {
             'todo-view': [() => renderDashTodos?.(), () => updateDashProgress?.(false)],
             'lessons-view': [() => refreshWorkspace?.()],
             'weather-view': [() => renderWeatherView?.()],
-            'dashboard-view': [() => updateDashboardLiveSession?.(), () => updateDashProgress?.(false)],
+            'dashboard-view': [() => updateDashboardLiveSession?.(), () => updateDashProgress?.(false), () => updateDailyStats?.()],
             'ai-view': [() => renderContextPanel?.(), () => document.getElementById('ai-input-view')?.focus()],
             'graph-view': [() => setTimeout(() => renderKnowledgeGraph?.(), 100)],
             'analytics-view': [() => renderAnalytics?.(), () => renderFocusHistory?.(), () => renderHeatmap?.()]
         };
         (viewInitMap[targetViewId] || []).forEach(fn => fn?.());
+
+        if (typeof updateDailyStats === 'function') {
+            updateDailyStats();
+        }
+
+        try {
+            localStorage.setItem('activeView', targetViewId);
+        } catch (_) { /* ignore */ }
+
+        if (window.innerWidth < 850) {
+            closeSidebarMenu();
+        }
     } catch (error) {
         console.error('SwitchView error:', error);
         showToast('⚠️ Something went wrong switching views. Reload the page.', 'error');
@@ -362,9 +374,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     const savedView = localStorage.getItem('activeView') || 'dashboard-view';
 
+
     const viewExists = document.getElementById(savedView) !== null;
     const initialView = viewExists ? savedView : 'dashboard-view';
 
+    if (typeof updateDailyStats === 'function') updateDailyStats();
     window.switchView(initialView);
 });
 
@@ -586,10 +600,21 @@ window.handleGlobalSearchClick = handleGlobalSearchClick;
 // 🎵 AUDIO & LoFi WIDGET CONTROLS
 // ============================================================
 
+let rainAudio = document.getElementById('rainAudioEngine');
 let rainPlaying = false;
 
+function toggleLofiConsole() {
+    const widget = document.getElementById('lofiWidget');
+    const btn = document.getElementById('lofiToggleBtn');
+    if (!widget) return;
+    widget.classList.toggle('minimized');
+    if (btn) {
+        btn.textContent = widget.classList.contains('minimized') ? '🎛️' : '−';
+    }
+}
+
 function toggleRainSound() {
-    const rainAudio = document.getElementById('rainAudioEngine');
+    rainAudio ||= document.getElementById('rainAudioEngine');
     if (!rainAudio) return;
     const btn = document.getElementById('rainPlayBtn');
     if (rainPlaying) {
@@ -835,16 +860,20 @@ window.initHeaderToggles = initHeaderToggles;
 
 // Initialize header toggles when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        initHeaderToggles();
-        if (typeof initSessionHub === 'function') initSessionHub();
-        if (typeof initDashboardCards === 'function') initDashboardCards();
-    });
+    document.addEventListener('DOMContentLoaded', initHeaderToggles);
 } else {
     initHeaderToggles();
-    if (typeof initSessionHub === 'function') initSessionHub();
-    if (typeof initDashboardCards === 'function') initDashboardCards();
 }
+
+    // Initialize Session Hub drag & resize
+    if (typeof initSessionHub === 'function') {
+        initSessionHub();
+    }
+
+    // Initialize Dashboard Cards drag & resize
+    if (typeof initDashboardCards === 'function') {
+        initDashboardCards();
+    }
 
     let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -986,24 +1015,6 @@ function toggleMinimalUI() {
 }
 window.toggleMinimalUI = toggleMinimalUI;
 
-function toggleLofiConsole() {
-    const widget = document.getElementById('lofiWidget');
-    const body = document.getElementById('lofiBody');
-    const btn = document.getElementById('lofiToggleBtn');
-    if (!widget || !body) return;
-    const hidden = widget.dataset.lofiHidden === '1';
-    if (hidden) {
-        body.style.display = '';
-        widget.dataset.lofiHidden = '0';
-        if (btn) btn.textContent = '−';
-    } else {
-        body.style.display = 'none';
-        widget.dataset.lofiHidden = '1';
-        if (btn) btn.textContent = '+';
-    }
-}
-window.toggleLofiConsole = toggleLofiConsole;
-
 window.toggleSidebarMenu = toggleSidebarMenu;
 
 window.quickAddTask = quickAddTask;
@@ -1011,6 +1022,7 @@ window.quickAddTask = quickAddTask;
 window.showShortcuts = showShortcuts;
 
 // Expose globally
+window.toggleLofiConsole = toggleLofiConsole;
 window.toggleRainSound = toggleRainSound;
 window.changeRainVolume = changeRainVolume;
 
