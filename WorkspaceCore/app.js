@@ -586,21 +586,10 @@ window.handleGlobalSearchClick = handleGlobalSearchClick;
 // 🎵 AUDIO & LoFi WIDGET CONTROLS
 // ============================================================
 
-let rainAudio = document.getElementById('rainAudioEngine');
 let rainPlaying = false;
 
-function toggleLofiConsole() {
-    const widget = document.getElementById('lofiWidget');
-    const btn = document.getElementById('lofiToggleBtn');
-    if (!widget) return;
-    widget.classList.toggle('minimized');
-    if (btn) {
-        btn.textContent = widget.classList.contains('minimized') ? '🎛️' : '−';
-    }
-}
-
 function toggleRainSound() {
-    rainAudio ||= document.getElementById('rainAudioEngine');
+    const rainAudio = document.getElementById('rainAudioEngine');
     if (!rainAudio) return;
     const btn = document.getElementById('rainPlayBtn');
     if (rainPlaying) {
@@ -846,20 +835,16 @@ window.initHeaderToggles = initHeaderToggles;
 
 // Initialize header toggles when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initHeaderToggles);
+    document.addEventListener('DOMContentLoaded', () => {
+        initHeaderToggles();
+        if (typeof initSessionHub === 'function') initSessionHub();
+        if (typeof initDashboardCards === 'function') initDashboardCards();
+    });
 } else {
     initHeaderToggles();
+    if (typeof initSessionHub === 'function') initSessionHub();
+    if (typeof initDashboardCards === 'function') initDashboardCards();
 }
-
-    // Initialize Session Hub drag & resize
-    if (typeof initSessionHub === 'function') {
-        initSessionHub();
-    }
-
-    // Initialize Dashboard Cards drag & resize
-    if (typeof initDashboardCards === 'function') {
-        initDashboardCards();
-    }
 
     let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {

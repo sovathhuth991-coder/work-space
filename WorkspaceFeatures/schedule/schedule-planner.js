@@ -3,6 +3,7 @@
 // Edit-state: id of the event currently being edited, or null in Add mode.
 // Single source of truth shared across schedule-planner.js and schedule-core.js.
 window.editingEventId = null;
+let currentOpenDay = null;
 
 
 function renderSchedule() {
@@ -629,7 +630,7 @@ function handleModalSubmit(e, day) {
     selectedDays.forEach((selectedDay, index) => {
         const event = {
             ...baseEvent,
-            id: Date.now() + index,
+            id: (typeof generateId === 'function' ? generateId() : `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${index}`),
             day: selectedDay
         };
 
@@ -650,7 +651,7 @@ function handleModalSubmit(e, day) {
             const lastEvent = events[events.length - 1]; // the base event we just added
 
             for (let i = 1; i < count; i++) {
-                const newEventCopy = { ...lastEvent, id: Date.now() + i };
+                const newEventCopy = { ...lastEvent, id: (typeof generateId === 'function' ? generateId() : `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${i}`) };
                 // Override day based on recurrence type
                 if (recurrence === 'daily') {
                     const d = new Date();
@@ -745,19 +746,15 @@ function getDefaultWheelTimes() {
     const currentHour = now.getHours();
     const currentMinute = String(now.getMinutes()).padStart(2, '0');
 
-    // Default start time: current time
-    const startHour = currentHour;
-    const startMin = currentMinute;
-
-    // Default end time: 1 hour from now
+    const startHour12 = String(currentHour % 12 || 12).padStart(2, '0');
     let endHour = (currentHour + 1) % 24;
-    const endMin = currentMinute;
+    const endHour12 = String(endHour % 12 || 12).padStart(2, '0');
 
     return {
-        startHour: String(startHour).padStart(2, '0'),
-        startMin: startMin,
-        endHour: String(endHour).padStart(2, '0'),
-        endMin: endMin
+        startHour: startHour12,
+        startMin: currentMinute,
+        endHour: endHour12,
+        endMin: currentMinute
     };
 }
 
