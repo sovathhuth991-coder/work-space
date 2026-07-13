@@ -116,12 +116,16 @@ function updateDashProgress(saveFromDom = true) {
     const count = document.getElementById("todoCount");
     const doneCount = document.getElementById("todoDoneCount");
     const pctEl = document.getElementById("todoPercent");
+    const ring = document.getElementById("momentumRing");
+    const leftCount = document.getElementById("todoLeftCount");
     if (fill) fill.style.width = `${pct}%`;
     if (pctLabel) pctLabel.textContent = `${pct}%`;
     if (stat) stat.textContent = label;
     if (count) count.textContent = String(total);
     if (doneCount) doneCount.textContent = String(done);
     if (pctEl) pctEl.textContent = `${pct}%`;
+    if (ring) ring.style.setProperty("--momentum-pct", pct);
+    if (leftCount) leftCount.textContent = String(Math.max(total - done, 0));
     if (typeof updateStreakDisplay === 'function') {
         setTimeout(updateStreakDisplay, 50);
     }

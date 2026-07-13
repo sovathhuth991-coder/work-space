@@ -891,6 +891,7 @@
 
 .todo-summary-card {
     grid-column: 2;
+    position: relative;
 }
 
 .todo-page-card .card-inner,
@@ -905,15 +906,102 @@
     font-style: italic;
 }
 
+.momentum-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+}
+
+.momentum-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.momentum-emoji {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.momentum-title {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ─── Completion progress ring (driven by --momentum-pct) ─── */
+.momentum-ring-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 22px;
+}
+
+.momentum-ring {
+    --momentum-pct: 0;
+    --ring-size: 148px;
+    --ring-thickness: 12px;
+    width: var(--ring-size);
+    height: var(--ring-size);
+    border-radius: 50%;
+    background:
+        conic-gradient(var(--accent-1) calc(var(--momentum-pct) * 1%), rgba(255, 255, 255, 0.06) 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 0 30px rgba(124, 109, 240, 0.18);
+    transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.momentum-ring::before {
+    content: '';
+    position: absolute;
+    inset: var(--ring-thickness);
+    border-radius: 50%;
+    background: var(--bg-card);
+}
+
+.momentum-ring-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+}
+
+.momentum-pct {
+    font-size: 1.9rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.75));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.momentum-ring-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
 .todo-summary-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 12px;
 }
 
 .todo-summary-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
     text-align: center;
-    padding: 16px 8px;
+    padding: 14px 6px;
     background: rgba(124, 109, 240, 0.05);
     border-radius: var(--radius-sm);
     border: 1px solid rgba(124, 109, 240, 0.1);
@@ -926,19 +1014,23 @@
     transform: translateY(-2px);
 }
 
+.todo-stat-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
 .todo-summary-stat strong {
     display: block;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: 700;
     background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
 }
 
 .todo-summary-stat span {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-muted);

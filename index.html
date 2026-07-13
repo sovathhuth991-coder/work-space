@@ -1241,19 +1241,35 @@
                             <ul class="strike-list" id="todoStrikeList"></ul>
                         </div>
                     </div>
-                    <div class="dash-card todo-summary-card">
+                    <div class="dash-card todo-summary-card" id="todoSummaryCard">
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
-                            <div class="card-header">
-                                <h3>Momentum</h3>
+                            <div class="card-header momentum-header">
+                                <h3><span class="momentum-emoji">⚡</span> <span class="momentum-title">Momentum</span></h3>
+                            </div>
+                            <div class="momentum-ring-wrap">
+                                <div class="momentum-ring" id="momentumRing">
+                                    <div class="momentum-ring-inner">
+                                        <span class="momentum-pct" id="todoPercent">0%</span>
+                                        <span class="momentum-ring-label">Complete</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="todo-summary-grid">
-                                <div class="todo-summary-stat"> <strong id="todoCount">0</strong> <span>Tasks</span>
+                                <div class="todo-summary-stat">
+                                    <span class="todo-stat-icon">📋</span>
+                                    <strong id="todoCount">0</strong>
+                                    <span>Tasks</span>
                                 </div>
-                                <div class="todo-summary-stat"> <strong id="todoDoneCount">0</strong> <span>Done</span>
+                                <div class="todo-summary-stat">
+                                    <span class="todo-stat-icon">✅</span>
+                                    <strong id="todoDoneCount">0</strong>
+                                    <span>Done</span>
                                 </div>
-                                <div class="todo-summary-stat"> <strong id="todoPercent">0%</strong>
-                                    <span>Complete</span>
+                                <div class="todo-summary-stat">
+                                    <span class="todo-stat-icon">🎯</span>
+                                    <strong id="todoLeftCount">0</strong>
+                                    <span>Left</span>
                                 </div>
                             </div>
                         </div>
