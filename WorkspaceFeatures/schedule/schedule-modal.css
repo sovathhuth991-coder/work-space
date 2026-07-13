@@ -656,39 +656,39 @@
 }
 
 .badge-study {
-    background: rgba(124, 109, 240, 0.2);
-    color: var(--accent-1);
-    border: 1px solid rgba(124, 109, 240, 0.3);
+    background: color-mix(in srgb, var(--cat-study) 20%, transparent);
+    color: var(--cat-study);
+    border: 1px solid color-mix(in srgb, var(--cat-study) 30%, transparent);
 }
 
 .badge-work {
-    background: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: color-mix(in srgb, var(--cat-work) 20%, transparent);
+    color: var(--cat-work);
+    border: 1px solid color-mix(in srgb, var(--cat-work) 30%, transparent);
 }
 
 .badge-personal {
-    background: rgba(52, 211, 153, 0.2);
-    color: #34d399;
-    border: 1px solid rgba(52, 211, 153, 0.3);
+    background: color-mix(in srgb, var(--cat-personal) 20%, transparent);
+    color: var(--cat-personal);
+    border: 1px solid color-mix(in srgb, var(--cat-personal) 30%, transparent);
 }
 
 .badge-fitness {
-    background: rgba(251, 146, 60, 0.2);
-    color: #fb923c;
-    border: 1px solid rgba(251, 146, 60, 0.3);
+    background: color-mix(in srgb, var(--cat-fitness) 20%, transparent);
+    color: var(--cat-fitness);
+    border: 1px solid color-mix(in srgb, var(--cat-fitness) 30%, transparent);
 }
 
 .badge-social {
-    background: rgba(236, 72, 153, 0.2);
-    color: #f472b6;
-    border: 1px solid rgba(236, 72, 153, 0.3);
+    background: color-mix(in srgb, var(--cat-social) 20%, transparent);
+    color: var(--cat-social);
+    border: 1px solid color-mix(in srgb, var(--cat-social) 30%, transparent);
 }
 
 .badge-other {
-    background: rgba(148, 163, 184, 0.2);
-    color: #94a3b8;
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: color-mix(in srgb, var(--cat-other) 20%, transparent);
+    color: var(--cat-other);
+    border: 1px solid color-mix(in srgb, var(--cat-other) 30%, transparent);
 }
 
 .timeline-overlap-badge {

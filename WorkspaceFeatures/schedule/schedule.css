@@ -6,14 +6,13 @@
 
 .day {
     background: var(--bg-card);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--border-color);
+    border: 1px solid transparent;
     border-radius: var(--radius-md);
     padding: 16px;
     min-height: 180px;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-card);
     position: relative;
     overflow: hidden;
 }
@@ -43,6 +42,9 @@
     }
 }
 
+/* Top accent bar — always visible, colored by state instead of only
+   appearing on hover. Neutral by default, status-live for today,
+   status-attention when the day has a scheduling conflict. */
 .day::before {
     content: '';
     position: absolute;
@@ -50,61 +52,64 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--accent-solid);
-    opacity: 0;
-    transition: opacity var(--transition);
+    background: var(--bracket-color);
+}
+
+.day.today-highlight::before {
+    background: var(--status-live);
+}
+
+.day:has(.day-overlap-flag)::before {
+    background: var(--status-attention);
 }
 
 .day:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     border-color: var(--border-color-hover);
     background: var(--bg-card-hover);
-    box-shadow: var(--shadow-glow), var(--shadow-elevated);
-}
-
-.day:hover::before {
-    opacity: 1;
+    box-shadow: var(--shadow-elevated);
 }
 
 .day:active {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .day:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--accent-1);
+    box-shadow: 0 0 0 2px var(--status-live);
 }
 
 .today-highlight {
-    border-color: var(--accent-1);
-    background: rgba(124, 109, 240, 0.06);
+    background: color-mix(in srgb, var(--status-live) 6%, transparent);
 }
 
 .day h3 {
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.08em;
     color: var(--text-secondary);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
-.day-summary {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+.today-highlight h3 {
+    color: var(--status-live);
 }
 
 .day-overlap-flag {
-    color: #f59e0b;
-    background: rgba(245, 158, 11, 0.1);
-    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.03em;
+    color: var(--status-attention);
+    background: color-mix(in srgb, var(--status-attention) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--status-attention) 25%, transparent);
+    padding: 2px 8px;
     border-radius: 4px;
+    margin-bottom: 10px;
 }
 
 .mini-preview-list {
@@ -113,30 +118,44 @@
 }
 
 .mini-dot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 2px 0;
     white-space: nowrap;
+    overflow: hidden;
+}
+
+.mini-dot-marker {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--text-muted);
+}
+
+.mini-dot-marker.cat-study { background: var(--cat-study); }
+.mini-dot-marker.cat-work { background: var(--cat-work); }
+.mini-dot-marker.cat-personal { background: var(--cat-personal); }
+.mini-dot-marker.cat-fitness { background: var(--cat-fitness); }
+.mini-dot-marker.cat-social { background: var(--cat-social); }
+.mini-dot-marker.cat-other { background: var(--cat-other); }
+
+.mini-dot-time {
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+.mini-dot-title {
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.mini-done {
+.mini-dot.mini-done {
     text-decoration: line-through;
     opacity: 0.5;
-}
-
-.progress-track {
-    margin-top: 12px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 99px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background: var(--accent-solid);
-    width: 0%;
-    transition: width 0.4s ease;
 }
 
 /* Calendar Month View */
@@ -151,12 +170,12 @@
 }
 
 .calendar-month-grid .cal-day:hover {
-    border-color: var(--accent-1);
+    border-color: var(--status-live);
 }
 
 .calendar-month-grid .cal-day.today {
-    border-color: var(--accent-1);
-    background: rgba(124, 109, 240, 0.1);
+    border-color: var(--status-live);
+    background: color-mix(in srgb, var(--status-live) 10%, transparent);
 }
 
 .calendar-month-grid .cal-day.other-month {
@@ -164,6 +183,7 @@
 }
 
 .calendar-month-grid .cal-day .day-number {
+    font-family: var(--font-mono);
     font-size: 0.85rem;
     font-weight: 500;
 }
@@ -181,21 +201,12 @@
     border-radius: 50%;
 }
 
-.calendar-month-grid .cal-day .day-dot.study {
-    background: var(--accent-1);
-}
-
-.calendar-month-grid .cal-day .day-dot.assignment {
-    background: #f472b6;
-}
-
-.calendar-month-grid .cal-day .day-dot.class {
-    background: #34d399;
-}
-
-.calendar-month-grid .cal-day .day-dot.break {
-    background: #fbbf24;
-}
+.calendar-month-grid .cal-day .day-dot.study { background: var(--cat-study); }
+.calendar-month-grid .cal-day .day-dot.work { background: var(--cat-work); }
+.calendar-month-grid .cal-day .day-dot.personal { background: var(--cat-personal); }
+.calendar-month-grid .cal-day .day-dot.fitness { background: var(--cat-fitness); }
+.calendar-month-grid .cal-day .day-dot.social { background: var(--cat-social); }
+.calendar-month-grid .cal-day .day-dot.other { background: var(--cat-other); }
 
 .calendar-event-item {
     display: flex;
@@ -221,8 +232,9 @@
 }
 
 .calendar-event-item .event-time {
+    font-family: var(--font-mono);
     font-weight: 600;
-    color: var(--accent-1);
+    color: var(--status-live);
     font-size: 0.75rem;
     min-width: 70px;
 }
@@ -240,7 +252,7 @@
 }
 
 /* ============================================================
-   WHEEL TIME PICKER - iOS Style with Orange Focus
+   WHEEL TIME PICKER - iOS Style
    ============================================================ */
 .time-picker-wheel {
     position: relative;
@@ -257,8 +269,8 @@
 }
 
 .time-picker-wheel.focused {
-    border-color: #f97316;
-    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2), 0 4px 12px rgba(249, 115, 22, 0.15);
+    border-color: var(--status-live);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--status-live) 20%, transparent), 0 4px 12px color-mix(in srgb, var(--status-live) 15%, transparent);
 }
 
 .wheel-container {
@@ -319,6 +331,7 @@
 }
 
 .wheel-item {
+    font-family: var(--font-mono);
     height: 40px;
     display: flex;
     align-items: center;
@@ -367,12 +380,12 @@
     top: 50%;
     transform: translateY(-50%);
     height: 44px;
-    border: 2px solid var(--accent-1);
+    border: 2px solid var(--status-live);
     border-radius: 10px;
-    background: rgba(124, 109, 240, 0.08);
+    background: color-mix(in srgb, var(--status-live) 8%, transparent);
     pointer-events: none;
     z-index: 2;
-    box-shadow: 0 4px 12px rgba(124, 109, 240, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--status-live) 20%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .time-picker-wheel input[type="hidden"] {
@@ -433,7 +446,7 @@
 }
 
 .day-select {
-    accent-color: var(--accent-1);
+    accent-color: var(--status-live);
     width: 14px;
     height: 14px;
     cursor: pointer;
@@ -445,11 +458,11 @@
 }
 
 #daySelection label:hover {
-    border-color: var(--accent-1);
-    background: rgba(124, 109, 240, 0.06);
+    border-color: var(--status-live);
+    background: color-mix(in srgb, var(--status-live) 6%, transparent);
 }
 
 #daySelection label:has(input:checked) {
-    border-color: var(--accent-1);
-    background: rgba(124, 109, 240, 0.12);
+    border-color: var(--status-live);
+    background: color-mix(in srgb, var(--status-live) 12%, transparent);
 }

@@ -57,6 +57,18 @@
     --bracket-color: rgba(255, 255, 255, 0.22);
     --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 
+    /* Event category colors — single source of truth. The event form's
+       #category <select> only ever offers study/work/personal/fitness/
+       social/other; these match schedule-modal.css's .badge-* colors
+       exactly so all three places categories appear (badges, month-grid
+       dots, weekly mini-dots) render the same color for the same event. */
+    --cat-study: var(--accent-1);
+    --cat-work: #3b82f6;
+    --cat-personal: #34d399;
+    --cat-fitness: #fb923c;
+    --cat-social: #f472b6;
+    --cat-other: #94a3b8;
+
     /* Type scale — replaces 15 one-off font-size values that had
        crept in over time (including a literal duplicate: 0.8rem
        and 0.80rem used for two different elements). Named so future

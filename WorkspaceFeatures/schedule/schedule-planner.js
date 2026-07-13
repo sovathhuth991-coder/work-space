@@ -12,26 +12,22 @@ function renderSchedule() {
         if (day === todayName) dayBox.classList.add("today-highlight");
         dayBox.setAttribute("onclick", `openDayDiagram('${day}')`);
         dayBox.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); showContextMenu(e, day); });
-        const dayEvents = events.filter(e => e.day === day);
+        const dayEvents = events.filter(e => e.day === day).sort((a, b) => a.start.localeCompare(b.start));
         const eventCount = dayEvents.length;
         const hasOverlaps = dayHasTimeOverlaps(dayEvents);
-        let progress = 0;
-        if (eventCount > 0) {
-            const done = dayEvents.filter(e => e.completed).length;
-            progress = Math.round((done / eventCount) * 100);
-        }
         dayBox.innerHTML = `
-            <h3>${day} ${day === todayName ? '⭐️' : ''}</h3>
-            <div class="day-summary">
-                <span class="pulse-dot"></span>
-                ${eventCount} ${eventCount === 1 ? 'Task' : 'Tasks'} Scheduled
-                ${hasOverlaps ? '<span class="day-overlap-flag">⚠ Time conflict</span>' : ''}
-            </div>
+            <h3>${day.slice(0, 3)}${day === todayName ? ' &middot; TODAY' : ''}</h3>
+            ${hasOverlaps ? '<span class="day-overlap-flag">⚠ CONFLICT</span>' : ''}
             <div class="mini-preview-list">
-                ${dayEvents.slice(0, 3).map(ev => `<div class="mini-dot color-${escapeHtml(ev.category || 'study')} ${ev.completed ? 'mini-done' : ''}">▪️ ${escapeHtml(ev.title)}</div>`).join('')}
+                ${dayEvents.slice(0, 3).map(ev => `
+                    <div class="mini-dot ${ev.completed ? 'mini-done' : ''}">
+                        <span class="mini-dot-marker cat-${escapeHtml(ev.category || 'study')}"></span>
+                        <span class="mini-dot-time">${escapeHtml(ev.start || '')}</span>
+                        <span class="mini-dot-title">${escapeHtml(ev.title)}</span>
+                    </div>
+                `).join('')}
                 ${eventCount > 3 ? '<div class="mini-dot extra">...and more</div>' : ''}
             </div>
-            <div class="progress-track"><div class="progress-bar" style="width: ${progress}%"></div></div>
         `;
         calendar.appendChild(dayBox);
     });
