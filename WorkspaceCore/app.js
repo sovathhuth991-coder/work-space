@@ -341,24 +341,12 @@ window.switchView = function(targetViewId) {
             'todo-view': [() => renderDashTodos?.(), () => updateDashProgress?.(false)],
             'lessons-view': [() => refreshWorkspace?.()],
             'weather-view': [() => renderWeatherView?.()],
-            'dashboard-view': [() => updateDashboardLiveSession?.(), () => updateDashProgress?.(false), () => updateDailyStats?.()],
+            'dashboard-view': [() => updateDashboardLiveSession?.(), () => updateDashProgress?.(false)],
             'ai-view': [() => renderContextPanel?.(), () => document.getElementById('ai-input-view')?.focus()],
             'graph-view': [() => setTimeout(() => renderKnowledgeGraph?.(), 100)],
             'analytics-view': [() => renderAnalytics?.(), () => renderFocusHistory?.(), () => renderHeatmap?.()]
         };
         (viewInitMap[targetViewId] || []).forEach(fn => fn?.());
-
-        if (typeof updateDailyStats === 'function') {
-            updateDailyStats();
-        }
-
-        try {
-            localStorage.setItem('activeView', targetViewId);
-        } catch (_) { /* ignore */ }
-
-        if (window.innerWidth < 850) {
-            closeSidebarMenu();
-        }
     } catch (error) {
         console.error('SwitchView error:', error);
         showToast('⚠️ Something went wrong switching views. Reload the page.', 'error');
@@ -374,11 +362,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     const savedView = localStorage.getItem('activeView') || 'dashboard-view';
 
-
     const viewExists = document.getElementById(savedView) !== null;
     const initialView = viewExists ? savedView : 'dashboard-view';
 
-    if (typeof updateDailyStats === 'function') updateDailyStats();
     window.switchView(initialView);
 });
 

@@ -8,7 +8,6 @@ function saveEvents() {
     localStorage.setItem("scheduleEvents", JSON.stringify(events));
     if (typeof updateDashboardLiveSession === 'function') updateDashboardLiveSession();
     if (typeof updateDashboardStats === 'function') updateDashboardStats();
-    if (typeof updateDailyStats === 'function') updateDailyStats();
 }
 
 function autoCompletePastEvents() {
