@@ -323,7 +323,7 @@ function updateModalFormFeedback(day) {
     if (!feedback || !sh || !sm || !eh || !em) return;
     const start = `${sh.value}:${sm.value}`;
     const end = `${eh.value}:${em.value}`;
-    const issues = validateTaskTimes(start, end, day);
+    const issues = validateTaskTimes(start, end, day, window.editingEventId ?? null);
     feedback.innerHTML = issues.length ? issues.map(i => `<p class="form-feedback-${i.type}">${i.message}</p>`).join("") : "";
 }
 
@@ -331,6 +331,7 @@ function closeDayDiagram() {
     const modal = document.getElementById("diagramModal");
     if (modal) modal.style.display = "none";
     currentOpenDay = null;
+    window.editingEventId = null;
 }
 
 // Ensure the function is globally accessible

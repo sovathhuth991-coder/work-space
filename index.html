@@ -744,10 +744,23 @@
                         <p class="view-kicker">Schedule</p>
                         <h1>Weekly Schedule</h1>
                     </div>
-                    <button class="matrix-btn" data-action="exportToIcal">📅 Export iCal</button>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <button class="matrix-btn" data-action="jumpToTodaySchedule" title="Jump to today (T)">⏮ Today</button>
+                        <button class="matrix-btn" data-action="addTaskToday" title="Add a task to today (Ctrl+N)">＋ Add Task</button>
+                        <button class="matrix-btn" data-action="exportToIcal">📅 Export iCal</button>
+                    </div>
                 </div>
+
+                <!-- ===== QUICK DAY NAV ===== -->
+                <div class="schedule-quicknav" id="scheduleQuickNav" role="navigation" aria-label="Quick day navigation">
+                    <div class="schedule-quicknav-pills" id="scheduleQuickNavPills"></div>
+                    <span class="schedule-quicknav-hint">Press <kbd>1</kbd>–<kbd>7</kbd> to open a day · <kbd>T</kbd> for today</span>
+                </div>
+
                 <section class="calendar-section-wrapper">
-                    <div class="calendar" id="calendar"></div>
+                    <div class="calendar-scroll">
+                        <div class="calendar" id="calendar"></div>
+                    </div>
                 </section>
                 <div style="margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 24px;">
                     <div class="calendar-month-view">

@@ -1,4 +1,9 @@
-﻿﻿﻿﻿﻿﻿// This file contains the main schedule renderer and day diagram logic.
+﻿// This file contains the main schedule renderer and day diagram logic.
+
+// Edit-state: id of the event currently being edited, or null in Add mode.
+// Single source of truth shared across schedule-planner.js and schedule-core.js.
+window.editingEventId = null;
+
 
 function renderSchedule() {
     autoCompletePastEvents();
@@ -9,7 +14,10 @@ function renderSchedule() {
     DAYS.forEach((day, index) => {
         const dayBox = document.createElement("div");
         dayBox.className = "day";
-        if (day === todayName) dayBox.classList.add("today-highlight");
+        if (day === todayName) {
+            dayBox.classList.add("today-highlight");
+            dayBox.id = "todayDayBox";
+        }
         dayBox.setAttribute("onclick", `openDayDiagram('${day}')`);
         dayBox.addEventListener("contextmenu", (e) => { e.preventDefault(); e.stopPropagation(); showContextMenu(e, day); });
         const dayEvents = events.filter(e => e.day === day).sort((a, b) => a.start.localeCompare(b.start));
@@ -31,6 +39,55 @@ function renderSchedule() {
         `;
         calendar.appendChild(dayBox);
     });
+    renderScheduleQuickNav();
+    if (typeof initScheduleKeyboardNav === 'function') initScheduleKeyboardNav();
+}
+
+// ============================================================
+// QUICK DAY NAVIGATION BAR
+// ============================================================
+
+function renderScheduleQuickNav() {
+    const pillsEl = document.getElementById("scheduleQuickNavPills");
+    if (!pillsEl) return;
+    const { todayName } = getTimeMetrics();
+    pillsEl.innerHTML = DAYS.map((day, i) => {
+        const count = getDayEventCount(day);
+        const isToday = day === todayName;
+        return `<button class="qn-pill ${isToday ? 'today' : ''}" data-day="${day}" data-index="${i}" title="Open ${day}">
+            <span class="qn-pill-name">${day.slice(0, 3)}</span>
+            <span class="qn-pill-count"${count === 0 ? ' data-empty="1"' : ''}>${count}</span>
+        </button>`;
+    }).join("");
+    pillsEl.querySelectorAll('.qn-pill').forEach(pill => {
+        pill.addEventListener('click', () => openDayDiagram(pill.dataset.day));
+    });
+}
+
+// Jump to today: open schedule view, scroll the current day into view, pulse it
+function jumpToTodaySchedule() {
+    const { todayName } = getTimeMetrics();
+    if (typeof switchView === 'function' && !document.getElementById('schedule-view').classList.contains('active')) {
+        switchView('schedule-view');
+    }
+    renderSchedule();
+    const todayBox = document.getElementById("todayDayBox");
+    if (todayBox) {
+        todayBox.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        todayBox.classList.remove('day-flash');
+        void todayBox.offsetWidth; // reflow to restart animation
+        todayBox.classList.add('day-flash');
+    }
+    if (typeof showToast === 'function') showToast(`📍 ${todayName}`, 'info');
+}
+
+// Add a task directly to today
+function addTaskToday() {
+    const { todayName } = getTimeMetrics();
+    if (typeof switchView === 'function' && !document.getElementById('schedule-view').classList.contains('active')) {
+        switchView('schedule-view');
+    }
+    openDayDiagram(todayName);
 }
 
 // Helper: convert 24-hour hour (0-23) to 12-hour hour (1-12) as a 2‑digit string
@@ -48,6 +105,8 @@ function to12Hour(h24) {
 
 function openDayDiagram(day) {
     if (!DAYS.includes(day)) return;
+    // Every open/refresh/day-switch starts in Add mode (form is rebuilt below)
+    window.editingEventId = null;
     autoCompletePastEvents();
     currentOpenDay = day;
 
@@ -65,6 +124,11 @@ function openDayDiagram(day) {
             initWheelPickers();
         } else {
             console.warn('initWheelPickers not available');
+        }
+        // Sync recurrence-count row visibility with the current recurrence value
+        if (typeof toggleRecurrenceCountUI === 'function') {
+            const recEl = document.getElementById('recurrence');
+            toggleRecurrenceCountUI(recEl ? recEl.value : 'none');
         }
     }, 100);
 
@@ -157,14 +221,20 @@ function buildFormZone(day, defaults) {
                     </select>
                 </div>
                 <!-- ===== RECURRENCE DROPDOWN ===== -->
-                <div class="form-row">
+                <div class="form-row" id="recurrenceRow">
                     <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">🔄 Repeat</label>
-                    <select id="recurrence" class="form-select">
+                    <select id="recurrence" class="form-select" onchange="toggleRecurrenceCountUI(this.value)">
                         <option value="none">No Repeat</option>
                         <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
                         <option value="monthly">Monthly</option>
                     </select>
+                </div>
+
+                <!-- ===== RECURRENCE OCCURRENCE COUNT (inline) ===== -->
+                <div class="form-row" id="recurrenceCountRow" style="display:none;">
+                    <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">🔁 How many occurrences?</label>
+                    <input type="number" id="recurrenceCount" class="form-input" min="2" value="4" />
                 </div>
 
                 <!-- ===== NEW: DAY SELECTION ===== -->
@@ -187,7 +257,8 @@ function buildFormZone(day, defaults) {
                 </div>
                 <div id="modal-form-feedback" class="modal-form-feedback"></div>
                 <div class="form-row form-actions">
-                    <button type="submit" class="btn-primary">➕ Add Task</button>
+                    <button type="submit" id="submitTaskBtn" class="btn-primary">➕ Add Task</button>
+                    <button type="button" id="cancelEditBtn" class="btn-preset" style="display:none;" onclick="exitEditMode()">✕ Cancel</button>
                     <button type="button" class="btn-preset" onclick="injectPreset('study')">🧠 Study</button>
                     <button type="button" class="btn-preset" onclick="injectPreset('break')">☕ Break</button>
                 </div>
@@ -220,7 +291,7 @@ function buildTimelineItem(ev, todayName, currentHHMM, overlaps) {
     const safeOverlaps = overlaps.map(o => escapeHtml(o)).join(', ');
     const safeLinkedTitle = linkedPage ? escapeHtml(linkedPage.title) : '';
     return `
-        <div class="timeline-item ${ev.completed ? 'completed' : ''} ${isNow ? 'active' : ''} ${isPast ? 'past' : ''}" data-event-id="${ev.id}" onclick="selectTimelineTask(${ev.id}, '${ev.day}')" draggable="true">
+        <div class="timeline-item ${ev.completed ? 'completed' : ''} ${isNow ? 'active' : ''} ${isPast ? 'past' : ''}" data-event-id="${ev.id}" onclick="enterEditMode(${ev.id})" draggable="true">
             <div class="timeline-item-time">${escapeHtml(ev.start)} – ${escapeHtml(ev.end)}</div>
             <div class="timeline-item-title">${ev.completed ? '✅ ' : ''}${safeTitle}</div>
             <span class="timeline-item-cat badge-${safeCategory}">${safeCategory.toUpperCase()}</span>
@@ -308,6 +379,58 @@ function selectTimelineTask(eventId, day) {
         }
     }
 }
+
+// ============================================================
+// EDIT MODE — enter / exit
+// ============================================================
+
+// Enter edit mode for an existing event: populate the form and switch the UI.
+function enterEditMode(id) {
+    const ev = events.find(e => e.id === id);
+    if (!ev) return;
+
+    // Populate title, category, and start/end wheels (existing helper)
+    selectTimelineTask(id, ev.day);
+
+    // Fields selectTimelineTask does not populate:
+    const linkedSelect = document.getElementById('linked-lesson-page');
+    if (linkedSelect) linkedSelect.value = ev.linkedPageId || '';
+    const recurrenceSelect = document.getElementById('recurrence');
+    if (recurrenceSelect) recurrenceSelect.value = 'none';
+    if (typeof toggleRecurrenceCountUI === 'function') toggleRecurrenceCountUI('none');
+
+    // Day checkboxes = single "move to day": check only this event's day
+    document.querySelectorAll('.day-select').forEach(cb => {
+        cb.checked = (cb.value === ev.day);
+    });
+
+    window.editingEventId = id;
+
+    // Switch UI into edit mode
+    const submitBtn = document.getElementById('submitTaskBtn');
+    if (submitBtn) submitBtn.textContent = '✏️ Update Task';
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (cancelBtn) cancelBtn.style.display = '';
+    // Recurrence is a single-occurrence concept while editing — hide it
+    const recurrenceRow = document.getElementById('recurrenceRow');
+    if (recurrenceRow) recurrenceRow.style.display = 'none';
+    const recurrenceCountRow = document.getElementById('recurrenceCountRow');
+    if (recurrenceCountRow) recurrenceCountRow.style.display = 'none';
+}
+
+// Exit edit mode: rebuild the form to a clean Add state (clears edited values).
+function exitEditMode() {
+    window.editingEventId = null;
+    if (currentOpenDay) openDayDiagram(currentOpenDay);
+}
+
+// Show/hide the recurrence occurrence-count field based on the recurrence value.
+function toggleRecurrenceCountUI(value) {
+    const row = document.getElementById('recurrenceCountRow');
+    if (!row) return;
+    row.style.display = (value && value !== 'none') ? '' : 'none';
+}
+
 
 // ----- Helper: Convert 24-hour time to 12-hour format -----
 function convert24To12Hour(time24) {
@@ -453,6 +576,34 @@ function handleModalSubmit(e, day) {
     const linkedPageId = document.getElementById('linked-lesson-page')?.value || '';
     const recurrence = document.getElementById('recurrence')?.value || 'none';
 
+    // ─── EDIT MODE: update the existing event in place ──────
+    if (window.editingEventId != null) {
+        const idx = events.findIndex(ev => ev.id === window.editingEventId);
+        if (idx === -1) {
+            showToast('Task not found.', 'error');
+            window.editingEventId = null;
+            return;
+        }
+        saveStateForUndo();
+        const targetDay = selectedDays[0]; // "move to one day"; extras ignored
+        events[idx] = {
+            ...events[idx],          // preserve notes, link, color, reminder*, completed, weekId, id
+            title,
+            category,
+            start: start24,
+            end: end24,
+            day: targetDay,
+            linkedPageId: linkedPageId || undefined,
+            recurrence: null
+        };
+        saveEvents();
+        renderSchedule();
+        window.editingEventId = null;
+        openDayDiagram(targetDay);   // rebuilds form -> back to Add mode
+        showToast('Task updated', 'success');
+        return;
+    }
+
     // ─── Prepare base event data ────────────────────────
     const currentWeekId = getWeekId(new Date());
     const baseEvent = {
@@ -492,9 +643,8 @@ function handleModalSubmit(e, day) {
 
     // ─── Handle recurrence for single day ──────────────
     if (selectedDays.length === 1 && recurrence !== 'none') {
-        const countPrompt = prompt('How many occurrences? (e.g. 4 for 4 weeks)', '4');
-        if (countPrompt && !isNaN(countPrompt) && parseInt(countPrompt) > 1) {
-            const count = parseInt(countPrompt);
+        const count = parseInt(document.getElementById('recurrenceCount')?.value, 10);
+        if (!Number.isNaN(count) && count > 1) {
             const baseDay = selectedDays[0];
             const baseDayIndex = DAYS.indexOf(baseDay);
             const lastEvent = events[events.length - 1]; // the base event we just added
@@ -517,6 +667,8 @@ function handleModalSubmit(e, day) {
                 }
                 events.push(newEventCopy);
             }
+        } else {
+            showToast('Occurrences must be at least 2.', 'warning');
         }
     }
 
@@ -692,13 +844,59 @@ function setTimePickerValue(prefix, hour, minute, ampm) {
     if (ampmEl) ampmEl.value = ampm;
 }
 
+// ============================================================
+// SCHEDULE VIEW KEYBOARD NAVIGATION
+// ============================================================
+
+function initScheduleKeyboardNav() {
+    if (window._scheduleKbdBound) return;
+    window._scheduleKbdBound = true;
+
+    document.addEventListener('keydown', (e) => {
+        // Only when Schedule view is active
+        const scheduleView = document.getElementById('schedule-view');
+        if (!scheduleView || !scheduleView.classList.contains('active')) return;
+
+        // Don't hijack typing
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT' || active.isContentEditable)) return;
+
+        // Don't conflict with the open day diagram modal (handled separately)
+        const modal = document.getElementById('diagramModal');
+        if (modal && modal.style.display === 'flex') return;
+
+        if (e.key >= '1' && e.key <= '7') {
+            e.preventDefault();
+            const idx = parseInt(e.key, 10) - 1;
+            if (DAYS[idx]) openDayDiagram(DAYS[idx]);
+        } else if (e.key === 't' || e.key === 'T') {
+            e.preventDefault();
+            jumpToTodaySchedule();
+        }
+    });
+
+    // Auto-scroll to today when entering the Schedule view (once per visit)
+    document.addEventListener('viewChanged', (e) => {
+        if (e?.detail?.viewId !== 'schedule-view') return;
+        const todayBox = document.getElementById("todayDayBox");
+        if (todayBox) todayBox.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
+}
+
 // Expose functions to global scope
+window.renderScheduleQuickNav = renderScheduleQuickNav;
+window.jumpToTodaySchedule = jumpToTodaySchedule;
+window.addTaskToday = addTaskToday;
+window.initScheduleKeyboardNav = initScheduleKeyboardNav;
 window.openDayDiagram = openDayDiagram;
 window.getDefaultWheelTimes = getDefaultWheelTimes;
 window.getOverlapMap = getOverlapMap;
 window.getAdjacentDay = getAdjacentDay;
 window.getDayEventCount = getDayEventCount;
 window.selectTimelineTask = selectTimelineTask;
+window.enterEditMode = enterEditMode;
+window.exitEditMode = exitEditMode;
+window.toggleRecurrenceCountUI = toggleRecurrenceCountUI;
 window.convert24To12Hour = convert24To12Hour;
 window.handleModalSubmit = handleModalSubmit;
 window.formatTime24h = formatTime24h;

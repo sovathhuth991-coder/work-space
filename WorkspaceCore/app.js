@@ -121,6 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'addLibraryItem': () => addLibraryItem?.(),
             'renderKnowledgeGraph': () => renderKnowledgeGraph?.(),
             'exportToIcal': () => exportToIcal?.(),
+            'jumpToTodaySchedule': () => jumpToTodaySchedule?.(),
+            'addTaskToday': () => addTaskToday?.(),
             'changeMonth': () => {
                 const delta = parseInt(actionBtn.dataset.delta) || 0;
                 changeMonth?.(delta);
