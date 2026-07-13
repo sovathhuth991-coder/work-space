@@ -1404,30 +1404,33 @@
                     <button class="matrix-btn" data-action="renderAnalytics" title="Refresh data">⟳ Refresh</button>
                 </div>
 
-                <!-- Focus Session History -->
-                <div class="dash-card" style="grid-column: span 2;">
-                    <div class="card-glow-border"></div>
-                    <div class="card-inner">
-                        <div class="card-header">
-                            <h3>⏱️ Focus Session History</h3>
+                <!-- Focus History + Heatmap (side-by-side) -->
+                <div class="analytics-dual-row-focus-heatmap">
+                    <!-- Focus Session History -->
+                    <div class="dash-card">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header">
+                                <h3>⏱️ Focus Session History</h3>
+                            </div>
+                            <div id="focusHistoryContainer"></div>
                         </div>
-                        <div id="focusHistoryContainer"></div>
+                    </div>
+
+                    <!-- Completion Heatmap -->
+                    <div class="dash-card">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header">
+                                <h3>🗓️ This Month's Completions</h3>
+                            </div>
+                            <div id="heatmapContainer"></div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Stats Grid -->
                 <div class="analytics-stats-grid" id="analyticsStatsGrid"></div>
-
-                <!-- Completion Heatmap -->
-                <div class="dash-card" style="grid-column: span 2;">
-                    <div class="card-glow-border"></div>
-                    <div class="card-inner">
-                        <div class="card-header">
-                            <h3>🗓️ This Month's Completions</h3>
-                        </div>
-                        <div id="heatmapContainer"></div>
-                    </div>
-                </div>
 
                 <!-- Charts & Insights -->
                 <div class="analytics-charts-grid">

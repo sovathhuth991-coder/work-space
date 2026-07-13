@@ -148,6 +148,22 @@
     grid-column: 1 / -1;
 }
 
+/* Focus History + Heatmap share a row (each half-width). Specific class name
+   so future dual-row Analytics layouts can't collide with or override this. */
+.analytics-dual-row-focus-heatmap {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* When the Heatmap is empty, let the Focus card fill the row instead of
+   leaving an orphan 24px gap next to an empty heatmap cell. */
+.analytics-dual-row-focus-heatmap:has(.analytics-heatmap-empty) {
+    grid-template-columns: 1fr;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 900px) {
     .analytics-stats-grid {
@@ -159,6 +175,10 @@
     }
 
     #analytics-view.active {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-dual-row-focus-heatmap {
         grid-template-columns: 1fr;
     }
 }
