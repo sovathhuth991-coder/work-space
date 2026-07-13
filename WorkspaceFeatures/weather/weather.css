@@ -4,7 +4,7 @@
 
 /* ─── Full View ─── */
 .weather-view-container {
-    max-width: 800px;
+    max-width: 820px;
     margin: 0 auto;
     padding: 20px 0;
 }
@@ -30,13 +30,15 @@
     border: 1px solid var(--border-color);
     background: var(--bg-secondary);
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     width: 200px;
+    transition: var(--transition);
 }
 
 .weather-city-input input:focus {
     border-color: var(--accent-1);
     outline: none;
+    box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .weather-city-input button {
@@ -69,46 +71,93 @@
     color: #fff;
 }
 
-/* ─── Current Weather (big card) ─── */
+/* ─── Current Weather (big card) ───
+   Base fallback gradient — always present before the [data-cond]
+   overrides so the card is never transparent if the bucket is missing. */
 .weather-current {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--nav-weather, #f97316), var(--accent-2, #5b8def));
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: var(--radius-lg);
-    padding: 28px 32px;
+    padding: 32px 36px;
     margin-bottom: 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 20px;
     backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-card);
+}
+
+/* Soft inner glow for depth */
+.weather-current::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 120% at 0% 0%, rgba(255, 255, 255, 0.18), transparent 55%);
+    pointer-events: none;
 }
 
 .weather-current .left {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: 20px;
 }
 
 .weather-current .temp {
-    font-size: 3.2rem;
+    font-size: var(--text-4xl);
     font-weight: 700;
-    color: var(--text-primary);
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
 .weather-current .condition {
-    font-size: 1.2rem;
-    color: var(--text-secondary);
+    font-size: var(--text-xl);
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
 .weather-current .details {
+    position: relative;
+    z-index: 1;
     text-align: right;
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    font-size: var(--text-md);
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
 .weather-current .details span {
     display: block;
+    color: #fff;
+}
+
+/* ─── Per-condition gradients ───
+   Right (brighter) ends are kept dark enough that the white .details
+   text on that side stays legible. */
+.weather-current[data-cond="sunny"]   { background: linear-gradient(135deg, #f97316, #d97706); }
+.weather-current[data-cond="cloudy"]  { background: linear-gradient(135deg, #475569, #64748b); }
+.weather-current[data-cond="rain"]    { background: linear-gradient(135deg, #1e3a8a, #0284c7); }
+.weather-current[data-cond="snow"]    { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
+.weather-current[data-cond="thunder"] { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+.weather-current[data-cond="fog"]     { background: linear-gradient(135deg, #9ca3af, #d1d5db); }
+.weather-current[data-cond="wind"]    { background: linear-gradient(135deg, #0e7490, #0891b2); }
+
+/* Pale buckets need dark text + a light shadow for legibility */
+.weather-current[data-cond="snow"] .temp,
+.weather-current[data-cond="snow"] .condition,
+.weather-current[data-cond="snow"] .details,
+.weather-current[data-cond="snow"] .details span,
+.weather-current[data-cond="fog"] .temp,
+.weather-current[data-cond="fog"] .condition,
+.weather-current[data-cond="fog"] .details,
+.weather-current[data-cond="fog"] .details span {
+    color: var(--bg-primary, #0a0a12);
+    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.35);
 }
 
 /* ─── 7‑Day Forecast ─── */
@@ -119,34 +168,60 @@
 }
 
 .weather-day-card {
+    position: relative;
+    overflow: hidden;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    padding: 16px 12px;
+    padding: 18px 12px 16px;
     text-align: center;
     transition: var(--transition);
     backdrop-filter: blur(4px);
 }
 
+/* Top accent strip colored by the day's own condition */
+.weather-day-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--day-accent, var(--accent-1));
+}
+
+.weather-day-card[data-cond="sunny"]   { --day-accent: #fbbf24; }
+.weather-day-card[data-cond="cloudy"]  { --day-accent: #64748b; }
+.weather-day-card[data-cond="rain"]    { --day-accent: #0ea5e9; }
+.weather-day-card[data-cond="snow"]    { --day-accent: #cbd5e1; }
+.weather-day-card[data-cond="thunder"] { --day-accent: #7c3aed; }
+.weather-day-card[data-cond="fog"]     { --day-accent: #9ca3af; }
+.weather-day-card[data-cond="wind"]    { --day-accent: #22d3ee; }
+
 .weather-day-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent-1);
+    transform: translateY(-6px);
+    border-color: var(--border-color-hover);
     box-shadow: var(--shadow-glow);
+}
+
+.weather-day-card:hover .day-icon {
+    transform: scale(1.15) rotate(-4deg);
 }
 
 .weather-day-card .day-name {
     font-weight: 600;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--text-md);
 }
 
 .weather-day-card .day-icon {
     font-size: 2rem;
     margin: 8px 0 4px;
+    transition: transform var(--transition);
 }
 
 .weather-day-card .day-temp {
-    font-size: 1.1rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -154,16 +229,16 @@
 .weather-day-card .day-temp small {
     font-weight: 400;
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: var(--text-base-sm);
 }
 
 .weather-day-card .day-condition {
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
     color: var(--text-muted);
     margin-top: 4px;
 }
 
-/* ─── Dashboard Widget ─── */
+/* ─── Dashboard Widget (left unchanged per scope) ─── */
 .weather-widget {
     cursor: pointer;
     transition: var(--transition);
@@ -194,7 +269,7 @@
 }
 
 .weather-widget .widget-condition {
-    font-size: 0.9rem;
+    font-size: var(--text-md);
     color: var(--text-secondary);
 }
 
@@ -203,12 +278,12 @@
 }
 
 .weather-widget .widget-location {
-    font-size: 0.85rem;
+    font-size: var(--text-base-sm);
     color: var(--text-muted);
 }
 
 .weather-widget .widget-updated {
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
     color: var(--text-muted);
 }
 
@@ -216,18 +291,25 @@
     text-align: center;
     padding: 40px;
     color: var(--text-muted);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
 }
 
 .weather-error {
     text-align: center;
     padding: 40px;
     color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: var(--radius-lg);
 }
 
 @media (max-width: 600px) {
     .weather-current {
         flex-direction: column;
         text-align: center;
+        padding: 28px 20px;
     }
 
     .weather-current .left {

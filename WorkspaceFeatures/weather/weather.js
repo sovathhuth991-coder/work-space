@@ -37,17 +37,28 @@ async function fetchWeather(city = currentCity) {
                 temp: data.current_condition?.[0]?.temp_C || '--',
                 condition: data.current_condition?.[0]?.weatherDesc?.[0]?.value || 'Unknown',
                 icon: mapWeatherIcon(data.current_condition?.[0]?.weatherCode || 0),
+                code: data.current_condition?.[0]?.weatherCode || 0,
                 wind: data.current_condition?.[0]?.windspeedKmph || '0',
                 humidity: data.current_condition?.[0]?.humidity || '0'
             },
-            forecast: (data.weather || []).slice(0, 7).map(day => ({
-                date: day.date,
-                max: day.maxtempC || '--',
-                min: day.mintempC || '--',
-                condition: day.hourly?.[0]?.weatherDesc?.[0]?.value || 'Unknown',
-                icon: mapWeatherIcon(day.hourly?.[0]?.weatherCode || 0)
-            }))
+            forecast: (data.weather || []).slice(0, 7).map(day => {
+                const code = day.hourly?.[0]?.weatherCode || 0;
+                const condition = day.hourly?.[0]?.weatherDesc?.[0]?.value || 'Unknown';
+                return {
+                    date: day.date,
+                    max: day.maxtempC || '--',
+                    min: day.mintempC || '--',
+                    condition,
+                    code,
+                    icon: mapWeatherIcon(code),
+                    bucket: getConditionBucket(code, condition)
+                };
+            })
         };
+
+        // Derive the condition bucket for theming (added after parse so cached
+        // data rebuilt from localStorage also gets a fresh bucket).
+        weatherData.current.bucket = getConditionBucket(weatherData.current.code, weatherData.current.condition);
 
         // Cache in localStorage
         localStorage.setItem(WEATHER_STORAGE_KEY, JSON.stringify(weatherData));
@@ -123,6 +134,22 @@ function mapWeatherIcon(code) {
     return map[code] || '🌤️';
 }
 
+// ─── Map a weather code + condition text to a CSS-safe bucket ──
+// Text-based (not weatherCode alone) because wttr.in's codes don't always
+// map cleanly to a single condition. Order matters: check the most specific
+// (thunder/snow/rain) before the looser "cloud"/"sunny" fallbacks.
+function getConditionBucket(code, conditionText) {
+    const text = (conditionText || '').toLowerCase();
+    if (text.includes('thunder') || text.includes('storm')) return 'thunder';
+    if (text.includes('snow') || text.includes('sleet') || text.includes('ice') || text.includes('blizzard')) return 'snow';
+    if (text.includes('rain') || text.includes('drizzle') || text.includes('shower')) return 'rain';
+    if (text.includes('fog') || text.includes('mist') || text.includes('haze')) return 'fog';
+    if (text.includes('sunny') || text.includes('clear')) return 'sunny';
+    if (text.includes('cloud') || text.includes('overcast')) return 'cloudy';
+    if (text.includes('wind')) return 'wind';
+    return 'cloudy'; // safe fallback (never 'sunny' — avoids a wrong warm tint)
+}
+
 // ─── Format "Last Updated" ────────────────────────────────
 function getLastUpdatedString(timestamp) {
     if (!timestamp) return 'Unknown';
@@ -173,7 +200,7 @@ function renderWeatherView() {
             </div>
 
             <!-- Current Weather -->
-            <div class="weather-current">
+            <div class="weather-current" data-cond="${w.current.bucket}">
                 <div class="left">
                     <span style="font-size:3.5rem;">${w.current.icon}</span>
                     <div>
@@ -194,7 +221,7 @@ function renderWeatherView() {
                 ${w.forecast.map((day, index) => {
                     const dayName = days[(today + index) % 7];
                     return `
-                        <div class="weather-day-card">
+                        <div class="weather-day-card" data-cond="${day.bucket}">
                             <div class="day-name">${dayName}</div>
                             <div class="day-icon">${day.icon}</div>
                             <div class="day-temp">${day.max}° <small>${day.min}°</small></div>
