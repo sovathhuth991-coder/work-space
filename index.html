@@ -479,6 +479,11 @@
                                 </div>
                             </div>
 
+                            <!-- Today's Agenda renders here (inserted by live-widgets.js) —
+                                 grouped with Today's Focus/Master To-Do so the left column
+                                 isn't dramatically shorter than the right one. -->
+                            <div id="liveWidgetsSlotMain"></div>
+
                             <!-- ===== MASTER TO-DO ===== -->
                             <div class="dash-card" data-card-id="todo">
                                 <div class="card-glow-border"></div>
@@ -505,70 +510,74 @@
                         <!-- ---- RIGHT: secondary / glanceable ---- -->
                         <div class="dashboard-col-side">
 
-                            <!-- Live mini-widgets (Today's Agenda, Focus Timer, Weather, Calendar)
-                                 render here — inserted dynamically by live-widgets.js / dashboard.js
-                                 so they keep using the same drag/resize/minimize system. -->
+                            <!-- Focus Timer, Weather, Calendar render here (inserted by
+                                 live-widgets.js / dashboard.js) so they keep using the same
+                                 drag/resize/minimize system. -->
                             <div id="liveWidgetsSlot"></div>
 
-                            <!-- ===== WIDGETS: Quick Notes + Current Lesson + Bookmarks ===== -->
-                            <div class="dash-card" data-card-id="widgets">
-                                <div class="card-glow-border"></div>
-                                <div class="card-inner">
-                                    <div class="card-header-drag"
-                                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                        <h3 style="margin:0;">📦 Custom Widgets</h3>
-                                        <div class="card-controls">
-                                            <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                            <button class="card-resize-btn" data-action="resizeCard" data-card="widgets"
-                                                title="Resize">⤡</button>
-                                        </div>
-                                    </div>
-                                    <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
-                                    <div id="dashQuickLinks" class="dash-quick-links"
-                                        style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-                                        <div
-                                            style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
-                                            <div
-                                                style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
-                                                📂 Current Lesson</div>
-                                            <div id="dashRecentLessons" style="font-size:0.9rem;color:var(--text-secondary);">No
-                                                open lesson</div>
-                                        </div>
-                                        <div
-                                            style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
-                                            <div
-                                                style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
-                                                🔗 Recent Bookmarks</div>
-                                            <div id="dashRecentLibs" style="font-size:0.9rem;color:var(--text-secondary);">No
-                                                bookmarks yet</div>
-                                        </div>
-                                    </div>
+                        </div>
 
-                                    <!-- Quick Notes Widget -->
-                                    <div id="quickNotesWidget"
-                                        style="margin-top: 18px; background: var(--bg-primary); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border-color);">
-                                        <div
-                                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                            <div
-                                                style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">
-                                                📝 Quick Notes</div>
-                                            <button id="clearNotesBtn" class="matrix-btn"
-                                                style="padding: 2px 8px; font-size: 0.7rem;"
-                                                title="Clear all notes">Clear</button>
-                                        </div>
-                                        <textarea id="quickNotesInput"
-                                            placeholder="Jot down quick thoughts, reminders, or ideas..."
-                                            style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; font-family: inherit;"></textarea>
-                                        <div id="quickNotesList"
-                                            style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
-                                        </div>
-                                    </div>
+                    </div>
 
+                    <!-- ===== WIDGETS: Quick Notes + Current Lesson + Bookmarks + any
+                         user-added custom widgets. Full width, below both columns —
+                         this section grows as the user adds widgets, so it's kept out
+                         of the two-column balance instead of making one column trail
+                         off far below the other. ===== -->
+                    <div class="dash-card" data-card-id="widgets">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;">📦 Custom Widgets</h3>
+                                <div class="card-controls">
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                    <button class="card-resize-btn" data-action="resizeCard" data-card="widgets"
+                                        title="Resize">⤡</button>
+                                </div>
+                            </div>
+                            <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
+                            <div id="dashQuickLinks" class="dash-quick-links"
+                                style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+                                <div
+                                    style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
+                                    <div
+                                        style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
+                                        📂 Current Lesson</div>
+                                    <div id="dashRecentLessons" style="font-size:0.9rem;color:var(--text-secondary);">No
+                                        open lesson</div>
+                                </div>
+                                <div
+                                    style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
+                                    <div
+                                        style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
+                                        🔗 Recent Bookmarks</div>
+                                    <div id="dashRecentLibs" style="font-size:0.9rem;color:var(--text-secondary);">No
+                                        bookmarks yet</div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Notes Widget -->
+                            <div id="quickNotesWidget"
+                                style="margin-top: 18px; background: var(--bg-primary); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border-color);">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <div
+                                        style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">
+                                        📝 Quick Notes</div>
+                                    <button id="clearNotesBtn" class="matrix-btn"
+                                        style="padding: 2px 8px; font-size: 0.7rem;"
+                                        title="Clear all notes">Clear</button>
+                                </div>
+                                <textarea id="quickNotesInput"
+                                    placeholder="Jot down quick thoughts, reminders, or ideas..."
+                                    style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; font-family: inherit;"></textarea>
+                                <div id="quickNotesList"
+                                    style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
                                 </div>
                             </div>
 
                         </div>
-
                     </div>
 
                 </div>

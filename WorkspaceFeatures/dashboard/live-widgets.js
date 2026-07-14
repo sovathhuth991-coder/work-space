@@ -36,9 +36,12 @@ function insertLiveWidgetCard(card) {
     const grid = document.querySelector('.dashboard-grid');
     if (!grid) return false;
     if (grid.querySelector(`.dash-card[data-card-id="${card.dataset.cardId}"]`)) return false;
-    const slot = document.getElementById('liveWidgetsSlot');
-    if (slot) {
-        slot.appendChild(card);
+    const mainSlot = document.getElementById('liveWidgetsSlotMain');
+    const sideSlot = document.getElementById('liveWidgetsSlot');
+    if (card.dataset.cardId === 'schedule-mini' && mainSlot) {
+        mainSlot.appendChild(card);
+    } else if (sideSlot) {
+        sideSlot.appendChild(card);
     } else {
         const statsContainer = grid.querySelector('.dash-stats-container');
         if (statsContainer) grid.insertBefore(card, statsContainer);
