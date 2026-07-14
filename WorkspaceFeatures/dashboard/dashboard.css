@@ -417,7 +417,7 @@
 .dash-stats-container {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
     gap: clamp(12px, 1.5vw, 20px);
     width: 100%;
 }
@@ -476,10 +476,13 @@
 
 .stat-value {
     font-family: var(--font-mono);
-    font-size: clamp(1.3rem, 2vw, 1.8rem);
+    font-size: clamp(1.1rem, 1.7vw, 1.8rem);
     font-weight: 700;
     color: var(--text-primary);
     display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stat-title {

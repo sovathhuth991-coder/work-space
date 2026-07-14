@@ -336,7 +336,10 @@ function updateDashboardStats() {
     const todayStat = document.getElementById("statTodayTasks");
     const libStat = document.getElementById("statLibraryItems");
     const todayEvents = (events || []).filter(e => e.day === getTimeMetrics().todayName);
-    if (folderStat && typeof hubState !== 'undefined') folderStat.textContent = String(hubState.folders.length);
+    if (folderStat && typeof hubState !== 'undefined') {
+        const folderCount = Array.isArray(hubState.folders) ? hubState.folders.length : 0;
+        folderStat.textContent = String(folderCount);
+    }
     if (todayStat) todayStat.textContent = String(todayEvents.length);
     if (libStat) libStat.textContent = String(libraryItems.length);
 }
