@@ -14,6 +14,19 @@ const DEFAULT_HUB_STATE = {
 
 // ----- State Loading -----
 function loadHubState() {
+    if (window.TinyBaseStore) {
+        const table = window.TinyBaseStore.getTable('hubState');
+        if (table && table.length) {
+            const row = table[0];
+            const { _id, ...state } = row;
+            if (state.rootFolderIds) return state;
+            if (state.folders && typeof state.folders === 'object') {
+                state.rootFolderIds = Object.keys(state.folders);
+                return state;
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_HUB_STATE));
+        }
+    }
     try {
         const stored = localStorage.getItem("hubState");
         if (stored) {
@@ -53,9 +66,46 @@ function migrateFromOldFormat(oldState) {
 }
 
 let hubState = loadHubState();
-console.log('hubState initial:', hubState);
-console.log('hubState.rootFolderIds:', Array.isArray(hubState.rootFolderIds) ? hubState.rootFolderIds : 'MISSING');
-let collapsedFolders = JSON.parse(localStorage.getItem("collapsedFolders") || "{}");
+let collapsedFolders = {};
+let lessonsUnsub = null;
+
+function loadCollapsedFolders() {
+    if (window.TinyBaseStore) {
+        const val = window.TinyBaseStore.getValue('collapsedFolders');
+        collapsedFolders = (typeof val === 'object' && val !== null) ? val : {};
+    } else {
+        collapsedFolders = JSON.parse(localStorage.getItem("collapsedFolders") || "{}");
+    }
+}
+
+function saveHubState() {
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setValue('hubState', hubState);
+    } else {
+        localStorage.setItem("hubState", JSON.stringify(hubState));
+    }
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setValue('collapsedFolders', collapsedFolders);
+    } else {
+        localStorage.setItem("collapsedFolders", JSON.stringify(collapsedFolders));
+    }
+}
+
+function initLessonsStore() {
+    loadCollapsedFolders();
+    if (window.TinyBaseStore) {
+        lessonsUnsub = window.TinyBaseStore.on('hubState', () => {
+            hubState = loadHubState();
+        });
+        lessonsUnsub = window.TinyBaseStore.on('collapsedFolders', () => {
+            loadCollapsedFolders();
+        });
+    }
+}
+
+function destroyLessonsStore() {
+    if (lessonsUnsub) { lessonsUnsub(); lessonsUnsub = null; }
+}
 let currentSearchQuery = '';
 
 // ============================================================
@@ -142,13 +192,26 @@ function showSaveIndicator() {
 }
 
 function saveHubState() {
-    localStorage.setItem("hubState", JSON.stringify(hubState));
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setValue('hubState', hubState);
+    } else {
+        localStorage.setItem("hubState", JSON.stringify(hubState));
+    }
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setValue('collapsedFolders', collapsedFolders);
+    } else {
+        localStorage.setItem("collapsedFolders", JSON.stringify(collapsedFolders));
+    }
     if (typeof updateDashboardStats === 'function') updateDashboardStats();
     showSaveIndicator();
 }
 
 function saveCollapsedFolders() {
-    localStorage.setItem("collapsedFolders", JSON.stringify(collapsedFolders));
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setValue('collapsedFolders', collapsedFolders);
+    } else {
+        localStorage.setItem("collapsedFolders", JSON.stringify(collapsedFolders));
+    }
 }
 
 function refreshWorkspace() {
@@ -2203,5 +2266,7 @@ window.toggleFindBar = toggleFindBar;
 window.addNewBlockToPage = addNewBlockToPage;
 window.exportPageAsHTML = exportPageAsHTML;
 window.toggleExportOptions = toggleExportOptions;
+window.initLessonsStore = initLessonsStore;
+window.destroyLessonsStore = destroyLessonsStore;
 
 console.log('📚 lessons.js loaded with backup/restore and XSS fixes.');

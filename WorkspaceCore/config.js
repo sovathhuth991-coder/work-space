@@ -22,8 +22,13 @@ const THEMES = ['cyberpunk', 'minimal', 'ocean', 'sunset', 'forest', 'midnight',
 const DEFAULT_THEME = 'cyberpunk';
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+const PARTYKIT_URL = 'localhost:1999';
+const PARTYKIT_ROOM = 'workspace-hub-sync';
+
 window.APP_VERSION = APP_VERSION;
 window.APP_NAME = APP_NAME;
 window.STORAGE_KEYS = STORAGE_KEYS;
 window.THEMES = THEMES;
 window.DAYS = DAYS;
+window.PARTYKIT_URL = PARTYKIT_URL;
+window.PARTYKIT_ROOM = PARTYKIT_ROOM;

@@ -2,10 +2,38 @@
 // WIDGETS – FIXED: Only add default audio if no audio widgets exist
 // ============================================================
 
-let customWidgets = JSON.parse(localStorage.getItem('customWidgets') || '[]');
+let customWidgets = [];
+let widgetsUnsub = null;
+
+function loadCustomWidgets() {
+    if (window.TinyBaseStore) {
+        customWidgets = window.TinyBaseStore.getTable('customWidgets').map(row => {
+            const { _id, ...rest } = row;
+            return rest;
+        }) || [];
+    } else {
+        customWidgets = JSON.parse(localStorage.getItem('customWidgets') || '[]');
+    }
+}
 
 function saveCustomWidgets() {
-    localStorage.setItem('customWidgets', JSON.stringify(customWidgets));
+    const data = customWidgets.map(item => ({ ...item, _id: item.id }));
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setTable('customWidgets', data);
+    } else {
+        localStorage.setItem('customWidgets', JSON.stringify(customWidgets));
+    }
+}
+
+function initWidgetsStore() {
+    loadCustomWidgets();
+    if (window.TinyBaseStore) {
+        widgetsUnsub = window.TinyBaseStore.on('customWidgets', () => { loadCustomWidgets(); renderWidgets(); });
+    }
+}
+
+function destroyWidgetsStore() {
+    if (widgetsUnsub) { widgetsUnsub(); widgetsUnsub = null; }
 }
 
 function renderWidgets() {
@@ -346,3 +374,5 @@ window.updateAudioProgress = updateAudioProgress;
 window.setVolume = setVolume;
 window.toggleMute = toggleMute;
 window.initAudioPlayers = initAudioPlayers;
+window.initWidgetsStore = initWidgetsStore;
+window.destroyWidgetsStore = destroyWidgetsStore;

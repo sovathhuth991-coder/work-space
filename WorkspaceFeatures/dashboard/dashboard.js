@@ -3,9 +3,30 @@ const DEFAULT_DASH_TODOS = [
     { id: "todo_2", text: "Add one study block", done: false },
     { id: "todo_3", text: "Check off completed tasks", done: false }
 ];
-let dashTodos = JSON.parse(localStorage.getItem("dashTodos") || "null") || DEFAULT_DASH_TODOS;
+let dashTodos = [];
+let dashTodosUnsub = null;
+let quickNotes = [];
+let quickNotesUnsub = null;
 
-function saveDashTodos() { localStorage.setItem("dashTodos", JSON.stringify(dashTodos)); }
+function loadDashTodos() {
+    if (window.TinyBaseStore) {
+        dashTodos = window.TinyBaseStore.getTable('dashTodos').map(row => {
+            const { _id, ...rest } = row;
+            return rest;
+        }) || [];
+    } else {
+        dashTodos = JSON.parse(localStorage.getItem("dashTodos") || "null") || DEFAULT_DASH_TODOS;
+    }
+}
+
+function saveDashTodos() {
+    const data = dashTodos.map(item => ({ ...item, _id: item.id }));
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setTable('dashTodos', data);
+    } else {
+        localStorage.setItem("dashTodos", JSON.stringify(dashTodos));
+    }
+}
 
 function renderDashTodos() {
     document.querySelectorAll("#dashStrikeList, #todoStrikeList").forEach(container => {
@@ -618,9 +639,39 @@ function editFocusGoal() {
     }
 }
 
-const DEFAULT_QUICK_NOTES = [];
-let quickNotes = JSON.parse(localStorage.getItem('quickNotes') || 'null') || DEFAULT_QUICK_NOTES;
-function saveQuickNotes() { localStorage.setItem('quickNotes', JSON.stringify(quickNotes)); }
+function loadQuickNotes() {
+    if (window.TinyBaseStore) {
+        quickNotes = window.TinyBaseStore.getTable('quickNotes').map(row => {
+            const { _id, ...rest } = row;
+            return rest;
+        }) || [];
+    } else {
+        quickNotes = JSON.parse(localStorage.getItem('quickNotes') || 'null') || DEFAULT_QUICK_NOTES;
+    }
+}
+
+function saveQuickNotes() {
+    const data = quickNotes.map(item => ({ ...item, _id: item.text + item.timestamp }));
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setTable('quickNotes', data);
+    } else {
+        localStorage.setItem('quickNotes', JSON.stringify(quickNotes));
+    }
+}
+
+function initDashboardStore() {
+    loadDashTodos();
+    loadQuickNotes();
+    if (window.TinyBaseStore) {
+        dashTodosUnsub = window.TinyBaseStore.on('dashTodos', () => { loadDashTodos(); renderDashTodos(); });
+        quickNotesUnsub = window.TinyBaseStore.on('quickNotes', () => { loadQuickNotes(); renderQuickNotes(); });
+    }
+}
+
+function destroyDashboardStore() {
+    if (dashTodosUnsub) { dashTodosUnsub(); dashTodosUnsub = null; }
+    if (quickNotesUnsub) { quickNotesUnsub(); quickNotesUnsub = null; }
+}
 function renderQuickNotes() {
     const container = document.getElementById('quickNotesList');
     if (!container) return;
@@ -1102,3 +1153,7 @@ if (document.readyState === 'loading') {
 } else {
     setTimeout(initDashboardEnhancements, 200);
 }
+
+// Expose store init globally
+window.initDashboardStore = initDashboardStore;
+window.destroyDashboardStore = destroyDashboardStore;

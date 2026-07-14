@@ -1,7 +1,28 @@
-let myTasks = JSON.parse(localStorage.getItem("myTasks") || "[]");
+let myTasks = [];
 let activeTaskCategory = "all";
+let tasksUnsub = null;
 
-function saveMyTasks() { localStorage.setItem("myTasks", JSON.stringify(myTasks)); updateTaskCategoryCounts(); updateDashboardStats(); }
+function loadMyTasks() {
+    if (window.TinyBaseStore) {
+        myTasks = window.TinyBaseStore.getTable('myTasks').map(row => {
+            const { _id, ...rest } = row;
+            return rest;
+        }) || [];
+    } else {
+        myTasks = JSON.parse(localStorage.getItem("myTasks") || "[]");
+    }
+}
+
+function saveMyTasks() {
+    const data = myTasks.map(item => ({ ...item, _id: item.id }));
+    if (window.TinyBaseStore) {
+        window.TinyBaseStore.setTable('myTasks', data);
+    } else {
+        localStorage.setItem("myTasks", JSON.stringify(myTasks));
+    }
+    updateTaskCategoryCounts();
+    updateDashboardStats();
+}
 
 function updateTaskCategoryCounts() {
     ["all", "codes", "teachers", "fun", "general"].forEach(cat => {
@@ -64,3 +85,26 @@ function deleteMyTask(id) {
     saveMyTasks();
     renderMyTasks();
 }
+
+function initTasksStore() {
+    loadMyTasks();
+    if (window.TinyBaseStore) {
+        tasksUnsub = window.TinyBaseStore.on('myTasks', () => {
+            loadMyTasks();
+            renderMyTasks();
+        });
+    }
+}
+
+function destroyTasksStore() {
+    if (tasksUnsub) { tasksUnsub(); tasksUnsub = null; }
+}
+
+// Expose functions globally
+window.renderMyTasks = renderMyTasks;
+window.addMyTask = addMyTask;
+window.toggleMyTask = toggleMyTask;
+window.deleteMyTask = deleteMyTask;
+window.initTasksStore = initTasksStore;
+window.destroyTasksStore = destroyTasksStore;
+window.loadMyTasks = loadMyTasks;

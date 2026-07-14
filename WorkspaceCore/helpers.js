@@ -70,14 +70,42 @@ function formatTime(hhmm) {
 }
 
 function saveToLocalStorage(key, data) {
-    try {
-        localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
-        console.warn('localStorage save failed:', e);
+    if (window.TinyBaseStore) {
+        try {
+            if (Array.isArray(data)) {
+                window.TinyBaseStore.setTable(key, data.map((item, idx) => ({ ...item, _id: item.id || `ls_${key}_${idx}` })));
+            } else {
+                window.TinyBaseStore.setValue(key, data);
+            }
+        } catch (e) {
+            console.warn('TinyBase save failed, falling back to localStorage', e);
+            try { localStorage.setItem(key, JSON.stringify(data)); } catch (_) {}
+        }
+    } else {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {
+            console.warn('localStorage save failed:', e);
+        }
     }
 }
 
 function loadFromLocalStorage(key, fallback = null) {
+    if (window.TinyBaseStore) {
+        try {
+            const table = window.TinyBaseStore.getTable(key);
+            if (table && table.length) {
+                return table.map(row => {
+                    const { _id, ...rest } = row;
+                    return rest;
+                });
+            }
+            const value = window.TinyBaseStore.getValue(key);
+            if (value !== undefined) return value;
+        } catch (e) {
+            console.warn('TinyBase load failed, falling back to localStorage', e);
+        }
+    }
     try {
         const data = localStorage.getItem(key);
         return data ? JSON.parse(data) : fallback;

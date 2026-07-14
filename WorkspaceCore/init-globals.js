@@ -1,6 +1,19 @@
 // Temporary initializer for missing globals (prevents ReferenceError in dev)
 (function(){
     function safeParse(key, fallback) {
+        if (window.TinyBaseStore) {
+            try {
+                const table = window.TinyBaseStore.getTable(key);
+                if (table && table.length) {
+                    return table.map(row => {
+                        const { _id, ...rest } = row;
+                        return rest;
+                    });
+                }
+                const value = window.TinyBaseStore.getValue(key);
+                if (value !== undefined) return value;
+            } catch (_) { /* fall through */ }
+        }
         try {
             const raw = localStorage.getItem(key);
             if (!raw) return fallback;

@@ -31,9 +31,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // initTimerAI() is called in focus-timer.js DOMContentLoaded - removed duplicate
     renderSchedule();
     refreshWorkspace();
+    if (typeof initTasksStore === 'function') { initTasksStore(); } else { loadMyTasks && loadMyTasks(); }
+    if (typeof initHabitsStore === 'function') initHabitsStore();
+    if (typeof initDashboardStore === 'function') initDashboardStore();
+    if (typeof initWidgetsStore === 'function') initWidgetsStore();
+    if (typeof initLibraryStore === 'function') initLibraryStore();
+    if (typeof initLessonsStore === 'function') initLessonsStore();
     renderMyTasks();
     renderLibrary();
     renderWidgets();
+
+    // Keep window globals in sync with store for remote changes
+    if (window.TinyBaseStore) {
+        const store = window.TinyBaseStore;
+        store.on('scheduleEvents', () => {
+            const table = store.getTable('scheduleEvents');
+            if (table) window.events = table.map(row => { const { _id, ...rest } = row; return rest; });
+        });
+        store.on('libraryItems', () => {
+            const table = store.getTable('libraryItems');
+            if (table) window.libraryItems = table.map(row => { const { _id, ...rest } = row; return rest; });
+        });
+        store.on('habits', () => {
+            const table = store.getTable('habits');
+            if (table) window.habits = table.map(row => { const { _id, ...rest } = row; return rest; });
+        });
+        store.on('myTasks', () => {
+            const table = store.getTable('myTasks');
+            if (table) window.myTasks = table.map(row => { const { _id, ...rest } = row; return rest; });
+        });
+        store.on('dashTodos', () => {
+            const table = store.getTable('dashTodos');
+            if (table) window.dashTodos = table.map(row => { const { _id, ...rest } = row; return rest; });
+        });
+    }
+
     initGlobalSearch();
     renderCalendarMonth();
     checkUpcomingEvents();
