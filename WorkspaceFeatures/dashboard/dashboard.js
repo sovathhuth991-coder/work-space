@@ -1035,6 +1035,7 @@ function initMiniCalendar() {
     const calendarCard = document.createElement('div');
     calendarCard.className = 'dash-card';
     calendarCard.setAttribute('data-card-id', 'calendar');
+    calendarCard.setAttribute('data-source-view', 'schedule-view');
     calendarCard.innerHTML = `
         <div class="card-glow-border"></div>
         <div class="card-inner">
@@ -1042,7 +1043,6 @@ function initMiniCalendar() {
                 <h3 style="margin:0;">📅 Calendar</h3>
                 <div class="card-controls">
                     <span class="card-drag-handle" title="Drag to move">⠿</span>
-                    <button class="card-resize-btn" data-action="resizeCard" data-card="calendar" title="Resize">⤡</button>
                 </div>
             </div>
             <div id="dashMiniCalendar"></div>
@@ -1057,6 +1057,7 @@ function initMiniCalendar() {
         else grid.appendChild(calendarCard);
     }
     renderMiniCalendar();
+    if (typeof initDashboardCards === 'function') initDashboardCards();
 }
 function toggleDashboardFocusMode() {
     const grid = document.querySelector('.dashboard-grid');

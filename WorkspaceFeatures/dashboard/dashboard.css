@@ -14,27 +14,26 @@
 }
 
 /* ============================================================
-   MAIN TWO-COLUMN LAYOUT – left column is what you act on
-   (focus tracking, tasks), right column is glanceable
-   secondary info (mini-widgets, notes, quick links). Cards
-   inside each column use flexbox, so per-card drag-reorder
-   (via inline `order`) still works exactly as before, just
-   scoped to its own column instead of the whole dashboard.
+   FREEFORM CANVAS – Today's Focus, Master To-Do, Today's Agenda,
+   Focus Timer, Weather, and Calendar all live here as freely
+   draggable/resizable tiles (position/size stored per-card in
+   localStorage by drag-drop.js). Below 860px this collapses back
+   to a plain single-column stack — see the media query at the
+   bottom of this block and initCanvasCards()'s isCanvasMode().
    ============================================================ */
-.dashboard-main-row {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    gap: clamp(14px, 1.8vw, 28px);
-    align-items: start;
+.dashboard-canvas {
+    position: relative;
     width: 100%;
 }
 
-.dashboard-col-main,
-.dashboard-col-side {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(14px, 1.8vw, 28px);
-    min-width: 0;
+.dash-card.canvas-card {
+    position: absolute;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.dash-card.canvas-card .card-inner {
+    height: 100%;
 }
 
 .dash-header-greeting {
@@ -43,10 +42,75 @@
     font-size: var(--text-base);
 }
 
-@media (max-width: 900px) {
-    .dashboard-main-row {
-        grid-template-columns: 1fr;
+@media (max-width: 860px) {
+    .dashboard-canvas {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(14px, 1.8vw, 28px);
+        min-height: 0 !important;
     }
+
+    .dash-card.canvas-card {
+        position: static;
+        width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* ---- Per-card accent identity ----
+   A distinct --card-accent per widget, used for the left edge
+   of the card instead of the single global --status-live color.
+   Falls back to --status-live for anything not listed. */
+.dash-card .card-inner {
+    border-left-color: var(--card-accent, var(--status-live));
+}
+
+.dash-card[data-card-id="banner"] { --card-accent: #7c6df0; }
+.dash-card[data-card-id="todo"] { --card-accent: #10b981; }
+.dash-card[data-card-id="schedule-mini"] { --card-accent: #5b8def; }
+.dash-card[data-card-id="timer-mini"] { --card-accent: #f97316; }
+.dash-card[data-card-id="weather"] { --card-accent: #22d3ee; }
+.dash-card[data-card-id="calendar"] { --card-accent: #a78bfa; }
+.dash-card[data-card-id="widgets"] { --card-accent: #f59e0b; }
+
+/* ---- Resize hotzones: cursor swaps when near an edge/corner,
+   set inline by JS via getResizeDirection() — this just makes
+   sure nothing else on the card overrides that cursor. ---- */
+.dash-card.canvas-card.resize-hover { cursor: inherit; }
+
+/* ---- Right-click context menu ---- */
+.card-context-menu {
+    position: fixed;
+    z-index: 10200;
+    min-width: 180px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color-hover);
+    border-radius: var(--radius-md, 10px);
+    box-shadow: var(--shadow-elevated);
+    backdrop-filter: blur(20px);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.card-context-menu button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.card-context-menu button:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 /* ============================================================
@@ -184,7 +248,7 @@
 .dash-card:hover .card-inner {
     transform: translateY(-3px);
     border-color: var(--border-color-hover);
-    border-left-color: var(--status-live);
+    border-left-color: var(--card-accent, var(--status-live));
     background: var(--bg-card-hover);
     box-shadow: var(--shadow-elevated);
 }
@@ -420,6 +484,7 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
     gap: clamp(12px, 1.5vw, 20px);
     width: 100%;
+    position: relative;
 }
 
 .stat-card .card-inner {
@@ -464,10 +529,10 @@
 /* Color-coded stat cards — each sets --stat-color once and every
    rule below (icon tint, hover border, value readout) derives from
    it, instead of repeating the same hex three times per category. */
-.stat-card[data-view="todo-view"] { --stat-color: #10b981; }
-.stat-card[data-view="schedule-view"] { --stat-color: #5b8def; }
-.stat-card[data-view="lessons-view"] { --stat-color: #f59e0b; }
-.stat-card[data-view="analytics-view"] { --stat-color: #8b5cf6; }
+.stat-card[data-view="todo-view"] { --stat-color: #10b981; --card-accent: #10b981; }
+.stat-card[data-view="schedule-view"] { --stat-color: #5b8def; --card-accent: #5b8def; }
+.stat-card[data-view="lessons-view"] { --stat-color: #f59e0b; --card-accent: #f59e0b; }
+.stat-card[data-view="analytics-view"] { --stat-color: #8b5cf6; --card-accent: #8b5cf6; }
 
 .stat-card[data-view] .stat-icon {
     background: color-mix(in srgb, var(--stat-color) 16%, transparent);
@@ -625,6 +690,11 @@
     transition: none !important;
     box-shadow: 0 12px 40px rgba(124, 109, 240, 0.35);
     z-index: 900;
+}
+
+.dash-card.dragging .card-inner,
+.dash-card.resizing .card-inner {
+    transform: none !important;
 }
 
 /* Dynamically-added live view cards (schedule/timer/weather) */

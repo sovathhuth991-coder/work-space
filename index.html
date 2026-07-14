@@ -326,15 +326,14 @@
                     <div class="dash-stats-container">
 
                         <div class="dash-card stat-card" data-card-id="stat-tasks" data-action="switchView"
-                            data-view="todo-view" role="button" tabindex="0" aria-label="View Master To-Do">
+                            data-view="todo-view" data-source-view="todo-view" role="button" tabindex="0"
+                            aria-label="View Master To-Do">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
                                     <span class="stat-icon">✓</span>
                                     <div class="card-controls">
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-tasks"
-                                            title="Resize">⤡</button>
                                     </div>
                                 </div>
                                 <span class="stat-info">
@@ -345,15 +344,14 @@
                         </div>
 
                         <div class="dash-card stat-card" data-card-id="stat-schedule" data-action="switchView"
-                            data-view="schedule-view" role="button" tabindex="0" aria-label="View Weekly Schedule">
+                            data-view="schedule-view" data-source-view="schedule-view" role="button" tabindex="0"
+                            aria-label="View Weekly Schedule">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
                                     <span class="stat-icon">▦</span>
                                     <div class="card-controls">
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard"
-                                            data-card="stat-schedule" title="Resize">⤡</button>
                                     </div>
                                 </div>
                                 <span class="stat-info">
@@ -364,15 +362,14 @@
                         </div>
 
                         <div class="dash-card stat-card" data-card-id="stat-lessons" data-action="switchView"
-                            data-view="lessons-view" role="button" tabindex="0" aria-label="View Lessons">
+                            data-view="lessons-view" data-source-view="lessons-view" role="button" tabindex="0"
+                            aria-label="View Lessons">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
                                     <span class="stat-icon">▣</span>
                                     <div class="card-controls">
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard"
-                                            data-card="stat-lessons" title="Resize">⤡</button>
                                     </div>
                                 </div>
                                 <span class="stat-info">
@@ -383,15 +380,14 @@
                         </div>
 
                         <div class="dash-card stat-card" data-card-id="stat-streak" data-action="switchView"
-                            data-view="analytics-view" role="button" tabindex="0" aria-label="View Analytics">
+                            data-view="analytics-view" data-source-view="analytics-view" role="button" tabindex="0"
+                            aria-label="View Analytics">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
                                     <span class="stat-icon">🔥</span>
                                     <div class="card-controls">
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                        <button class="card-resize-btn" data-action="resizeCard" data-card="stat-streak"
-                                            title="Resize">⤡</button>
                                     </div>
                                 </div>
                                 <span class="stat-info">
@@ -403,119 +399,103 @@
 
                     </div>
 
-                    <!-- ===== MAIN TWO-COLUMN AREA ===== -->
-                    <div class="dashboard-main-row">
+                    <!-- ===== FREEFORM CANVAS ===== -->
+                    <div class="dashboard-canvas" id="dashboardCanvas">
 
-                        <!-- ---- LEFT: primary / actionable ---- -->
-                        <div class="dashboard-col-main">
-
-                            <!-- ===== TODAY'S FOCUS (banner + active session + session-hub countdown, merged) ===== -->
-                            <div class="dash-card dash-banner" data-card-id="banner">
-                                <div class="card-glow-border"></div>
-                                <div class="card-inner">
-                                    <div class="card-header-drag"
-                                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                        <h3 style="margin:0;"><span class="pulse-dot"></span> Today's Focus</h3>
-                                        <div class="card-controls">
-                                            <button class="matrix-btn" data-action="showSessionDetailsModal"
-                                                style="padding:4px 12px;font-size:0.75rem;">📊 View Sessions</button>
-                                        </div>
+                        <!-- ===== TODAY'S FOCUS (banner + active session + session-hub countdown, merged) ===== -->
+                        <div class="dash-card canvas-card dash-banner" data-card-id="banner">
+                            <div class="card-glow-border"></div>
+                            <div class="card-inner">
+                                <div class="card-header-drag"
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                    <h3 style="margin:0;"><span class="pulse-dot"></span> Today's Focus</h3>
+                                    <div class="card-controls">
+                                        <button class="matrix-btn" data-action="showSessionDetailsModal" data-nav-expand
+                                            style="padding:4px 12px;font-size:0.75rem;">📊 View Sessions</button>
+                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
                                     </div>
-                                    <div class="banner-progress">
-                                        <div class="progress-label">
-                                            <span>Daily completion</span>
-                                            <span id="dashProgressPercent">0%</span>
-                                        </div>
-                                        <div class="progress-bar-bg">
-                                            <div class="progress-bar-fill" id="dashProgressBar"></div>
-                                        </div>
-                                    </div>
-                                    <!-- Daily Focus Goal -->
-                                    <div id="dailyFocusGoal"
-                                        style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
-                                        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                                            <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
-                                                <svg viewBox="0 0 80 80"
-                                                    style="transform: rotate(-90deg); width: 100%; height: 100%;">
-                                                    <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.06)"
-                                                        stroke-width="6" />
-                                                    <circle id="focusGoalRing" cx="40" cy="40" r="35" fill="none"
-                                                        stroke="url(#focusGoalGradient)" stroke-width="6" stroke-linecap="round"
-                                                        stroke-dasharray="220" stroke-dashoffset="220"
-                                                        style="transition: stroke-dashoffset 0.5s ease;" />
-                                                    <defs>
-                                                        <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%"
-                                                            y2="100%">
-                                                            <stop offset="0%" style="stop-color:#5b8def;stop-opacity:1" />
-                                                            <stop offset="100%" style="stop-color:#5b8def;stop-opacity:1" />
-                                                        </linearGradient>
-                                                    </defs>
-                                                </svg>
-                                                <div
-                                                    style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                                                    <span id="focusGoalPercent"
-                                                        style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">0%</span>
-                                                    <span style="font-size: 0.6rem; color: var(--text-muted);">of goal</span>
-                                                </div>
-                                            </div>
-                                            <div style="flex: 1; min-width: 150px;">
-                                                <div
-                                                    style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;">
-                                                    Daily Focus Goal</div>
-                                                <div id="focusGoalText"
-                                                    style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 8px;">
-                                                    0h 0m / 4h 0m</div>
-                                                <div id="focusGoalMessage"
-                                                    style="font-size: 0.8rem; color: var(--accent-1); font-weight: 500;"></div>
-                                            </div>
-                                            <button id="editGoalBtn" class="matrix-btn"
-                                                style="padding: 4px 12px; font-size: 0.75rem; white-space: nowrap;"
-                                                title="Edit daily goal">⚙️ Set Goal</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- ===== DATE COUNTDOWN ===== -->
-                                    <div id="dashDateCountdown" style="display: none; margin-top: 16px;"></div>
                                 </div>
-                            </div>
-
-                            <!-- Today's Agenda renders here (inserted by live-widgets.js) —
-                                 grouped with Today's Focus/Master To-Do so the left column
-                                 isn't dramatically shorter than the right one. -->
-                            <div id="liveWidgetsSlotMain"></div>
-
-                            <!-- ===== MASTER TO-DO ===== -->
-                            <div class="dash-card" data-card-id="todo">
-                                <div class="card-glow-border"></div>
-                                <div class="card-inner">
-                                    <p class="card-eyebrow" id="dashTodoEyebrow">TASKS</p>
-                                    <div class="card-header-drag"
-                                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                        <h3 style="margin:0;">Master To-Do</h3>
-                                        <div class="card-controls">
-                                            <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                            <button class="card-resize-btn" data-action="resizeCard" data-card="todo"
-                                                title="Resize">⤡</button>
-                                        </div>
+                                <div class="banner-progress">
+                                    <div class="progress-label">
+                                        <span>Daily completion</span>
+                                        <span id="dashProgressPercent">0%</span>
                                     </div>
-                                    <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task"
-                                        style="padding:4px 12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
-                                        Add Task</button>
-                                    <ul class="strike-list" id="dashStrikeList"></ul>
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" id="dashProgressBar"></div>
+                                    </div>
                                 </div>
-                            </div>
+                                <!-- Daily Focus Goal -->
+                                <div id="dailyFocusGoal"
+                                    style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                        <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
+                                            <svg viewBox="0 0 80 80"
+                                                style="transform: rotate(-90deg); width: 100%; height: 100%;">
+                                                <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.06)"
+                                                    stroke-width="6" />
+                                                <circle id="focusGoalRing" cx="40" cy="40" r="35" fill="none"
+                                                    stroke="url(#focusGoalGradient)" stroke-width="6" stroke-linecap="round"
+                                                    stroke-dasharray="220" stroke-dashoffset="220"
+                                                    style="transition: stroke-dashoffset 0.5s ease;" />
+                                                <defs>
+                                                    <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%"
+                                                        y2="100%">
+                                                        <stop offset="0%" style="stop-color:#5b8def;stop-opacity:1" />
+                                                        <stop offset="100%" style="stop-color:#5b8def;stop-opacity:1" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            <div
+                                                style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                                <span id="focusGoalPercent"
+                                                    style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">0%</span>
+                                                <span style="font-size: 0.6rem; color: var(--text-muted);">of goal</span>
+                                            </div>
+                                        </div>
+                                        <div style="flex: 1; min-width: 150px;">
+                                            <div
+                                                style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px;">
+                                                Daily Focus Goal</div>
+                                            <div id="focusGoalText"
+                                                style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 8px;">
+                                                0h 0m / 4h 0m</div>
+                                            <div id="focusGoalMessage"
+                                                style="font-size: 0.8rem; color: var(--accent-1); font-weight: 500;"></div>
+                                        </div>
+                                        <button id="editGoalBtn" class="matrix-btn"
+                                            style="padding: 4px 12px; font-size: 0.75rem; white-space: nowrap;"
+                                            title="Edit daily goal">⚙️ Set Goal</button>
+                                    </div>
+                                </div>
 
+                                <!-- ===== DATE COUNTDOWN ===== -->
+                                <div id="dashDateCountdown" style="display: none; margin-top: 16px;"></div>
+                            </div>
                         </div>
 
-                        <!-- ---- RIGHT: secondary / glanceable ---- -->
-                        <div class="dashboard-col-side">
-
-                            <!-- Focus Timer, Weather, Calendar render here (inserted by
-                                 live-widgets.js / dashboard.js) so they keep using the same
-                                 drag/resize/minimize system. -->
-                            <div id="liveWidgetsSlot"></div>
-
+                        <!-- ===== MASTER TO-DO ===== -->
+                        <div class="dash-card canvas-card" data-card-id="todo" data-source-view="todo-view">
+                            <div class="card-glow-border"></div>
+                            <div class="card-inner">
+                                <p class="card-eyebrow" id="dashTodoEyebrow">TASKS</p>
+                                <div class="card-header-drag"
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                    <h3 style="margin:0;">Master To-Do</h3>
+                                    <div class="card-controls">
+                                        <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                    </div>
+                                </div>
+                                <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task"
+                                    style="padding:4px 12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
+                                    Add Task</button>
+                                <ul class="strike-list" id="dashStrikeList"></ul>
+                            </div>
                         </div>
+
+                        <!-- Today's Agenda, Focus Timer, Weather, Calendar render here
+                             (inserted dynamically by live-widgets.js / dashboard.js) —
+                             positioned as canvas-cards by drag-drop.js like everything else. -->
+                        <div id="liveWidgetsSlot"></div>
 
                     </div>
 
@@ -530,11 +510,7 @@
                             <div class="card-header-drag"
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;">📦 Custom Widgets</h3>
-                                <div class="card-controls">
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
-                                    <button class="card-resize-btn" data-action="resizeCard" data-card="widgets"
-                                        title="Resize">⤡</button>
-                                </div>
+                                <div class="card-controls"></div>
                             </div>
                             <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
                             <div id="dashQuickLinks" class="dash-quick-links"

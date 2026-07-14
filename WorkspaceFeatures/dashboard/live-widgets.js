@@ -20,10 +20,9 @@ function buildLiveWidgetCard(cardId, icon, title, bodyHtml) {
             <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <h3 style="margin:0;">${icon} ${title}</h3>
                 <div class="card-controls">
-                    <button class="card-nav-btn" data-nav-expand title="Expand">⛶</button>
-                    <button class="card-nav-btn" data-nav-jump title="Open full page">↗</button>
+                    <button class="card-nav-btn" data-nav-expand title="View Details">⛶</button>
+                    <button class="card-nav-btn" data-nav-jump title="Go to Source">↗</button>
                     <span class="card-drag-handle" title="Drag to move">⠿</span>
-                    <button class="card-resize-btn" data-action="resizeCard" data-card="${cardId}" title="Drag to resize, click to reset">⤡</button>
                 </div>
             </div>
             ${bodyHtml}
@@ -36,12 +35,9 @@ function insertLiveWidgetCard(card) {
     const grid = document.querySelector('.dashboard-grid');
     if (!grid) return false;
     if (grid.querySelector(`.dash-card[data-card-id="${card.dataset.cardId}"]`)) return false;
-    const mainSlot = document.getElementById('liveWidgetsSlotMain');
-    const sideSlot = document.getElementById('liveWidgetsSlot');
-    if (card.dataset.cardId === 'schedule-mini' && mainSlot) {
-        mainSlot.appendChild(card);
-    } else if (sideSlot) {
-        sideSlot.appendChild(card);
+    const slot = document.getElementById('liveWidgetsSlot');
+    if (slot) {
+        slot.appendChild(card);
     } else {
         const statsContainer = grid.querySelector('.dash-stats-container');
         if (statsContainer) grid.insertBefore(card, statsContainer);
@@ -72,8 +68,7 @@ function ensureLiveWidgetStyles() {
     const style = document.createElement('style');
     style.id = 'live-widget-styles';
     style.textContent = `
-        .card-nav-btn { background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:13px; padding:2px 4px; border-radius:6px; transition:var(--transition-fast); }
-        .card-nav-btn:hover { color:var(--text-primary); background:rgba(255,255,255,0.06); }
+        .card-nav-btn { display:none; }
         .live-widget-footer { margin-top:12px; font-size:11px; color:var(--accent-1); cursor:pointer; opacity:0.85; }
         .live-widget-footer:hover { opacity:1; text-decoration:underline; }
         .live-widget-empty { padding:14px 4px; text-align:center; color:var(--text-muted); font-size:0.85rem; }

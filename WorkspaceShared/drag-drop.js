@@ -446,101 +446,166 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
 })();
 
 // ============================================================
-// DASHBOARD CARDS DRAG & RESIZE (All cards)
+// DASHBOARD CARDS — minimize + right-click context menu
+// (shared by both the stat-tile reorder system below and the
+// freeform canvas system below that)
+// ============================================================
+
+function ensureMinimizeButton(card) {
+    const controls = card.querySelector('.card-controls');
+    if (!controls || controls.querySelector('.card-minimize-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'card-minimize-btn';
+    btn.title = 'Minimize';
+    btn.textContent = '−';
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleCardMinimize(card);
+    });
+    const dragHandle = controls.querySelector('.card-drag-handle');
+    if (dragHandle) controls.insertBefore(btn, dragHandle);
+    else controls.appendChild(btn);
+}
+
+function toggleCardMinimize(card) {
+    const minimizing = !card.classList.contains('card-minimized');
+    if (card.classList.contains('canvas-card')) {
+        if (minimizing) {
+            // Remember the current height so un-minimizing can restore it —
+            // a freeform card has no natural "content height" to spring back to.
+            card.dataset.restoreHeight = card.style.height || (card.getBoundingClientRect().height + 'px');
+            card.style.height = '';
+        } else {
+            card.style.height = card.dataset.restoreHeight || '260px';
+        }
+    }
+    card.classList.toggle('card-minimized', minimizing);
+    const btn = card.querySelector('.card-minimize-btn');
+    if (btn) { btn.textContent = minimizing ? '+' : '−'; btn.title = minimizing ? 'Restore' : 'Minimize'; }
+    if (typeof window.updateCardSizeClasses === 'function') window.updateCardSizeClasses();
+    if (typeof window.__dashCanvasSave === 'function') window.__dashCanvasSave();
+    if (typeof window.__dashStatsSave === 'function') window.__dashStatsSave();
+}
+
+// ---- Right-click context menu: "View Details" + "Go to Source" ----
+// Reuses whatever nav the card already defines:
+//   - a [data-nav-expand] / [data-nav-jump] button (live-widget cards), or
+//   - a data-source-view="xxx" attribute → switchView(xxx) (static cards).
+let activeContextMenu = null;
+
+function closeContextMenu() {
+    if (activeContextMenu) { activeContextMenu.remove(); activeContextMenu = null; }
+    document.removeEventListener('mousedown', onContextMenuOutsideClick, true);
+}
+
+function onContextMenuOutsideClick(e) {
+    if (activeContextMenu && !activeContextMenu.contains(e.target)) closeContextMenu();
+}
+
+function openContextMenu(card, clientX, clientY) {
+    closeContextMenu();
+
+    const items = [];
+    const expandBtn = card.querySelector('[data-nav-expand]');
+    if (expandBtn) {
+        items.push({ label: '🔍 View Details', onClick: () => expandBtn.click() });
+    }
+    const jumpBtn = card.querySelector('[data-nav-jump]');
+    const sourceView = card.dataset.sourceView;
+    if (jumpBtn) {
+        items.push({ label: '↗ Go to Source', onClick: () => jumpBtn.click() });
+    } else if (sourceView) {
+        items.push({ label: '↗ Go to Source', onClick: () => { if (typeof switchView === 'function') switchView(sourceView); } });
+    }
+    if (!items.length) return;
+
+    const menu = document.createElement('div');
+    menu.className = 'card-context-menu';
+    items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.textContent = item.label;
+        btn.addEventListener('click', () => { closeContextMenu(); item.onClick(); });
+        menu.appendChild(btn);
+    });
+    document.body.appendChild(menu);
+
+    // Keep it on-screen
+    const menuRect = menu.getBoundingClientRect();
+    const left = Math.min(clientX, window.innerWidth - menuRect.width - 8);
+    const top = Math.min(clientY, window.innerHeight - menuRect.height - 8);
+    menu.style.left = Math.max(8, left) + 'px';
+    menu.style.top = Math.max(8, top) + 'px';
+
+    activeContextMenu = menu;
+    setTimeout(() => document.addEventListener('mousedown', onContextMenuOutsideClick, true), 0);
+}
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeContextMenu(); });
+
+// ============================================================
+// STAT TILES — reorder-by-drag, scoped to .dash-stats-container
+// so it no longer fights with cards living elsewhere on the page
+// (that cross-container order collision was the source of the
+// "glitches after moving" bug).
 // ============================================================
 
 (function() {
     'use strict';
 
-    const STORAGE_KEY = 'dashboardCardLayout';
     let activeCard = null;
-    let startX = 0;
-    let startY = 0;
     let isDragging = false;
+    let startX = 0, startY = 0;
     let dropZoneIndicator = null;
-    let cardOrderMap = {}; // cardId -> order number
 
-    function getVisibleCards() {
-        return Array.from(document.querySelectorAll('.dash-card[data-card-id]')).filter(c => c.style.display !== 'none');
+    function container() { return document.querySelector('.dash-stats-container'); }
+
+    function getVisibleStatCards() {
+        const box = container();
+        if (!box) return [];
+        return Array.from(box.querySelectorAll('.dash-card[data-card-id]')).filter(c => c.style.display !== 'none');
     }
 
-    function getCardOrder(card) {
-        return parseInt(card.style.order || '0', 10);
+    function getOrder(card) { return parseInt(card.style.order || '0', 10); }
+    function setOrder(card, order) { card.style.order = order; }
+
+    function renumber() {
+        const visible = getVisibleStatCards();
+        visible.sort((a, b) => getOrder(a) - getOrder(b));
+        visible.forEach((card, index) => setOrder(card, index + 1));
     }
 
-    function setCardOrder(card, order) {
-        card.style.order = order;
-        cardOrderMap[card.dataset.cardId] = order;
-    }
+    function initStatCards() {
+        const box = container();
+        if (!box) return;
+        const cards = box.querySelectorAll('.dash-card[data-card-id]');
+        if (!cards.length) return;
 
-    function renumberAllCards() {
-        const visible = getVisibleCards();
-        visible.sort((a, b) => getCardOrder(a) - getCardOrder(b));
-        visible.forEach((card, index) => {
-            setCardOrder(card, index + 1);
-        });
-    }
-
-    function initDashboardCards() {
-        const cards = document.querySelectorAll('.dash-card[data-card-id]');
-        if (cards.length === 0) return;
-
-        // Load saved layout (safe to re-run — only touches cards it finds)
         loadLayout();
-
-        // Ensure every visible card has an order
-        const visible = getVisibleCards();
-        visible.forEach((card, index) => {
-            if (!card.style.order) {
-                setCardOrder(card, index + 1);
-            }
+        getVisibleStatCards().forEach((card, index) => {
+            if (!card.style.order) setOrder(card, index + 1);
         });
 
-        // Wire each card exactly once — this function is called again
-        // whenever new cards are added dynamically (e.g. live-widgets.js),
-        // so already-wired cards must be skipped rather than double-bound.
         cards.forEach(card => {
-            if (card.dataset.dragWired === '1') return;
-            card.dataset.dragWired = '1';
-
+            if (card.dataset.statWired === '1') return;
+            card.dataset.statWired = '1';
             const handle = card.querySelector('.card-drag-handle');
             if (handle) {
                 handle.addEventListener('mousedown', (e) => startDrag(e, card));
                 handle.addEventListener('touchstart', (e) => startDrag(e, card), { passive: false });
             }
-
-            const resizeBtn = card.querySelector('.card-resize-btn');
-            if (resizeBtn) {
-                resizeBtn.addEventListener('mousedown', (e) => startResize(e, card));
-                resizeBtn.addEventListener('touchstart', (e) => startResize(e, card), { passive: false });
-                // Permanently stop this button's click from bubbling to the document
-                // delegated handler (stat cards use switchView), so resizing/cycling a
-                // stat card never navigates away. Harmless otherwise.
-                resizeBtn.addEventListener('click', (e) => e.stopPropagation());
-            }
-
             ensureMinimizeButton(card);
+            card.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                openContextMenu(card, e.clientX, e.clientY);
+            });
         });
 
-        // Global move/end listeners — identical function references, so the
-        // DOM dedupes repeat calls automatically; safe to call again.
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onEnd);
         document.addEventListener('touchmove', onMove, { passive: false });
         document.addEventListener('touchend', onEnd);
-        document.addEventListener('mousemove', onResizeMove);
-        document.addEventListener('mouseup', onResizeEnd);
-        document.addEventListener('touchmove', onResizeMove, { passive: false });
-        document.addEventListener('touchend', onResizeEnd);
 
-        // Reset button
-        const resetBtn = document.querySelector('[data-action="resetDashboardLayout"]');
-        if (resetBtn && resetBtn.dataset.wired !== '1') {
-            resetBtn.dataset.wired = '1';
-            resetBtn.addEventListener('click', resetLayout);
-        }
-
-        // Create drop zone indicator once
         if (!dropZoneIndicator || !document.body.contains(dropZoneIndicator)) {
             dropZoneIndicator = document.createElement('div');
             dropZoneIndicator.className = 'drop-zone-indicator';
@@ -554,104 +619,51 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
                 display: none;
                 transition: all 0.2s ease;
             `;
-            const grid = document.querySelector('.dashboard-grid');
-            if (grid) {
-                grid.appendChild(dropZoneIndicator);
-            }
+            box.appendChild(dropZoneIndicator);
         }
-
-        // Tag every card with width/height size classes so the inner UI can adapt.
-        updateCardSizeClasses();
-    }
-
-    // ---- MINIMIZE ----
-    function ensureMinimizeButton(card) {
-        const controls = card.querySelector('.card-controls');
-        if (!controls || controls.querySelector('.card-minimize-btn')) return;
-        const btn = document.createElement('button');
-        btn.className = 'card-minimize-btn';
-        btn.title = 'Minimize';
-        btn.textContent = '−';
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleCardMinimize(card);
-        });
-        // Sits with the other controls, right before the drag handle.
-        const dragHandle = controls.querySelector('.card-drag-handle');
-        if (dragHandle) controls.insertBefore(btn, dragHandle);
-        else controls.appendChild(btn);
-    }
-
-    function toggleCardMinimize(card) {
-        const minimized = card.classList.toggle('card-minimized');
-        const btn = card.querySelector('.card-minimize-btn');
-        if (btn) { btn.textContent = minimized ? '+' : '−'; btn.title = minimized ? 'Restore' : 'Minimize'; }
-        saveLayout();
-        // Neighbors reflow to fill/relinquish space, so recompute their size classes
-        // on BOTH minimize and un-minimize (skips minimized cards internally).
-        updateCardSizeClasses();
     }
 
     function startDrag(e, card) {
         if (e.button && e.button !== 0) return;
         e.preventDefault();
         e.stopPropagation();
-
         activeCard = card;
         isDragging = true;
         card.classList.add('dragging');
-
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-        startX = clientX;
-        startY = clientY;
+        startX = e.touches ? e.touches[0].clientX : e.clientX;
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
     }
 
     function onMove(e) {
         if (!isDragging || !activeCard) return;
         e.preventDefault();
-
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
         const deltaX = clientX - startX;
         const deltaY = clientY - startY;
-
-        activeCard.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.02)`;
+        activeCard.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.03)`;
         activeCard.style.transition = 'none';
         activeCard.style.zIndex = '1000';
-
         showDropZone(clientX, clientY);
     }
 
     function showDropZone(cursorX, cursorY) {
-        const grid = document.querySelector('.dashboard-grid');
-        if (!grid || !dropZoneIndicator) return;
-
-        const visible = getVisibleCards();
-        let closestCard = null;
-        let closestDist = Infinity;
-
-        visible.forEach(card => {
+        const box = container();
+        if (!box || !dropZoneIndicator) return;
+        let closestCard = null, closestDist = Infinity;
+        getVisibleStatCards().forEach(card => {
             if (card === activeCard) return;
             const rect = card.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
+            const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
             const dist = Math.sqrt((cursorX - cx) ** 2 + (cursorY - cy) ** 2);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closestCard = card;
-            }
+            if (dist < closestDist) { closestDist = dist; closestCard = card; }
         });
-
         if (closestCard && closestDist < 250) {
             const rect = closestCard.getBoundingClientRect();
-            const gridRect = grid.getBoundingClientRect();
+            const boxRect = box.getBoundingClientRect();
             dropZoneIndicator.style.display = 'block';
-            dropZoneIndicator.style.left = (rect.left - gridRect.left) + 'px';
-            dropZoneIndicator.style.top = (rect.top - gridRect.top) + 'px';
+            dropZoneIndicator.style.left = (rect.left - boxRect.left) + 'px';
+            dropZoneIndicator.style.top = (rect.top - boxRect.top) + 'px';
             dropZoneIndicator.style.width = rect.width + 'px';
             dropZoneIndicator.style.height = rect.height + 'px';
             dropZoneIndicator.dataset.targetId = closestCard.dataset.cardId;
@@ -662,317 +674,423 @@ console.log('🖱️ Enhanced Drag & Drop module loaded');
 
     function onEnd() {
         if (!isDragging || !activeCard) return;
-
         const card = activeCard;
         card.classList.remove('dragging');
         card.style.transition = '';
         card.style.zIndex = '';
-
-        if (dropZoneIndicator) {
-            dropZoneIndicator.style.display = 'none';
-        }
+        if (dropZoneIndicator) dropZoneIndicator.style.display = 'none';
 
         const transform = card.style.transform;
         const match = transform.match(/translate\(([^p]+)px,\s*([^p]+)px\)/);
         if (match) {
-            const deltaX = parseFloat(match[1]);
-            const deltaY = parseFloat(match[2]);
-
-            if (Math.abs(deltaX) > 30 || Math.abs(deltaY) > 30) {
+            const deltaX = parseFloat(match[1]), deltaY = parseFloat(match[2]);
+            if (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20) {
                 const targetId = dropZoneIndicator?.dataset?.targetId;
-                if (targetId && targetId !== card.dataset.cardId) {
-                    reorderCards(card.dataset.cardId, targetId);
-                }
+                if (targetId && targetId !== card.dataset.cardId) reorder(card.dataset.cardId, targetId);
             }
-
             card.style.transform = '';
         }
-
         isDragging = false;
         activeCard = null;
     }
 
-    function reorderCards(sourceId, targetId) {
-        const sourceCard = document.querySelector(`.dash-card[data-card-id="${sourceId}"]`);
-        const targetCard = document.querySelector(`.dash-card[data-card-id="${targetId}"]`);
+    function reorder(sourceId, targetId) {
+        const sourceCard = document.querySelector(`.dash-stats-container .dash-card[data-card-id="${sourceId}"]`);
+        const targetCard = document.querySelector(`.dash-stats-container .dash-card[data-card-id="${targetId}"]`);
         if (!sourceCard || !targetCard) return;
 
-        const sourceOrder = getCardOrder(sourceCard);
-        const targetOrder = getCardOrder(targetCard);
+        const sourceOrder = getOrder(sourceCard);
+        const targetOrder = getOrder(targetCard);
 
-        // Shift other cards to make room
-        const visible = getVisibleCards();
-        visible.forEach(card => {
-            const order = getCardOrder(card);
+        getVisibleStatCards().forEach(card => {
+            const order = getOrder(card);
             const cardId = card.dataset.cardId;
             if (cardId === sourceId) return;
-
             if (targetOrder < sourceOrder) {
-                // Moving up: shift cards between target+1 and source down by 1
-                if (order > targetOrder && order < sourceOrder) {
-                    setCardOrder(card, order + 1);
-                }
+                if (order > targetOrder && order < sourceOrder) setOrder(card, order + 1);
             } else {
-                // Moving down: shift cards between source and target-1 up by 1
-                if (order >= sourceOrder && order < targetOrder) {
-                    setCardOrder(card, order - 1);
-                }
+                if (order >= sourceOrder && order < targetOrder) setOrder(card, order - 1);
             }
         });
-
-        // Place source at target position
-        setCardOrder(sourceCard, targetOrder);
-
-        // Renumber everything to be sequential
-        renumberAllCards();
-
-        // Save
+        setOrder(sourceCard, targetOrder);
+        renumber();
         saveLayout();
-        showToast(`📦 ${sourceId} moved`, 'info');
-    }
-
-    // ---- RESIZE (real drag, not a binary toggle) ----
-    let resizingCard = null;
-    let resizeStartX = 0;
-    let resizeStartY = 0;
-    let resizeStartSpan = 1;
-    let resizeStartHeight = 0;
-    let resizeWasClick = true;
-    let pendingResizeRaf = null;
-    const RESIZE_STEP_PX = 140; // horizontal drag distance per +1 grid-column span
-    const NO_RESIZE_CARDS = new Set(['banner', 'widgets', 'hub']);
-
-    // Single source of truth for the grid-column span cap. Used by both the
-    // drag-resize path and the click-cycle.
-    function getMaxSpan() {
-        const g = document.querySelector('.dashboard-grid');
-        return g ? Math.max(1, Math.min(3, Math.round(g.getBoundingClientRect().width / 420))) : 1;
-    }
-
-    // Measure each card's real pixel size and tag it with width/height classes
-    // so the inner UI can re-densify (compact when small, roomy when large).
-    function updateCardSizeClasses() {
-        const cards = document.querySelectorAll('.dashboard-grid .dash-card[data-card-id]');
-        cards.forEach(card => {
-            if (card.style.display === 'none') return;
-            if (card.classList.contains('card-minimized')) return;
-            const rect = card.getBoundingClientRect();
-            const w = rect.width;
-            const h = rect.height;
-            const wClass = w < 300 ? 'xs' : w < 440 ? 'sm' : w < 640 ? 'md' : 'lg';
-            const hClass = h < 240 ? 'short' : h < 460 ? 'normal' : 'tall';
-            card.dataset.w = wClass;
-            card.dataset.h = hClass;
-        });
-    }
-
-    // Cycle a card through sm -> md -> lg -> sm on a plain click (no drag).
-    // Uses a deterministic data-size-preset attribute rather than parsing the
-    // rendered width (data-w) or inline styles.
-    function cycleCardSize(card) {
-        const SIZES = ['sm', 'md', 'lg'];
-        const PRESETS = {
-            sm: { span: '1', minHeight: '200px' },
-            md: { span: '1', minHeight: '360px' },
-            lg: { span: String(Math.min(2, getMaxSpan())), minHeight: '540px' }
-        };
-        const cur = card.dataset.sizePreset || 'sm';
-        const next = SIZES[(SIZES.indexOf(cur) + 1) % SIZES.length];
-        const preset = PRESETS[next];
-        card.style.gridColumn = `span ${preset.span}`;
-        card.style.minHeight = preset.minHeight;
-        card.dataset.sizePreset = next;
-        updateCardSizeClasses();
-    }
-
-    function currentSpan(card) {
-        const match = /span\s+(\d+)/.exec(card.style.gridColumn || '');
-        return match ? parseInt(match[1], 10) : 1;
-    }
-
-    function startResize(e, card) {
-        const cardId = card.dataset.cardId;
-        if (NO_RESIZE_CARDS.has(cardId)) {
-            showToast('This card cannot be resized', 'info');
-            return;
-        }
-        if (e.button && e.button !== 0) return;
-        e.preventDefault();
-        e.stopPropagation();
-
-        resizingCard = card;
-        resizeWasClick = true;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        resizeStartX = clientX;
-        resizeStartY = clientY;
-        resizeStartSpan = currentSpan(card);
-        resizeStartHeight = card.getBoundingClientRect().height;
-        card.classList.add('resizing');
-        card.classList.remove('card-large'); // superseded by real span/height values
-        document.body.style.cursor = 'nwse-resize';
-    }
-
-    function onResizeMove(e) {
-        if (!resizingCard) return;
-        e.preventDefault();
-
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const deltaX = clientX - resizeStartX;
-        const deltaY = clientY - resizeStartY;
-
-        // A real drag (not a click) means the card becomes a custom size, so drop
-        // any preset so the next click-cycle starts cleanly from sm.
-        if (Math.abs(deltaX) + Math.abs(deltaY) > 4) {
-            resizeWasClick = false;
-            delete resizingCard.dataset.sizePreset;
-        }
-
-        const maxSpan = getMaxSpan();
-        const stepChange = Math.round(deltaX / RESIZE_STEP_PX);
-        const newSpan = Math.min(maxSpan, Math.max(1, resizeStartSpan + stepChange));
-        const newHeight = Math.min(760, Math.max(160, resizeStartHeight + deltaY));
-
-        resizingCard.style.gridColumn = `span ${newSpan}`;
-        resizingCard.style.minHeight = `${newHeight}px`;
-
-        // Live-adapt the inner UI while dragging (throttled to one frame).
-        if (pendingResizeRaf) cancelAnimationFrame(pendingResizeRaf);
-        pendingResizeRaf = requestAnimationFrame(() => {
-            pendingResizeRaf = null;
-            updateCardSizeClasses();
-        });
-    }
-
-    function onResizeEnd() {
-        if (!resizingCard) return;
-        resizingCard.classList.remove('resizing');
-        document.body.style.cursor = '';
-        const card = resizingCard;
-        resizingCard = null;
-        if (resizeWasClick) {
-            cycleCardSize(card);
-        }
-        saveLayout();
-        updateCardSizeClasses();
     }
 
     function saveLayout() {
         const layout = {};
-        document.querySelectorAll('.dash-card[data-card-id]').forEach(card => {
-            const cardId = card.dataset.cardId;
-            if (!cardId) return;
-            layout[cardId] = {
-                order: card.style.order || '0',
-                hidden: card.style.display === 'none',
-                minimized: card.classList.contains('card-minimized'),
-                gridColumn: card.style.gridColumn || '',
-                minHeight: card.style.minHeight || ''
-            };
+        getVisibleStatCards().forEach(card => {
+            layout[card.dataset.cardId] = { order: card.style.order || '0' };
         });
-
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
-        } catch (e) {
-            console.error('Error saving layout:', e);
-        }
+        try { localStorage.setItem('dashboardStatLayout', JSON.stringify(layout)); }
+        catch (e) { console.error('Error saving stat layout:', e); }
     }
 
     function loadLayout() {
         try {
-            const saved = localStorage.getItem(STORAGE_KEY);
+            const saved = localStorage.getItem('dashboardStatLayout');
             if (!saved) return;
-
             const layout = JSON.parse(saved);
-            // A saved gridColumn span (e.g. "span 2") and pixel minHeight were
-            // computed against whatever viewport they were saved on. Re-applying
-            // them unmodified on a much narrower mobile screen forces the card
-            // wider than the grid actually has room for, which overflows /
-            // visually overlaps the content below it. Recompute the max span
-            // the CURRENT viewport can actually support (same formula used
-            // when resizing) and clamp to it; on mobile that's always 1, i.e.
-            // full-width, which matches the natural single-column layout.
-            const maxSpan = getMaxSpan();
-
             Object.keys(layout).forEach(cardId => {
-                const card = document.querySelector(`.dash-card[data-card-id="${cardId}"]`);
-                if (!card || !layout[cardId]) return;
-                const entry = layout[cardId];
-
-                if (entry.order) card.style.order = entry.order;
-                if (entry.hidden) card.style.display = 'none';
-                if (entry.gridColumn) {
-                    const match = /span\s+(\d+)/.exec(entry.gridColumn);
-                    const savedSpan = match ? parseInt(match[1], 10) : 1;
-                    card.style.gridColumn = savedSpan > maxSpan ? `span ${maxSpan}` : entry.gridColumn;
-                }
-                if (entry.minHeight && maxSpan > 1) {
-                    // Only honor a custom pixel height on wider screens where it
-                    // was actually set; on mobile let the card size to its content.
-                    card.style.minHeight = entry.minHeight;
-                }
-                if (entry.minimized) {
-                    card.classList.add('card-minimized');
-                    ensureMinimizeButton(card);
-                    const btn = card.querySelector('.card-minimize-btn');
-                    if (btn) { btn.textContent = '+'; btn.title = 'Restore'; }
-                }
-                // Backward compatibility with the old binary card-large layout format.
-                if (entry.isLarge && !entry.gridColumn) card.classList.add('card-large');
+                const card = document.querySelector(`.dash-stats-container .dash-card[data-card-id="${cardId}"]`);
+                if (card && layout[cardId] && layout[cardId].order) card.style.order = layout[cardId].order;
             });
-        } catch (e) {
-            console.error('Error loading layout:', e);
-        }
+        } catch (e) { console.error('Error loading stat layout:', e); }
     }
 
-    function resetLayout() {
-        document.querySelectorAll('.dash-card[data-card-id]').forEach(card => {
-            card.style.order = '';
-            card.style.gridArea = '';
-            card.style.gridColumn = '';
-            card.style.position = '';
-            card.style.left = '';
-            card.style.top = '';
-            card.style.width = '';
-            card.style.minHeight = '';
-            card.style.transform = '';
-            card.style.display = '';
-            card.classList.remove('card-large', 'card-minimized');
-            const btn = card.querySelector('.card-minimize-btn');
-            if (btn) { btn.textContent = '−'; btn.title = 'Minimize'; }
-            delete card.dataset.customPosition;
+    function resetStats() {
+        getVisibleStatCards().forEach(card => { card.style.order = ''; });
+        try { localStorage.removeItem('dashboardStatLayout'); } catch (e) {}
+    }
+
+    window.__dashStatsInit = initStatCards;
+    window.__dashStatsReset = resetStats;
+    window.__dashStatsRenumber = renumber;
+    window.__dashStatsSave = saveLayout;
+})();
+
+// ============================================================
+// FREEFORM CANVAS — Today's Focus, Master To-Do, Today's Agenda,
+// Focus Timer, Weather, Calendar. Fully free positioning (drag
+// anywhere) and resizing (drag any edge/corner) instead of the
+// old nearest-card-snap reorder system, which doesn't have a
+// coherent meaning once cards live in a fixed multi-column
+// layout. Position/size are stored per-card in localStorage.
+// ============================================================
+
+(function() {
+    'use strict';
+
+    const STORAGE_KEY = 'dashboardCanvasLayout';
+    const BREAKPOINT = 860;
+    const EDGE_ZONE = 10;
+    const MIN_W = 220, MIN_H = 140;
+    const CURSORS = { n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', ne: 'nesw-resize', sw: 'nesw-resize', nw: 'nwse-resize', se: 'nwse-resize' };
+
+    let activeCard = null;
+    let activeMode = null; // 'move' | one of the CURSORS keys (resize direction)
+    let startClientX = 0, startClientY = 0;
+    let startRect = null;
+
+    function canvas() { return document.getElementById('dashboardCanvas'); }
+    function isCanvasMode() { return window.innerWidth > BREAKPOINT; }
+
+    function getCanvasCards() {
+        const el = canvas();
+        if (!el) return [];
+        return Array.from(el.querySelectorAll('.dash-card[data-card-id]'));
+    }
+
+    function getDefaultRect(cardId, canvasWidth) {
+        const gap = 20;
+        const leftW = Math.max(280, Math.round((canvasWidth - gap) * 0.6));
+        const rightW = Math.max(240, canvasWidth - gap - leftW);
+        const rightX = leftW + gap;
+        const DEFAULTS = {
+            'banner':        { x: 0,      y: 0,   w: leftW,  h: 300 },
+            'schedule-mini': { x: 0,      y: 320, w: leftW,  h: 320 },
+            'todo':          { x: 0,      y: 660, w: leftW,  h: 220 },
+            'timer-mini':    { x: rightX, y: 0,   w: rightW, h: 260 },
+            'weather':       { x: rightX, y: 280, w: rightW, h: 220 },
+            'calendar':      { x: rightX, y: 520, w: rightW, h: 380 }
+        };
+        return DEFAULTS[cardId] || { x: 0, y: 0, w: leftW, h: 260 };
+    }
+
+    function loadLayout() {
+        try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : {}; }
+        catch (e) { return {}; }
+    }
+    function saveLayout() {
+        const layout = {};
+        getCanvasCards().forEach(card => {
+            layout[card.dataset.cardId] = {
+                x: parseFloat(card.style.left) || 0,
+                y: parseFloat(card.style.top) || 0,
+                w: parseFloat(card.style.width) || 0,
+                h: card.classList.contains('card-minimized')
+                    ? parseFloat(card.dataset.restoreHeight) || 260
+                    : (parseFloat(card.style.height) || 0),
+                minimized: card.classList.contains('card-minimized')
+            };
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layout)); }
+        catch (e) { console.error('Error saving canvas layout:', e); }
+    }
+
+    function applyRect(card, rect) {
+        card.style.left = rect.x + 'px';
+        card.style.top = rect.y + 'px';
+        card.style.width = rect.w + 'px';
+        card.style.height = rect.h + 'px';
+    }
+
+    function updateCanvasHeight() {
+        const el = canvas();
+        if (!el || !isCanvasMode()) return;
+        let maxBottom = 0;
+        getCanvasCards().forEach(card => {
+            if (card.style.display === 'none') return;
+            const y = parseFloat(card.style.top) || 0;
+            const h = card.classList.contains('card-minimized') ? 56 : (parseFloat(card.style.height) || 0);
+            maxBottom = Math.max(maxBottom, y + h);
+        });
+        el.style.minHeight = (maxBottom + 24) + 'px';
+    }
+
+    function layoutCards() {
+        const el = canvas();
+        if (!el) return;
+        const canvasMode = isCanvasMode();
+        const canvasWidth = el.getBoundingClientRect().width || 900;
+        const layout = loadLayout();
+
+        getCanvasCards().forEach(card => {
+            const cardId = card.dataset.cardId;
+            card.classList.toggle('canvas-card', canvasMode);
+            if (!canvasMode) {
+                card.style.left = ''; card.style.top = ''; card.style.width = ''; card.style.height = '';
+                return;
+            }
+            const saved = layout[cardId];
+            const rect = saved
+                ? { x: saved.x, y: saved.y, w: saved.w, h: saved.h }
+                : getDefaultRect(cardId, canvasWidth);
+            applyRect(card, rect);
+            if (saved && saved.minimized) {
+                card.dataset.restoreHeight = rect.h + 'px';
+                card.classList.add('card-minimized');
+                card.style.height = '';
+                const btn = card.querySelector('.card-minimize-btn');
+                if (btn) { btn.textContent = '+'; btn.title = 'Restore'; }
+            }
+        });
+        updateCanvasHeight();
+    }
+
+    function getResizeDirection(card, clientX, clientY) {
+        const rect = card.getBoundingClientRect();
+        const nearLeft = clientX - rect.left < EDGE_ZONE;
+        const nearRight = rect.right - clientX < EDGE_ZONE;
+        const nearTop = clientY - rect.top < EDGE_ZONE;
+        const nearBottom = rect.bottom - clientY < EDGE_ZONE;
+        if (nearTop && nearLeft) return 'nw';
+        if (nearTop && nearRight) return 'ne';
+        if (nearBottom && nearLeft) return 'sw';
+        if (nearBottom && nearRight) return 'se';
+        if (nearTop) return 'n';
+        if (nearBottom) return 's';
+        if (nearLeft) return 'w';
+        if (nearRight) return 'e';
+        return null;
+    }
+
+    function wireCanvasCard(card) {
+        if (card.dataset.canvasWired === '1') return;
+        card.dataset.canvasWired = '1';
+
+        card.addEventListener('mousemove', (e) => {
+            if (activeCard || !isCanvasMode() || card.classList.contains('card-minimized')) return;
+            const dir = getResizeDirection(card, e.clientX, e.clientY);
+            card.style.cursor = dir ? CURSORS[dir] : '';
+        });
+        card.addEventListener('mouseleave', () => { if (!activeCard) card.style.cursor = ''; });
+
+        card.addEventListener('mousedown', (e) => {
+            if (!isCanvasMode() || card.classList.contains('card-minimized')) return;
+            if (e.target.closest('button, a, input, textarea, select, .card-drag-handle')) return;
+            const dir = getResizeDirection(card, e.clientX, e.clientY);
+            if (!dir) return;
+            startInteraction(e, card, dir);
+        });
+        card.addEventListener('touchstart', (e) => {
+            if (!isCanvasMode() || card.classList.contains('card-minimized')) return;
+            if (e.target.closest('button, a, input, textarea, select, .card-drag-handle')) return;
+            const t = e.touches[0];
+            const dir = getResizeDirection(card, t.clientX, t.clientY);
+            if (!dir) return;
+            startInteraction(e, card, dir);
+        }, { passive: false });
+
+        const handle = card.querySelector('.card-drag-handle');
+        if (handle) {
+            handle.addEventListener('mousedown', (e) => startInteraction(e, card, 'move'));
+            handle.addEventListener('touchstart', (e) => startInteraction(e, card, 'move'), { passive: false });
+        }
+
+        card.addEventListener('contextmenu', (e) => {
+            if (!isCanvasMode()) return;
+            e.preventDefault();
+            openContextMenu(card, e.clientX, e.clientY);
         });
 
-        try {
-            localStorage.removeItem(STORAGE_KEY);
-        } catch (e) {
-            console.error('Error clearing layout:', e);
+        ensureMinimizeButton(card);
+    }
+
+    function startInteraction(e, card, mode) {
+        if (e.button && e.button !== 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+        activeCard = card;
+        activeMode = mode;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        startClientX = clientX;
+        startClientY = clientY;
+        const el = canvas();
+        const canvasRect = el.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        startRect = {
+            x: cardRect.left - canvasRect.left,
+            y: cardRect.top - canvasRect.top,
+            w: cardRect.width,
+            h: cardRect.height
+        };
+        card.classList.add(mode === 'move' ? 'dragging' : 'resizing');
+        document.body.style.cursor = mode === 'move' ? 'grabbing' : CURSORS[mode];
+        document.body.style.userSelect = 'none';
+    }
+
+    function onMove(e) {
+        if (!activeCard) return;
+        e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const dx = clientX - startClientX;
+        const dy = clientY - startClientY;
+        const el = canvas();
+        const canvasWidth = el.getBoundingClientRect().width || 900;
+
+        let { x, y, w, h } = startRect;
+
+        if (activeMode === 'move') {
+            x = startRect.x + dx;
+            y = startRect.y + dy;
+        } else {
+            if (activeMode.includes('e')) w = Math.max(MIN_W, startRect.w + dx);
+            if (activeMode.includes('s')) h = Math.max(MIN_H, startRect.h + dy);
+            if (activeMode.includes('w')) {
+                w = Math.max(MIN_W, startRect.w - dx);
+                x = startRect.x + (startRect.w - w);
+            }
+            if (activeMode.includes('n')) {
+                h = Math.max(MIN_H, startRect.h - dy);
+                y = startRect.y + (startRect.h - h);
+            }
         }
 
-        showToast('🔄 Layout reset to default', 'info');
-        // Recompute size classes for the restored (default) layout.
-        updateCardSizeClasses();
+        x = Math.max(0, Math.min(x, canvasWidth - 40));
+        y = Math.max(0, y);
+
+        activeCard.style.left = x + 'px';
+        activeCard.style.top = y + 'px';
+        activeCard.style.width = w + 'px';
+        activeCard.style.height = h + 'px';
+
+        updateCanvasHeight();
     }
 
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initDashboardCards);
-    } else {
-        initDashboardCards();
+    function onEnd() {
+        if (!activeCard) return;
+        activeCard.classList.remove('dragging', 'resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        activeCard = null;
+        activeMode = null;
+        saveLayout();
+        if (typeof window.updateCardSizeClasses === 'function') window.updateCardSizeClasses();
     }
 
-    // Re-tag size classes on viewport changes (debounced) so cards reflow density.
-    let dashWindowResizeTimer = null;
+    function initCanvasCards() {
+        const el = canvas();
+        if (!el) return;
+        getCanvasCards().forEach(wireCanvasCard);
+        layoutCards();
+    }
+
+    function resetCanvas() {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        getCanvasCards().forEach(card => {
+            card.classList.remove('card-minimized');
+            const btn = card.querySelector('.card-minimize-btn');
+            if (btn) { btn.textContent = '−'; btn.title = 'Minimize'; }
+            delete card.dataset.restoreHeight;
+        });
+        layoutCards();
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+
+    let resizeTimer = null;
     window.addEventListener('resize', () => {
-        if (dashWindowResizeTimer) clearTimeout(dashWindowResizeTimer);
-        dashWindowResizeTimer = setTimeout(() => updateCardSizeClasses(), 150);
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(layoutCards, 150);
     });
 
-    // Expose globally
-    window.initDashboardCards = initDashboardCards;
-    window.resetDashboardLayout = resetLayout;
-    window.renumberDashboardCards = renumberAllCards;
-    window.updateCardSizeClasses = updateCardSizeClasses;
-
+    window.__dashCanvasInit = initCanvasCards;
+    window.__dashCanvasReset = resetCanvas;
+    window.__dashCanvasSave = saveLayout;
+    window.__dashCanvasUpdateHeight = updateCanvasHeight;
 })();
+
+// ============================================================
+// PUBLIC GLUE — keeps the same function names the rest of the
+// app already calls (live-widgets.js, dashboard.js, app.js),
+// just fanning out to both subsystems above.
+// ============================================================
+
+function initDashboardCards() {
+    if (typeof window.__dashStatsInit === 'function') window.__dashStatsInit();
+    if (typeof window.__dashCanvasInit === 'function') window.__dashCanvasInit();
+    const widgetsCard = document.querySelector('.dash-card[data-card-id="widgets"]');
+    if (widgetsCard) ensureMinimizeButton(widgetsCard);
+    updateCardSizeClasses();
+}
+
+function updateCardSizeClasses() {
+    const cards = document.querySelectorAll('.dashboard-grid .dash-card[data-card-id]');
+    cards.forEach(card => {
+        if (card.style.display === 'none') return;
+        if (card.classList.contains('card-minimized')) return;
+        const rect = card.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        const wClass = w < 300 ? 'xs' : w < 440 ? 'sm' : w < 640 ? 'md' : 'lg';
+        const hClass = h < 240 ? 'short' : h < 460 ? 'normal' : 'tall';
+        card.dataset.w = wClass;
+        card.dataset.h = hClass;
+    });
+    if (typeof window.__dashCanvasUpdateHeight === 'function') window.__dashCanvasUpdateHeight();
+}
+
+function resetDashboardLayout() {
+    if (typeof window.__dashStatsReset === 'function') window.__dashStatsReset();
+    if (typeof window.__dashCanvasReset === 'function') window.__dashCanvasReset();
+    document.querySelectorAll('.dash-card[data-card-id]').forEach(card => {
+        card.style.display = '';
+    });
+    showToast('🔄 Layout reset to default', 'info');
+    updateCardSizeClasses();
+}
+
+function renumberAllCards() {
+    if (typeof window.__dashStatsRenumber === 'function') window.__dashStatsRenumber();
+    if (typeof window.__dashCanvasUpdateHeight === 'function') window.__dashCanvasUpdateHeight();
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboardCards);
+} else {
+    initDashboardCards();
+}
+
+// Expose globally
+window.initDashboardCards = initDashboardCards;
+window.resetDashboardLayout = resetDashboardLayout;
+window.renumberDashboardCards = renumberAllCards;
+window.updateCardSizeClasses = updateCardSizeClasses;
+window.openCardContextMenu = openContextMenu;
