@@ -140,46 +140,76 @@ read or write their own rows.
 -- without a separate migration every time a new field gets added to a task
 -- or habit in the app itself.
 
-create table tasks (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
+-- The app supplies each item's own string id (e.g. "mytask_1700000000000"),
+-- so the primary key is the composite (id, user_id) rather than a server
+-- generated uuid. `data` holds the full JS object as-is; `updated_at`
+-- powers last-push-wins merge + conflict tracking.
+create table if not exists tasks (
+  id text not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
   data jsonb not null,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  primary key (id, user_id)
 );
 
+alter table tasks enable row level security;
+create policy "Users manage their own tasks"
+  on tasks for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- Keep updated_at fresh on every update (the app also sets it on push).
+create or replace function set_updated_at() returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+create or replace trigger tasks_set_updated_at
+  before update on tasks
+  for each row execute function set_updated_at();
+
+-- Same shape for every item-collection table: composite PK (id, user_id),
+-- `data` jsonb, `updated_at`. Add the next one when its feature gets synced.
 create table habits (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
+  id text not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
   data jsonb not null,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  primary key (id, user_id)
 );
 
 create table library_items (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
+  id text not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
   data jsonb not null,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  primary key (id, user_id)
 );
 
 create table schedule_events (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
+  id text not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
   data jsonb not null,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  primary key (id, user_id)
 );
 
 create table journal_entries (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
+  id text not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
   data jsonb not null,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  primary key (id, user_id)
 );
 
 create table reading_items (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null,
+  id text not null,
+  user_id uuid not null references auth.users(id) on delete cascade,
   data jsonb not null,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  primary key (id, user_id)
 );
 
 -- Repeat the same pattern for: task_templates, dash_todos, quick_notes,
@@ -199,18 +229,11 @@ create policy "Users manage their own dashboard layout"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
--- Row-level security: turn it on and add the same four policies to every
--- table above. This is the part that actually enforces "you only see your
--- own data" even if someone else has the anon key.
-alter table tasks enable row level security;
-
-create policy "Users manage their own tasks"
-  on tasks for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
--- Repeat the enable + policy pair for every table listed above,
--- swapping the table name.
+-- Row-level security: the `tasks` table already has it enabled above with
+-- its policy. Repeat that same enable + policy pair for every other table
+-- listed above (habits, library_items, etc.), swapping the table name.
+-- This is the part that actually enforces "you only see your own data" even
+-- if someone else has the anon key.
 ```
 
 ## Part 3 — Client-side setup

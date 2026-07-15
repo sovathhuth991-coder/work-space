@@ -196,7 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'handleAccountSignIn': () => window.handleAccountSignIn?.(),
             'handleAccountSignUp': () => window.handleAccountSignUp?.(),
             'handleAccountMagicLink': () => window.handleAccountMagicLink?.(),
-            'handleAccountSignOut': () => window.handleAccountSignOut?.()
+            'handleAccountSignOut': () => window.handleAccountSignOut?.(),
+            'handleAccountSyncNow': () => window.handleAccountSyncNow?.()
         };
 
         const handler = actionHandlers[action];

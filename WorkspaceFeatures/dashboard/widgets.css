@@ -340,3 +340,247 @@
 .widget-schedule > div {
     padding: 4px 0;
 }
+
+/* ============================================================
+   BLOCK GRID + ADD-BLOCK MENU
+   The widgets grid previously had no layout rules at all — this
+   is what turns it into an actual Notion-like block area you can
+   build up, rather than a plain unstyled stack.
+   ============================================================ */
+.dash-widgets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.widget-add-menu {
+    position: relative;
+}
+
+.widget-add-btn {
+    padding: 4px 12px;
+    border-radius: 99px;
+    background: var(--accent-solid);
+    border: none;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+
+.widget-add-btn:hover {
+    filter: brightness(1.1);
+}
+
+.widget-add-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-elevated);
+    padding: 6px;
+    z-index: 20;
+    min-width: 140px;
+}
+
+.widget-add-dropdown.open {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.widget-add-dropdown button {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.widget-add-dropdown button:hover {
+    background: var(--bg-secondary);
+}
+
+/* ---- Drag-to-reorder blocks ---- */
+.widget-header {
+    gap: 6px;
+}
+
+.widget-drag-handle {
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: 1rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.widget-drag-handle:hover {
+    color: var(--accent-1);
+    background: rgba(124, 109, 240, 0.1);
+}
+
+.widget-drag-handle:active {
+    cursor: grabbing;
+}
+
+.widget-card.widget-dragging {
+    opacity: 0.5;
+}
+
+.widget-card.widget-drag-over {
+    box-shadow: 0 0 0 2px var(--accent-1);
+}
+
+/* ---- Notes / Quote (editable text blocks) ---- */
+.widget-content textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.widget-quote-input {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.widget-quote-author-input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* ---- Links / Stats blocks ---- */
+.widget-links,
+.widget-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.widget-link-item,
+.widget-stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+}
+
+.widget-link-item a {
+    color: var(--accent-1);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.widget-link-item a:hover {
+    text-decoration: underline;
+}
+
+.widget-stat-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.widget-stat-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.widget-row-delete {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+}
+
+.widget-row-delete:hover {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.1);
+}
+
+.widget-empty-hint {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.85rem;
+    padding: 8px 0;
+}
+
+.widget-add-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.widget-add-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-family: inherit;
+}
+
+.widget-add-row button {
+    background: var(--accent-solid);
+    border: none;
+    color: #fff;
+    width: 28px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.widget-add-row button:hover {
+    filter: brightness(1.1);
+}
+
+/* ---- Mobile: card-controls (incl. the Add Block button) are
+   already forced visible below 860px by dashboard.css, so the
+   button doesn't need its own hover-only affordance there. ---- */

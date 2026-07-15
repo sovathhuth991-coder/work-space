@@ -52,6 +52,164 @@ async function getCurrentUser() {
 }
 
 // ============================================================
+// PHASE 2: Tasks sync (proof of concept)
+// ============================================================
+// Each app feature stores its data in localStorage as an array of plain
+// JS objects, each with its own string `id`. The plan (docs/SYNC-PLAN.md)
+// mirrors every item into a Supabase table shaped as
+//   (id text, user_id uuid, data jsonb, updated_at timestamptz)
+// with a composite primary key on (id, user_id). The existing JS objects
+// sync close to as-is, with no per-field migration. Sync is "last push
+// wins": the app pushes on every local save and pulls (merging by id)
+// whenever the user signs in. Deletions delete the cloud row and keep a
+// small tombstone list so a later pull can't resurrect a deleted item.
+
+const DELETED_TASKS_KEY = 'deletedTaskIds';
+let lastSyncErrorAt = 0;
+
+function toastSyncError(message) {
+    console.warn('[sync] ' + message);
+    if (typeof showToast === 'function') {
+        const now = Date.now();
+        if (now - lastSyncErrorAt < 15000) return; // throttle to avoid spam
+        lastSyncErrorAt = now;
+        showToast('Sync error: ' + message, 'error', 5000);
+    }
+}
+
+function toastSyncInfo(message) {
+    if (typeof showToast === 'function') showToast(message, 'success', 2500);
+}
+
+function getSupabaseClient() { return supabaseClient; }
+
+function safeParseArray(json) {
+    try {
+        const v = JSON.parse(json);
+        return Array.isArray(v) ? v : [];
+    } catch (_) {
+        return [];
+    }
+}
+
+// Generic: push every item currently in `localKey` to `table`.
+// Returns the Supabase error (or null) so callers can surface it.
+async function pushToCloud(table, localKey) {
+    const user = await getCurrentUser();
+    if (!user) return null;
+    const local = safeParseArray(localStorage.getItem(localKey));
+    if (!local.length) return null;
+    const now = new Date().toISOString();
+    const rows = local.map(item => ({
+        id: String(item.id),
+        user_id: user.id,
+        data: item,
+        updated_at: now
+    }));
+    const { error } = await supabaseClient.from(table).upsert(rows, { onConflict: 'id,user_id' });
+    if (error) { toastSyncError('pushToCloud(' + table + '): ' + error.message); return error; }
+    return null;
+}
+
+// Generic: pull this user's rows from `table` and merge into `localKey`.
+// `afterMerge`, if provided, is called once after a successful merge so the
+// right UI can re-render. Returns the Supabase error (or null).
+async function pullFromCloud(table, localKey, afterMerge) {
+    const user = await getCurrentUser();
+    if (!user) return null;
+    const { data, error } = await supabaseClient.from(table).select('*').eq('user_id', user.id);
+    if (error) { toastSyncError('pullFromCloud(' + table + '): ' + error.message); return error; }
+    if (!data || !data.length) return null;
+
+    const local = safeParseArray(localStorage.getItem(localKey));
+    const byId = new Map(local.map(t => [String(t.id), t]));
+    const tombstones = safeParseArray(localStorage.getItem(DELETED_TASKS_KEY));
+    let changed = false;
+
+    for (const row of data) {
+        if (tombstones.includes(row.id)) continue;
+        byId.set(row.id, row.data);
+        changed = true;
+    }
+
+    if (changed) {
+        localStorage.setItem(localKey, JSON.stringify([...byId.values()]));
+        if (typeof afterMerge === 'function') afterMerge();
+    }
+    return null;
+}
+
+async function deleteItemInCloud(table, id) {
+    const user = await getCurrentUser();
+    if (!user) return null;
+    const { error } = await supabaseClient.from(table).delete().eq('id', String(id)).eq('user_id', user.id);
+    if (error) { toastSyncError('deleteItemInCloud(' + table + '): ' + error.message); return error; }
+    return null;
+}
+
+// --- Tasks ---
+async function pushMyTasks() { return await pushToCloud('tasks', 'myTasks'); }
+
+async function pullMyTasks() {
+    return await pullFromCloud('tasks', 'myTasks', () => {
+        if (typeof renderMyTasks === 'function') renderMyTasks();
+        if (typeof updateDashboardStats === 'function') updateDashboardStats();
+    });
+}
+
+async function deleteTaskInCloud(id) { return await deleteItemInCloud('tasks', id); }
+
+function markTaskDeleted(id) {
+    const tombstones = safeParseArray(localStorage.getItem(DELETED_TASKS_KEY));
+    if (!tombstones.includes(id)) {
+        tombstones.push(id);
+        localStorage.setItem(DELETED_TASKS_KEY, JSON.stringify(tombstones));
+    }
+}
+
+// Manual sync: pull remote changes, then push local ones. Driven by the
+// "Sync now" button; reports the result in the account modal + a toast.
+async function handleAccountSyncNow() {
+    const statusEl = document.getElementById('accountSyncStatus');
+    if (statusEl) statusEl.textContent = 'Syncing…';
+    const user = await getCurrentUser();
+    if (!user) {
+        if (statusEl) statusEl.textContent = 'You are not signed in.';
+        return;
+    }
+    const pullErr = await pullMyTasks();
+    const pushErr = await pushMyTasks();
+    if (pullErr || pushErr) {
+        if (statusEl) statusEl.textContent = 'Sync failed — see console for details.';
+    } else {
+        if (statusEl) statusEl.textContent = 'Synced at ' + new Date().toLocaleTimeString();
+        toastSyncInfo('Synced across devices');
+    }
+}
+
+// Pull remote changes on a timer and when the tab regains focus, so edits
+// made on another device show up here without a manual re-sign-in.
+let syncIntervalStarted = false;
+function startBackgroundSync() {
+    if (syncIntervalStarted) return;
+    syncIntervalStarted = true;
+    setInterval(async () => {
+        const user = await getCurrentUser();
+        if (user) pullMyTasks();
+    }, 15000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) pullMyTasks(); });
+    window.addEventListener('focus', () => pullMyTasks());
+}
+
+function markTaskDeleted(id) {
+    const tombstones = safeParseArray(localStorage.getItem(DELETED_TASKS_KEY));
+    if (!tombstones.includes(id)) {
+        tombstones.push(id);
+        localStorage.setItem(DELETED_TASKS_KEY, JSON.stringify(tombstones));
+    }
+}
+
+// ============================================================
 // UI WIRING
 // ============================================================
 
@@ -167,6 +325,7 @@ async function refreshAuthUI() {
     const user = await getCurrentUser();
     updateAccountButtonUI(user);
     renderAccountModalForUser(user);
+    if (user) pullMyTasks();
 }
 
 // ============================================================
@@ -183,7 +342,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     refreshAuthUI();
-    client.auth.onAuthStateChange(() => refreshAuthUI());
+    startBackgroundSync();
+    client.auth.onAuthStateChange((event) => {
+        refreshAuthUI(); // also pulls the user's cloud tasks when signed in
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') pushMyTasks();
+    });
 });
 
 window.openAccountModal = openAccountModal;
@@ -194,3 +357,9 @@ window.handleAccountSignUp = handleAccountSignUp;
 window.handleAccountMagicLink = handleAccountMagicLink;
 window.handleAccountSignOut = handleAccountSignOut;
 window.getCurrentUser = getCurrentUser;
+window.getSupabaseClient = getSupabaseClient;
+window.pushMyTasks = pushMyTasks;
+window.pullMyTasks = pullMyTasks;
+window.deleteTaskInCloud = deleteTaskInCloud;
+window.markTaskDeleted = markTaskDeleted;
+window.handleAccountSyncNow = handleAccountSyncNow;

@@ -12,7 +12,7 @@ function renderWidgets() {
     const grid = document.getElementById('dashWidgetsGrid');
     if (!grid) return;
     if (!customWidgets.length) {
-        grid.innerHTML = '<p style="color:#475569;font-style:italic;grid-column:1/-1;text-align:center;padding:40px;">No widgets yet.</p>';
+        grid.innerHTML = '<p style="color:#475569;font-style:italic;grid-column:1/-1;text-align:center;padding:40px;">No blocks yet — use + Add Block above to start building this out.</p>';
         return;
     }
     grid.innerHTML = customWidgets.map(widget => {
@@ -22,10 +22,35 @@ function renderWidgets() {
                 content = `<textarea placeholder="Write your notes..." onchange="updateWidgetContent('${widget.id}', this.value)">${escapeHtml(widget.content || '')}</textarea>`;
                 break;
             case 'links':
-                content = `<div class="widget-links">${(widget.links || []).map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="widget-link-item">🔗 ${escapeHtml(l.name)}</a>`).join('')}</div>`;
+                content = `
+                    <div class="widget-links">${(widget.links || []).map((l, i) => `
+                        <div class="widget-link-item">
+                            <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${escapeHtml(l.name)}</a>
+                            <button class="widget-row-delete" onclick="removeWidgetListItem('${widget.id}','links',${i})" title="Remove">✕</button>
+                        </div>`).join('') || '<p class="widget-empty-hint">No links yet — add one below</p>'}
+                    </div>
+                    <div class="widget-add-row">
+                        <input type="text" id="linkName-${widget.id}" placeholder="Label" />
+                        <input type="text" id="linkUrl-${widget.id}" placeholder="https://..." />
+                        <button onclick="addWidgetLink('${widget.id}')" title="Add link">+</button>
+                    </div>
+                `;
                 break;
             case 'stats':
-                content = `<div class="widget-stats">${(widget.stats || []).map(s => `<div class="widget-stat-item"><span class="widget-stat-label">${escapeHtml(s.label)}</span><span class="widget-stat-value">${escapeHtml(s.value)}</span></div>`).join('')}</div>`;
+                content = `
+                    <div class="widget-stats">${(widget.stats || []).map((s, i) => `
+                        <div class="widget-stat-item">
+                            <span class="widget-stat-label">${escapeHtml(s.label)}</span>
+                            <span class="widget-stat-value">${escapeHtml(s.value)}</span>
+                            <button class="widget-row-delete" onclick="removeWidgetListItem('${widget.id}','stats',${i})" title="Remove">✕</button>
+                        </div>`).join('') || '<p class="widget-empty-hint">No stats yet — add one below</p>'}
+                    </div>
+                    <div class="widget-add-row">
+                        <input type="text" id="statLabel-${widget.id}" placeholder="Label" />
+                        <input type="text" id="statValue-${widget.id}" placeholder="Value" />
+                        <button onclick="addWidgetStat('${widget.id}')" title="Add stat">+</button>
+                    </div>
+                `;
                 break;
             case 'timer': {
                 const m = Math.floor(widget.remainingSeconds / 60),
@@ -68,7 +93,10 @@ function renderWidgets() {
                 break;
             }
             case 'quote':
-                content = `<div class="widget-quote">"${escapeHtml(widget.quoteText || 'No quote set')}"${widget.quoteAuthor ? `<div class="widget-quote-author">— ${escapeHtml(widget.quoteAuthor)}</div>` : ''}</div>`;
+                content = `
+                    <textarea class="widget-quote-input" placeholder="Write a quote..." onchange="updateWidgetField('${widget.id}', 'quoteText', this.value)">${escapeHtml(widget.quoteText || '')}</textarea>
+                    <input type="text" class="widget-quote-author-input" placeholder="— Author" value="${escapeHtml(widget.quoteAuthor || '')}" onchange="updateWidgetField('${widget.id}', 'quoteAuthor', this.value)" />
+                `;
                 break;
             case 'weather':
                 content = `<div class="widget-weather"><div class="widget-weather-icon">${escapeHtml(widget.icon || '🌤️')}</div><div class="widget-weather-temp">${escapeHtml(widget.temp || 28)}°C</div><div class="widget-weather-desc">${escapeHtml(widget.condition || 'Sunny')} · ${escapeHtml(widget.location || 'Unknown')}</div></div>`;
@@ -112,10 +140,164 @@ function renderWidgets() {
             default:
                 content = `<p>Unknown widget type</p>`;
         }
-        return `<div class="widget-card widget-${widget.type}"><div class="widget-header"><div class="widget-title">${escapeHtml(widget.title)}</div><div class="widget-actions"><button class="widget-btn delete" onclick="deleteWidget('${widget.id}')">✕</button></div></div><div class="widget-content">${content}</div></div>`;
+        return `<div class="widget-card widget-${widget.type}" data-widget-id="${widget.id}"><div class="widget-header"><span class="widget-drag-handle" draggable="true" title="Drag to reorder">⠿</span><div class="widget-title">${escapeHtml(widget.title)}</div><div class="widget-actions"><button class="widget-btn delete" onclick="deleteWidget('${widget.id}')">✕</button></div></div><div class="widget-content">${content}</div></div>`;
     }).join('');
 
     initAudioPlayers();
+    initWidgetDragReorder();
+}
+
+// ============================================================
+// ADD BLOCK MENU
+// ============================================================
+function toggleWidgetAddMenu(e) {
+    if (e) e.stopPropagation();
+    const dropdown = document.getElementById('widgetAddDropdown');
+    if (dropdown) dropdown.classList.toggle('open');
+}
+
+function closeWidgetAddMenu() {
+    const dropdown = document.getElementById('widgetAddDropdown');
+    if (dropdown) dropdown.classList.remove('open');
+}
+
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('widgetAddDropdown');
+    if (dropdown && dropdown.classList.contains('open') && !e.target.closest('.widget-add-menu')) {
+        dropdown.classList.remove('open');
+    }
+});
+
+function addWidget(type) {
+    const widget = { id: `widget_${Date.now()}`, type };
+    switch (type) {
+        case 'notes':
+            widget.title = '📝 Notes';
+            widget.content = '';
+            break;
+        case 'quote':
+            widget.title = '💬 Quote';
+            widget.quoteText = '';
+            widget.quoteAuthor = '';
+            break;
+        case 'links':
+            widget.title = '🔗 Links';
+            widget.links = [];
+            break;
+        case 'stats':
+            widget.title = '📊 Stats';
+            widget.stats = [];
+            break;
+        default:
+            return;
+    }
+    customWidgets.push(widget);
+    saveCustomWidgets();
+    renderWidgets();
+    closeWidgetAddMenu();
+}
+
+// ============================================================
+// EDITABLE BLOCK CONTENT (quote text/author, links, stats)
+// ============================================================
+function updateWidgetField(id, field, value) {
+    const w = customWidgets.find(w => w.id === id);
+    if (w) {
+        w[field] = value;
+        saveCustomWidgets();
+    }
+}
+
+function addWidgetLink(id) {
+    const nameInput = document.getElementById(`linkName-${id}`);
+    const urlInput = document.getElementById(`linkUrl-${id}`);
+    if (!nameInput || !urlInput) return;
+    const name = nameInput.value.trim();
+    let url = urlInput.value.trim();
+    if (!name || !url) return;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    const w = customWidgets.find(w => w.id === id);
+    if (!w) return;
+    w.links = w.links || [];
+    w.links.push({ name, url });
+    saveCustomWidgets();
+    renderWidgets();
+}
+
+function addWidgetStat(id) {
+    const labelInput = document.getElementById(`statLabel-${id}`);
+    const valueInput = document.getElementById(`statValue-${id}`);
+    if (!labelInput || !valueInput) return;
+    const label = labelInput.value.trim();
+    const value = valueInput.value.trim();
+    if (!label || !value) return;
+    const w = customWidgets.find(w => w.id === id);
+    if (!w) return;
+    w.stats = w.stats || [];
+    w.stats.push({ label, value });
+    saveCustomWidgets();
+    renderWidgets();
+}
+
+function removeWidgetListItem(id, field, index) {
+    const w = customWidgets.find(w => w.id === id);
+    if (!w || !Array.isArray(w[field])) return;
+    w[field].splice(index, 1);
+    saveCustomWidgets();
+    renderWidgets();
+}
+
+// ============================================================
+// DRAG-TO-REORDER BLOCKS
+// Native HTML5 drag-and-drop. The drag handle (not the whole card)
+// is the draggable element, so dragging inside a textarea/input to
+// select text never gets hijacked as a card drag. Only mouse/
+// trackpad input fires these events — touch reordering isn't wired
+// up yet, same limitation as plain HTML5 DnD generally has.
+// ============================================================
+function initWidgetDragReorder() {
+    const grid = document.getElementById('dashWidgetsGrid');
+    if (!grid) return;
+    let dragSrcId = null;
+
+    grid.querySelectorAll('.widget-card').forEach(card => {
+        const handle = card.querySelector('.widget-drag-handle');
+        if (handle) {
+            handle.addEventListener('dragstart', (e) => {
+                dragSrcId = card.dataset.widgetId;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setDragImage(card, 20, 20);
+                card.classList.add('widget-dragging');
+            });
+            handle.addEventListener('dragend', () => {
+                card.classList.remove('widget-dragging');
+                grid.querySelectorAll('.widget-card').forEach(c => c.classList.remove('widget-drag-over'));
+            });
+        }
+
+        card.addEventListener('dragover', (e) => {
+            if (!dragSrcId || card.dataset.widgetId === dragSrcId) return;
+            e.preventDefault();
+            card.classList.add('widget-drag-over');
+        });
+        card.addEventListener('dragleave', () => {
+            card.classList.remove('widget-drag-over');
+        });
+        card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            card.classList.remove('widget-drag-over');
+            const targetId = card.dataset.widgetId;
+            if (!dragSrcId || dragSrcId === targetId) return;
+            const fromIndex = customWidgets.findIndex(w => w.id === dragSrcId);
+            const toIndex = customWidgets.findIndex(w => w.id === targetId);
+            if (fromIndex === -1 || toIndex === -1) return;
+            const [moved] = customWidgets.splice(fromIndex, 1);
+            customWidgets.splice(toIndex, 0, moved);
+            dragSrcId = null;
+            saveCustomWidgets();
+            renderWidgets();
+        });
+    });
 }
 
 // ============================================================

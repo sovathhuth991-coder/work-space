@@ -326,8 +326,9 @@
                     <div class="dash-stats-container">
 
                         <div class="dash-card stat-card" data-card-id="stat-tasks" data-action="switchView"
-                            data-view="todo-view" data-source-view="todo-view" data-detail-action="showTasksDoneTodayModal"
-                            role="button" tabindex="0" aria-label="View Master To-Do">
+                            data-view="todo-view" data-source-view="todo-view"
+                            data-detail-action="showTasksDoneTodayModal" role="button" tabindex="0"
+                            aria-label="View Master To-Do">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
@@ -362,8 +363,9 @@
                         </div>
 
                         <div class="dash-card stat-card" data-card-id="stat-lessons" data-action="switchView"
-                            data-view="lessons-view" data-source-view="lessons-view" data-detail-action="showLessonFoldersModal"
-                            role="button" tabindex="0" aria-label="View Lessons">
+                            data-view="lessons-view" data-source-view="lessons-view"
+                            data-detail-action="showLessonFoldersModal" role="button" tabindex="0"
+                            aria-label="View Lessons">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
@@ -422,11 +424,12 @@
                                         <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
                                             <svg viewBox="0 0 80 80"
                                                 style="transform: rotate(-90deg); width: 100%; height: 100%;">
-                                                <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.06)"
-                                                    stroke-width="6" />
+                                                <circle cx="40" cy="40" r="35" fill="none"
+                                                    stroke="rgba(255,255,255,0.06)" stroke-width="6" />
                                                 <circle id="focusGoalRing" cx="40" cy="40" r="35" fill="none"
-                                                    stroke="url(#focusGoalGradient)" stroke-width="6" stroke-linecap="round"
-                                                    stroke-dasharray="220" stroke-dashoffset="220"
+                                                    stroke="url(#focusGoalGradient)" stroke-width="6"
+                                                    stroke-linecap="round" stroke-dasharray="220"
+                                                    stroke-dashoffset="220"
                                                     style="transition: stroke-dashoffset 0.5s ease;" />
                                                 <defs>
                                                     <linearGradient id="focusGoalGradient" x1="0%" y1="0%" x2="100%"
@@ -440,7 +443,8 @@
                                                 style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
                                                 <span id="focusGoalPercent"
                                                     style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">0%</span>
-                                                <span style="font-size: 0.6rem; color: var(--text-muted);">of goal</span>
+                                                <span style="font-size: 0.6rem; color: var(--text-muted);">of
+                                                    goal</span>
                                             </div>
                                         </div>
                                         <div style="flex: 1; min-width: 150px;">
@@ -451,7 +455,8 @@
                                                 style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 8px;">
                                                 0h 0m / 4h 0m</div>
                                             <div id="focusGoalMessage"
-                                                style="font-size: 0.8rem; color: var(--accent-1); font-weight: 500;"></div>
+                                                style="font-size: 0.8rem; color: var(--accent-1); font-weight: 500;">
+                                            </div>
                                         </div>
                                         <button id="editGoalBtn" class="matrix-btn"
                                             style="padding: 4px 12px; font-size: 0.75rem; white-space: nowrap;"
@@ -501,7 +506,18 @@
                             <div class="card-header-drag"
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;">📦 Custom Widgets</h3>
-                                <div class="card-controls"></div>
+                                <div class="card-controls">
+                                    <div class="widget-add-menu">
+                                        <button class="widget-add-btn" onclick="toggleWidgetAddMenu(event)"
+                                            title="Add a new block">+ Add Block</button>
+                                        <div class="widget-add-dropdown" id="widgetAddDropdown">
+                                            <button onclick="addWidget('notes')">📝 Notes</button>
+                                            <button onclick="addWidget('quote')">💬 Quote</button>
+                                            <button onclick="addWidget('links')">🔗 Links</button>
+                                            <button onclick="addWidget('stats')">📊 Stats</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
                             <div id="dashQuickLinks" class="dash-quick-links"
@@ -631,16 +647,20 @@
                         <h1>Weekly Schedule</h1>
                     </div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                        <button class="matrix-btn" data-action="jumpToTodaySchedule" title="Jump to today (T)">⏮ Today</button>
-                        <button class="matrix-btn" data-action="addTaskToday" title="Add a task to today (Ctrl+N)">＋ Add Task</button>
+                        <button class="matrix-btn" data-action="jumpToTodaySchedule" title="Jump to today (T)">⏮
+                            Today</button>
+                        <button class="matrix-btn" data-action="addTaskToday" title="Add a task to today (Ctrl+N)">＋ Add
+                            Task</button>
                         <button class="matrix-btn" data-action="exportToIcal">📅 Export iCal</button>
                     </div>
                 </div>
 
                 <!-- ===== QUICK DAY NAV ===== -->
-                <div class="schedule-quicknav" id="scheduleQuickNav" role="navigation" aria-label="Quick day navigation">
+                <div class="schedule-quicknav" id="scheduleQuickNav" role="navigation"
+                    aria-label="Quick day navigation">
                     <div class="schedule-quicknav-pills" id="scheduleQuickNavPills"></div>
-                    <span class="schedule-quicknav-hint">Press <kbd>1</kbd>–<kbd>7</kbd> to open a day · <kbd>T</kbd> for today</span>
+                    <span class="schedule-quicknav-hint">Press <kbd>1</kbd>–<kbd>7</kbd> to open a day · <kbd>T</kbd>
+                        for today</span>
                 </div>
 
                 <section class="calendar-section-wrapper">
@@ -1131,7 +1151,8 @@
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
                             <div class="card-header momentum-header">
-                                <h3><span class="momentum-emoji">⚡</span> <span class="momentum-title">Momentum</span></h3>
+                                <h3><span class="momentum-emoji">⚡</span> <span class="momentum-title">Momentum</span>
+                                </h3>
                             </div>
                             <div class="momentum-ring-wrap">
                                 <div class="momentum-ring" id="momentumRing">
@@ -1288,12 +1309,14 @@
                     <div style="padding: 4px 4px 8px;">
                         <div style="display:flex; gap:12px; align-items:flex-end; margin-bottom: 20px;">
                             <div style="flex:1;">
-                                <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Hours</label>
+                                <label
+                                    style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Hours</label>
                                 <input type="number" id="focusGoalHoursInput" min="0" max="12"
                                     style="width:100%; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:1rem; font-family:inherit; box-sizing:border-box;" />
                             </div>
                             <div style="flex:1;">
-                                <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Minutes</label>
+                                <label
+                                    style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Minutes</label>
                                 <input type="number" id="focusGoalMinutesInput" min="0" max="59" step="5"
                                     style="width:100%; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:1rem; font-family:inherit; box-sizing:border-box;" />
                             </div>
@@ -1584,71 +1607,84 @@
                     Sign in only if you want your data to follow you across devices.
                 </p>
 
-                <div style="display:flex; gap:6px; margin-bottom:18px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
-                    <button id="accountTab_signin" class="matrix-btn active" data-action="switchAccountTab" data-tab="signin"
-                        style="flex:1; font-size:0.8rem; padding:8px;">Sign in</button>
+                <div
+                    style="display:flex; gap:6px; margin-bottom:18px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                    <button id="accountTab_signin" class="matrix-btn active" data-action="switchAccountTab"
+                        data-tab="signin" style="flex:1; font-size:0.8rem; padding:8px;">Sign in</button>
                     <button id="accountTab_signup" class="matrix-btn" data-action="switchAccountTab" data-tab="signup"
                         style="flex:1; font-size:0.8rem; padding:8px;">Sign up</button>
-                    <button id="accountTab_magiclink" class="matrix-btn" data-action="switchAccountTab" data-tab="magiclink"
-                        style="flex:1; font-size:0.8rem; padding:8px;">Magic link</button>
+                    <button id="accountTab_magiclink" class="matrix-btn" data-action="switchAccountTab"
+                        data-tab="magiclink" style="flex:1; font-size:0.8rem; padding:8px;">Magic link</button>
                 </div>
 
                 <!-- Sign in panel -->
                 <div id="accountPanel_signin">
                     <div style="margin-bottom:12px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
+                        <label
+                            style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
                         <input type="email" id="accountSignInEmail" placeholder="you@example.com"
                             style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
                     </div>
                     <div style="margin-bottom:16px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Password</label>
-                        <input type="password" id="accountSignInPassword" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
+                        <label
+                            style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Password</label>
+                        <input type="password" id="accountSignInPassword"
+                            placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
                             style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
                     </div>
                     <button class="matrix-btn" data-action="handleAccountSignIn"
-                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Sign in</button>
+                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Sign
+                        in</button>
                 </div>
 
                 <!-- Sign up panel -->
                 <div id="accountPanel_signup" style="display:none;">
                     <div style="margin-bottom:12px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
+                        <label
+                            style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
                         <input type="email" id="accountSignUpEmail" placeholder="you@example.com"
                             style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
                     </div>
                     <div style="margin-bottom:16px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Password</label>
+                        <label
+                            style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Password</label>
                         <input type="password" id="accountSignUpPassword" placeholder="At least 6 characters"
                             style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
                     </div>
                     <button class="matrix-btn" data-action="handleAccountSignUp"
-                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Create account</button>
+                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Create
+                        account</button>
                 </div>
 
                 <!-- Magic link panel -->
                 <div id="accountPanel_magiclink" style="display:none;">
                     <div style="margin-bottom:16px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
+                        <label
+                            style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">Email</label>
                         <input type="email" id="accountMagicLinkEmail" placeholder="you@example.com"
                             style="width:100%; padding:12px 16px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); font-size:0.95rem; outline:none; box-sizing:border-box;" />
                     </div>
                     <button class="matrix-btn" data-action="handleAccountMagicLink"
-                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Send magic link</button>
-                    <p style="margin:10px 0 0 0; font-size:0.78rem; color:var(--text-muted);">No password \u2014 we'll email you a one-time sign-in link instead.</p>
+                        style="width:100%; background:var(--accent-solid); color:#fff; border:none; font-weight:600; padding:12px;">Send
+                        magic link</button>
+                    <p style="margin:10px 0 0 0; font-size:0.78rem; color:var(--text-muted);">No password \u2014 we'll
+                        email you a one-time sign-in link instead.</p>
                 </div>
 
-                <p id="accountModalMessage" style="display:none; margin:16px 0 0 0; font-size:0.82rem; text-align:center;"></p>
+                <p id="accountModalMessage"
+                    style="display:none; margin:16px 0 0 0; font-size:0.82rem; text-align:center;"></p>
             </div>
 
             <!-- Signed-in view -->
             <div id="accountSignedInView" style="display:none;">
                 <p style="margin:0 0 4px 0; font-size:0.85rem; color:var(--text-muted);">Signed in as</p>
-                <p id="accountSignedInEmail" style="margin:0 0 20px 0; font-size:1rem; font-weight:600; color:var(--text-primary);"></p>
+                <p id="accountSignedInEmail"
+                    style="margin:0 0 20px 0; font-size:1rem; font-weight:600; color:var(--text-primary);"></p>
                 <p style="margin:0 0 20px 0; font-size:0.8rem; color:var(--text-muted);">
                     Cross-device sync isn't wired up yet \u2014 this only confirms your account works.
                 </p>
-                <button class="matrix-btn" data-action="handleAccountSignOut"
-                    style="width:100%; padding:12px;">Sign out</button>
+                <button class="matrix-btn" data-action="handleAccountSignOut" style="width:100%; padding:12px;">Sign
+                    out</button>
             </div>
         </div>
     </div>

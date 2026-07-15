@@ -1,7 +1,7 @@
 let myTasks = JSON.parse(localStorage.getItem("myTasks") || "[]");
 let activeTaskCategory = "all";
 
-function saveMyTasks() { localStorage.setItem("myTasks", JSON.stringify(myTasks)); updateTaskCategoryCounts(); updateDashboardStats(); }
+function saveMyTasks() { localStorage.setItem("myTasks", JSON.stringify(myTasks)); updateTaskCategoryCounts(); updateDashboardStats(); if (window.pushMyTasks) window.pushMyTasks(); }
 
 function updateTaskCategoryCounts() {
     ["all", "codes", "teachers", "fun", "general"].forEach(cat => {
@@ -61,6 +61,8 @@ function toggleMyTask(id) {
 
 function deleteMyTask(id) {
     myTasks = myTasks.filter(t => t.id !== id);
+    if (window.markTaskDeleted) window.markTaskDeleted(id);
+    if (window.deleteTaskInCloud) window.deleteTaskInCloud(id);
     saveMyTasks();
     renderMyTasks();
 }
