@@ -49,6 +49,9 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/firebase@9.22.0/firebase-app-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@9.22.0/firebase-database-compat.js"></script>
     <!-- ===== CSS Modules ===== -->
     <link rel="stylesheet" href="WorkspaceCore/reset.css" />
     <link rel="stylesheet" href="WorkspaceCore/variables.css" />
@@ -1695,9 +1698,9 @@
     <script type="text/javascript" src="WorkspaceCore/config.js"></script>
     <!-- ===== TinyBase (local data store + sync) ===== -->
     <script type="text/javascript" src="WorkspaceShared/tinybase.iife.js"></script>
-    <script type="text/javascript" src="WorkspaceShared/tinybase-partykit.iife.js"></script>
-    <script type="text/javascript" src="WorkspaceShared/partysocket.iife.js"></script>
     <script type="text/javascript" src="WorkspaceShared/tinybase-store.js"></script>
+    <!-- ===== Firebase Sync ===== -->
+    <script type="text/javascript" src="WorkspaceShared/firebase-sync.js"></script>
     <!-- Accounts (Phase 1) — see docs/SYNC-PLAN.md. Config must load before sync.js. -->
     <script type="text/javascript" src="WorkspaceCore/supabase-config.js"></script>
     <script type="text/javascript" src="WorkspaceShared/sync.js"></script>

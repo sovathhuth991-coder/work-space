@@ -1,5 +1,5 @@
-// ============================================================
-// tinybase-store.js — TinyBase MergeableStore + PartyKit sync
+﻿// ============================================================
+// tinybase-store.js — TinyBase MergeableStore + localStorage proxy
 // ============================================================
 
 (function () {
@@ -8,10 +8,7 @@
     return;
   }
 
-  const {
-    createMergeableStore,
-    createLocalStoragePersister,
-  } = window.TinyBase;
+  const { createMergeableStore } = window.TinyBase;
 
   const SYNCED_KEYS = new Set([
     'scheduleEvents', 'myTasks', 'habits', 'libraryItems', 'taskTemplates',
@@ -63,7 +60,7 @@
         try {
           const data = JSON.parse(value);
           if (Array.isArray(data)) {
-            store.setTable(key, data.map((item, idx) => ({ ...item, _id: item.id || `ls_${key}_${idx}` })));
+            store.setTable(key, data.map((item, idx) => ({ ...item, _id: item.id || 'ls_' + key + '_' + idx })));
           } else if (typeof data === 'object' && data !== null) {
             store.setValue(key, data);
           } else {
@@ -102,12 +99,9 @@
     };
   }
 
-  const PARTYKIT_ENABLED = typeof window.TinyBasePersisterPartyKitClient !== 'undefined';
-
   const store = createMergeableStore();
   const listeners = {};
   let partyKitPersister = null;
-  let localStoragePersister = null;
 
   function notify(tableOrValueId) {
     const cbs = listeners[tableOrValueId];
@@ -125,7 +119,8 @@
   }
 
   function getTable(tableId) {
-    try { return store.getTable(tableId); } catch (_) { return []; }
+    try { const obj = store.getTable(tableId); return Object.values(obj || {}); } catch (_) { return []; }
+  }
   }
 
   function getRow(tableId, rowId) {
@@ -228,7 +223,7 @@
         if (!raw) return;
         const data = JSON.parse(raw);
         if (Array.isArray(data)) {
-          store.setTable(tableId, data.map((item, idx) => ({ ...item, _id: item.id || `ls_${lsKey}_${idx}` })));
+          store.setTable(tableId, data.map((item, idx) => ({ ...item, _id: item.id || 'ls_' + lsKey + '_' + idx })));
         } else if (typeof data === 'object' && data !== null) {
           store.setValue(tableId, data);
         }
@@ -237,7 +232,7 @@
     });
 
     if (migrated.length) {
-      console.log(`tinybase-store: migrated ${migrated.length} localStorage keys to store`, migrated);
+      console.log('tinybase-store: migrated ' + migrated.length + ' localStorage keys to store', migrated);
     }
   }
 
@@ -245,14 +240,7 @@
     migrateLocalStorageToStore();
     installLocalStorageProxy();
 
-    localStoragePersister = createLocalStoragePersister(store, 'workspaceHubStore');
-    try {
-      await localStoragePersister.startAutoLoad();
-    } catch (e) {
-      console.warn('tinybase-store: localStorage persister load failed', e);
-    }
-
-    if (PARTYKIT_ENABLED && window.PARTYKIT_URL && window.PARTYKIT_ROOM) {
+    if (typeof window.TinyBasePersisterPartyKitClient !== 'undefined' && window.PARTYKIT_URL && window.PARTYKIT_ROOM) {
       try {
         const { createPartyKitPersister } = window.TinyBasePersisterPartyKitClient;
         const partySocket = new window.PartySocket({

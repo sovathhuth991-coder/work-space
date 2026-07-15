@@ -1,8 +1,9 @@
-const DEFAULT_DASH_TODOS = [
+﻿const DEFAULT_DASH_TODOS = [
     { id: "todo_1", text: "Open today's lesson page", done: false },
     { id: "todo_2", text: "Add one study block", done: false },
     { id: "todo_3", text: "Check off completed tasks", done: false }
 ];
+const DEFAULT_QUICK_NOTES = [];
 let dashTodos = [];
 let dashTodosUnsub = null;
 let quickNotes = [];
@@ -38,7 +39,7 @@ function renderDashTodos() {
                     <span class="checkmark"></span>
                     <span class="task-text">${escapeHtml(todo.text)}</span>
                 </label>
-                <button class="todo-delete-btn" title="Delete task">✕</button>
+                <button class="todo-delete-btn" title="Delete task">âœ•</button>
             </li>
         `).join("");
 
@@ -60,7 +61,7 @@ function renderDashTodos() {
     const dashEyebrow = document.getElementById('dashTodoEyebrow');
     if (dashEyebrow) {
         const openCount = dashTodos.filter(t => !t.done).length;
-        dashEyebrow.textContent = `TASKS · ${openCount} OPEN`;
+        dashEyebrow.textContent = `TASKS Â· ${openCount} OPEN`;
     }
 }
 
@@ -193,12 +194,12 @@ function updateHubSessionsWidget(current, next, todayEvents) {
         html += `
             <div class="session-item current-session" style="padding: 10px; font-size: 0.85rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-size: 0.75rem; color: #34d399; font-weight: 600;">● ACTIVE</span>
+                    <span style="font-size: 0.75rem; color: #34d399; font-weight: 600;">â— ACTIVE</span>
                     <span style="font-size: 0.7rem; color: var(--text-muted);">NOW</span>
                 </div>
                 <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(current.title)}</div>
                 <div style="display: flex; gap: 8px; font-size: 0.75rem; color: var(--text-muted);">
-                    <span style="color: #34d399;">⏱ Active</span>
+                    <span style="color: #34d399;">â± Active</span>
                 </div>
             </div>
         `;
@@ -215,7 +216,7 @@ function updateHubSessionsWidget(current, next, todayEvents) {
                     </div>
                     <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(taskName)}</div>
                     <div style="display: flex; gap: 8px; font-size: 0.75rem; color: var(--text-muted);">
-                        <span style="color: #34d399;">⏱ ${focusTime}</span>
+                        <span style="color: #34d399;">â± ${focusTime}</span>
                     </div>
                 </div>
             `;
@@ -224,7 +225,7 @@ function updateHubSessionsWidget(current, next, todayEvents) {
     if (!current && recentSessions.length === 0) {
         html = `
             <div class="session-history-empty" style="padding: 16px 8px;">
-                <div style="font-size: 1.2rem; margin-bottom: 4px;">📊</div>
+                <div style="font-size: 1.2rem; margin-bottom: 4px;">ðŸ“Š</div>
                 <div style="color: var(--text-muted); font-size: 0.75rem;">No sessions yet</div>
             </div>
         `;
@@ -270,7 +271,7 @@ function renderAllSessions(current, next, todayEvents) {
             const endAmpm = endHours >= 12 ? 'PM' : 'AM';
             const endFormattedHours = endHours % 12 || 12;
             const endFormattedMinutes = String(endMinutes).padStart(2, '0');
-            return `${timeStr} – ${endFormattedHours}:${endFormattedMinutes} ${endAmpm}`;
+            return `${timeStr} â€“ ${endFormattedHours}:${endFormattedMinutes} ${endAmpm}`;
         }
         return timeStr;
     };
@@ -278,18 +279,18 @@ function renderAllSessions(current, next, todayEvents) {
     if (current) {
         const currentStart = current.start || 'Now';
         const currentEnd = current.end || '';
-        const timeRange = currentEnd ? `${currentStart} – ${currentEnd}` : currentStart;
+        const timeRange = currentEnd ? `${currentStart} â€“ ${currentEnd}` : currentStart;
         html += `
             <div class="session-item current-session" data-action="showSessionDetailsModal" title="Click to view current session details">
                 <div class="session-time-range">${timeRange}</div>
                 <div class="session-info">
                     <div class="session-name">${escapeHtml(current.title)}</div>
                     <div class="session-stats">
-                        <span class="session-stat focus">⏱ Active</span>
+                        <span class="session-stat focus">â± Active</span>
                     </div>
                 </div>
                 <span class="session-badge">NOW</span>
-                <div class="session-arrow">→</div>
+                <div class="session-arrow">â†’</div>
             </div>
         `;
     }
@@ -306,12 +307,12 @@ function renderAllSessions(current, next, todayEvents) {
                     <div class="session-info">
                         <div class="session-name">${escapeHtml(taskName)}</div>
                         <div class="session-stats">
-                            <span class="session-stat focus">⏱ ${focusTime}</span>
-                            <span class="session-stat break">☕ ${breakTime}</span>
-                            <span class="session-stat total">⏳ ${totalDuration}</span>
+                            <span class="session-stat focus">â± ${focusTime}</span>
+                            <span class="session-stat break">â˜• ${breakTime}</span>
+                            <span class="session-stat total">â³ ${totalDuration}</span>
                         </div>
                     </div>
-                    <div class="session-arrow">→</div>
+                    <div class="session-arrow">â†’</div>
                 </div>
             `;
         });
@@ -319,7 +320,7 @@ function renderAllSessions(current, next, todayEvents) {
     if (!current && todaySessions.length === 0) {
         html = `
             <div class="session-history-empty">
-                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                <div style="font-size: 2rem; margin-bottom: 8px;">ðŸ“Š</div>
                 <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your progress</div>
             </div>
@@ -342,11 +343,11 @@ function updateQuickJumpLinks() {
     const recentLessons = document.getElementById("dashRecentLessons");
     const recentLibs = document.getElementById("dashRecentLibs");
     const activePage = (typeof hubState !== 'undefined' && hubState?.pages) ? hubState.pages[hubState.activePageId] : null;
-    if (recentLessons && activePage) recentLessons.innerHTML = `<span style="color:#e2e8f0;">📄 ${escapeHtml(activePage.title)}</span>`;
+    if (recentLessons && activePage) recentLessons.innerHTML = `<span style="color:#e2e8f0;">ðŸ“„ ${escapeHtml(activePage.title)}</span>`;
     else if (recentLessons) recentLessons.innerHTML = `<span style="color:#475569;">No open lesson</span>`;
     if (recentLibs && libraryItems.length > 0) {
         const recent = libraryItems.slice(-3).reverse();
-        recentLibs.innerHTML = recent.map(item => `<a href="${escapeHtml(item.url)}" target="_blank" style="color:#38bdf8;display:block;padding:2px 0;">🔗 ${escapeHtml(item.title)}</a>`).join('');
+        recentLibs.innerHTML = recent.map(item => `<a href="${escapeHtml(item.url)}" target="_blank" style="color:#38bdf8;display:block;padding:2px 0;">ðŸ”— ${escapeHtml(item.title)}</a>`).join('');
     } else if (recentLibs) {
         recentLibs.innerHTML = `<span style="color:#475569;">No bookmarks yet</span>`;
     }
@@ -381,7 +382,7 @@ function updateDailyStats() {
     if (total === 0) {
         el.textContent = 'No tasks scheduled for today';
     } else {
-        el.textContent = `⭐ ${pct}% complete · ${done}/${total} today`;
+        el.textContent = `â­ ${pct}% complete Â· ${done}/${total} today`;
     }
 }
 
@@ -398,7 +399,7 @@ function renderSessionHistory() {
     if (todaySessions.length === 0) {
         container.innerHTML = `
             <div class="session-history-empty">
-                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                <div style="font-size: 2rem; margin-bottom: 8px;">ðŸ“Š</div>
                 <div style="color: var(--text-muted); font-size: 0.9rem;">No completed sessions yet today</div>
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your history</div>
             </div>
@@ -423,12 +424,12 @@ function renderSessionHistory() {
                 <div class="session-history-info">
                     <div class="session-history-task-name">${escapeHtml(taskName)}</div>
                     <div class="session-history-duration">
-                        <span class="focus-time">⏱ ${focusTime}</span>
-                        <span class="break-time">☕ ${breakTime}</span>
-                        <span>⏳ ${totalDuration}</span>
+                        <span class="focus-time">â± ${focusTime}</span>
+                        <span class="break-time">â˜• ${breakTime}</span>
+                        <span>â³ ${totalDuration}</span>
                     </div>
                 </div>
-                <div class="session-history-arrow">→</div>
+                <div class="session-history-arrow">â†’</div>
             </div>
         `;
     }).join('');
@@ -530,7 +531,7 @@ window.showSessionDetailsModal = function(sessionTimestamp) {
     html += `<div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;"><div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Total Time</div><div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary);">${formatTimeShort(totalTimeToday)}</div></div>`;
     html += `</div>`;
     if (todaySessions.length > 0 || (currentFocus > 0 || currentBreak > 0)) {
-        html += `<h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">📋 Session Timeline</h3>`;
+        html += `<h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">ðŸ“‹ Session Timeline</h3>`;
         html += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
         todaySessions.slice().reverse().forEach((session, index) => {
             const time = new Date(session.timestamp);
@@ -544,10 +545,10 @@ window.showSessionDetailsModal = function(sessionTimestamp) {
             html += `<div style="min-width: 100px; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">${timeStr}</div>`;
             html += `<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(session.label)}</div>`;
             html += `<div style="display: flex; gap: 12px; font-size: 0.75rem; align-items: center; flex-wrap: wrap;">`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏱</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.focusSeconds)}</span></div>`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">☕</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.breakSeconds)}</span></div>`;
-            if (session.idleSeconds > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.idleSeconds)}</span></div>`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏳</span><span style="color: var(--text-secondary); font-variant-numeric: tabular-nums;">${formatTimeShort(sessionDuration)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â±</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.focusSeconds)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â˜•</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.breakSeconds)}</span></div>`;
+            if (session.idleSeconds > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â¸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.idleSeconds)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â³</span><span style="color: var(--text-secondary); font-variant-numeric: tabular-nums;">${formatTimeShort(sessionDuration)}</span></div>`;
             if (efficiency > 0) html += `<div style="margin-left: auto; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); color: var(--accent-1);">${efficiency}%</div>`;
             html += `</div></div></div>`;
         });
@@ -556,17 +557,17 @@ window.showSessionDetailsModal = function(sessionTimestamp) {
             const currentEfficiency = currentDuration > 0 ? Math.round((currentFocus / currentDuration) * 100) : 0;
             html += `<div style="background: rgba(124, 109, 240, 0.05); padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--accent-1); border-left: 3px solid var(--accent-1); display: flex; align-items: center; gap: 12px;">`;
             html += `<div style="min-width: 100px; font-size: 0.8rem; color: var(--accent-1); font-weight: 600;">NOW</div>`;
-            html += `<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">🟢 Current Session</div>`;
+            html += `<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">ðŸŸ¢ Current Session</div>`;
             html += `<div style="display: flex; gap: 12px; font-size: 0.75rem; align-items: center; flex-wrap: wrap;">`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏱</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentFocus)}</span></div>`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">☕</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentBreak)}</span></div>`;
-            if (currentIdle > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentIdle)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â±</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentFocus)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â˜•</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentBreak)}</span></div>`;
+            if (currentIdle > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â¸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentIdle)}</span></div>`;
             html += `<div style="margin-left: auto; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; background: rgba(52, 211, 153, 0.15); color: #34d399;">${currentEfficiency}% focus</div>`;
             html += `</div></div></div>`;
         }
         html += `</div>`;
     } else {
-        html += `<div style="text-align: center; padding: 48px 16px; color: var(--text-muted);"><div style="font-size: 3rem; margin-bottom: 16px;">📊</div><div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No sessions yet today</div><div style="font-size: 0.9rem;">Start a focus session to see your progress here</div></div>`;
+        html += `<div style="text-align: center; padding: 48px 16px; color: var(--text-muted);"><div style="font-size: 3rem; margin-bottom: 16px;">ðŸ“Š</div><div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No sessions yet today</div><div style="font-size: 0.9rem;">Start a focus session to see your progress here</div></div>`;
     }
     content.innerHTML = html;
     modal.style.display = 'flex';
@@ -620,12 +621,12 @@ function updateFocusGoalDisplay() {
     const messageEl = document.getElementById('focusGoalMessage');
     if (messageEl) {
         let message = '';
-        if (percentage === 0) message = '🚀 Ready to start?';
-        else if (percentage < 25) message = '💪 Great start!';
-        else if (percentage < 50) message = '🔥 Keep it up!';
-        else if (percentage < 75) message = '⚡ Almost there!';
-        else if (percentage < 100) message = '🎯 So close!';
-        else message = '🏆 Goal achieved! Amazing!';
+        if (percentage === 0) message = 'ðŸš€ Ready to start?';
+        else if (percentage < 25) message = 'ðŸ’ª Great start!';
+        else if (percentage < 50) message = 'ðŸ”¥ Keep it up!';
+        else if (percentage < 75) message = 'âš¡ Almost there!';
+        else if (percentage < 100) message = 'ðŸŽ¯ So close!';
+        else message = 'ðŸ† Goal achieved! Amazing!';
         messageEl.textContent = message;
     }
 }
@@ -794,13 +795,13 @@ function calculateStreak() {
 }
 
 function getStreakEmoji(streak) {
-    if (streak === 0) return '💤';
-    if (streak < 3) return '🌱';
-    if (streak < 7) return '🔥';
-    if (streak < 14) return '🔥🔥';
-    if (streak < 30) return '🔥🔥🔥';
-    if (streak < 60) return '⚡⚡⚡';
-    return '🏆🔥⚡';
+    if (streak === 0) return 'ðŸ’¤';
+    if (streak < 3) return 'ðŸŒ±';
+    if (streak < 7) return 'ðŸ”¥';
+    if (streak < 14) return 'ðŸ”¥ðŸ”¥';
+    if (streak < 30) return 'ðŸ”¥ðŸ”¥ðŸ”¥';
+    if (streak < 60) return 'âš¡âš¡âš¡';
+    return 'ðŸ†ðŸ”¥âš¡';
 }
 function getStreakColor(streak) {
     if (streak === 0) return 'var(--text-muted)';
@@ -911,9 +912,9 @@ const DEFAULT_CARD_VISIBILITY = {
     'stat-tasks': true, 'stat-schedule': true, 'stat-lessons': true, 'stat-streak': true
 };
 const CARD_LABELS = {
-    'banner': '🎯 Today\'s Focus', 'todo': '☑ Master To-Do',
-    'widgets': '📦 Custom Widgets', 'stat-tasks': '✓ Tasks Done',
-    'stat-schedule': '▦ Today\'s Tasks', 'stat-lessons': '▣ Lesson Folders', 'stat-streak': '🔥 Day Streak'
+    'banner': 'ðŸŽ¯ Today\'s Focus', 'todo': 'â˜‘ Master To-Do',
+    'widgets': 'ðŸ“¦ Custom Widgets', 'stat-tasks': 'âœ“ Tasks Done',
+    'stat-schedule': 'â–¦ Today\'s Tasks', 'stat-lessons': 'â–£ Lesson Folders', 'stat-streak': 'ðŸ”¥ Day Streak'
 };
 function loadCardVisibility() {
     try { const saved = localStorage.getItem('dashboardCardVisibility'); if (saved) return JSON.parse(saved); } catch (e) {}
@@ -1058,8 +1059,8 @@ function renderMiniCalendar() {
             <div class="mini-calendar-header">
                 <span class="mc-month">${monthNames[month]} ${year}</span>
                 <div class="mc-nav">
-                    <button data-mc-action="prev" title="Previous month">‹</button>
-                    <button data-mc-action="next" title="Next month">›</button>
+                    <button data-mc-action="prev" title="Previous month">â€¹</button>
+                    <button data-mc-action="next" title="Next month">â€º</button>
                 </div>
             </div>
             <div class="mini-calendar-weekdays">${dayNames.map(n => `<span>${n}</span>`).join('')}</div>
@@ -1091,9 +1092,9 @@ function initMiniCalendar() {
         <div class="card-glow-border"></div>
         <div class="card-inner">
             <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h3 style="margin:0;">📅 Calendar</h3>
+                <h3 style="margin:0;">ðŸ“… Calendar</h3>
                 <div class="card-controls">
-                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                    <span class="card-drag-handle" title="Drag to move">â ¿</span>
                 </div>
             </div>
             <div id="dashMiniCalendar"></div>
