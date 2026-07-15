@@ -997,7 +997,9 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             'weather':       { x: rightX, y: 0,   w: rightW, h: 220 },
             'date-countdown': { x: rightX, y: 240, w: rightW, h: 260 }
         };
-        return DEFAULTS[cardId] || { x: 0, y: 0, w: leftW, h: 260 };
+        // Unknown card ids (e.g. user-added "notion-like" cards) return null so
+        // layoutCards() can auto-place them instead of stacking at (0,0).
+        return DEFAULTS[cardId] || null;
     }
 
     function loadLayout() {
@@ -1458,7 +1460,13 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         const canvasMode = isCanvasMode();
         const canvasWidth = el.getBoundingClientRect().width || 900;
         const layout = loadLayout();
-
+        const gap = 20;
+        const leftW = Math.max(280, Math.round((canvasWidth - gap) * 0.6));
+        // Automatic-placement column for any card without a saved layout or a
+        // hard-coded default (e.g. user-added "notion-like" cards). Stack them
+        // below the known left-column cards (banner/schedule-mini/todo end at
+        // ~880px) so they never overlap anything.
+        let fallbackY = 900;
         getPositionedItems().forEach(item => {
             const key = item.dataset.cardId || item.dataset.groupId;
             item.classList.toggle('canvas-card', canvasMode);
@@ -1467,9 +1475,16 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
                 return;
             }
             const saved = layout[key];
-            const rect = saved
-                ? { x: saved.x, y: saved.y, w: saved.w, h: saved.h }
-                : getDefaultRect(key, canvasWidth);
+            let rect;
+            if (saved) {
+                rect = { x: saved.x, y: saved.y, w: saved.w, h: saved.h };
+            } else {
+                rect = getDefaultRect(key, canvasWidth);
+                if (!rect) {
+                    rect = { x: 0, y: fallbackY, w: leftW, h: 260 };
+                    fallbackY += 260 + gap;
+                }
+            }
             applyRect(item, rect);
             if (saved && saved.minimized) {
                 item.dataset.restoreHeight = rect.h + 'px';
