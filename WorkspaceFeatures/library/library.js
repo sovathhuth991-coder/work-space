@@ -1,37 +1,6 @@
-let libraryItems = [];
-let libraryUnsub = null;
+let libraryItems = JSON.parse(localStorage.getItem("libraryItems") || "[]");
 
-function loadLibraryItems() {
-    if (window.TinyBaseStore) {
-        libraryItems = window.TinyBaseStore.getTable('libraryItems').map(row => {
-            const { _id, ...rest } = row;
-            return rest;
-        }) || [];
-    } else {
-        libraryItems = JSON.parse(localStorage.getItem("libraryItems") || "[]");
-    }
-}
-
-function saveLibraryItems() {
-    const data = libraryItems.map(item => ({ ...item, _id: item.id }));
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setTable('libraryItems', data);
-    } else {
-        localStorage.setItem("libraryItems", JSON.stringify(libraryItems));
-    }
-    updateDashboardStats();
-}
-
-function initLibraryStore() {
-    loadLibraryItems();
-    if (window.TinyBaseStore) {
-        libraryUnsub = window.TinyBaseStore.on('libraryItems', () => { loadLibraryItems(); renderLibrary(); });
-    }
-}
-
-function destroyLibraryStore() {
-    if (libraryUnsub) { libraryUnsub(); libraryUnsub = null; }
-}
+function saveLibraryItems() { localStorage.setItem("libraryItems", JSON.stringify(libraryItems)); updateDashboardStats(); }
 
 function isValidUrl(url) {
     // Prevent javascript: URIs and other dangerous protocols
@@ -93,10 +62,3 @@ function deleteLibraryItem(id) {
     saveLibraryItems();
     renderLibrary();
 }
-
-// Expose functions globally
-window.renderLibrary = renderLibrary;
-window.addLibraryItem = addLibraryItem;
-window.deleteLibraryItem = deleteLibraryItem;
-window.initLibraryStore = initLibraryStore;
-window.destroyLibraryStore = destroyLibraryStore;

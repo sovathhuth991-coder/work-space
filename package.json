@@ -1,1 +1,13 @@
-﻿{"name":"workspace-hub","version":"1.0.0","private":true,"description":"Workspace Hub — personal productivity PWA. No build step; this package.json exists only to run stylelint locally before deploying.","scripts":{"lint:css":"stylelint \"**/*.css\"","build:tinybase":"node scripts/build-tinybase-iife.js","firebase:serve":"firebase serve","firebase:deploy":"firebase deploy","deploy":"deploy.bat"},"devDependencies":{"stylelint":"^17.14.0","stylelint-config-standard":"^40.0.0","firebase-tools":"^13.0.0"},"dependencies":{"tinybase":"^9.2.0"}}
+{
+  "name": "workspace-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Workspace Hub — personal productivity PWA. No build step; this package.json exists only to run stylelint locally before deploying.",
+  "scripts": {
+    "lint:css": "stylelint \"**/*.css\""
+  },
+  "devDependencies": {
+    "stylelint": "^17.14.0",
+    "stylelint-config-standard": "^40.0.0"
+  }
+}

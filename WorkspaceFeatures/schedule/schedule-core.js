@@ -5,12 +5,7 @@
 const DEFAULT_EVENT_COLOR = 'default';
 
 function saveEvents() {
-    const data = events.map(ev => ({ ...ev, _id: ev.id }));
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setTable('scheduleEvents', data);
-    } else {
-        localStorage.setItem("scheduleEvents", JSON.stringify(events));
-    }
+    localStorage.setItem("scheduleEvents", JSON.stringify(events));
     if (typeof updateDashboardLiveSession === 'function') updateDashboardLiveSession();
     if (typeof updateDashboardStats === 'function') updateDashboardStats();
     if (typeof updateDailyStats === 'function') updateDailyStats();

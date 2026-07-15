@@ -503,23 +503,8 @@ function onContextMenuOutsideClick(e) {
     if (activeContextMenu && !activeContextMenu.contains(e.target)) closeContextMenu();
 }
 
-function openContextMenu(card, clientX, clientY) {
-    closeContextMenu();
-
-    const items = [];
-    const expandBtn = card.querySelector('[data-nav-expand]');
-    if (expandBtn) {
-        items.push({ label: '🔍 View Details', onClick: () => expandBtn.click() });
-    }
-    const jumpBtn = card.querySelector('[data-nav-jump]');
-    const sourceView = card.dataset.sourceView;
-    if (jumpBtn) {
-        items.push({ label: '↗ Go to Source', onClick: () => jumpBtn.click() });
-    } else if (sourceView) {
-        items.push({ label: '↗ Go to Source', onClick: () => { if (typeof switchView === 'function') switchView(sourceView); } });
-    }
+function renderContextMenu(items, clientX, clientY) {
     if (!items.length) return;
-
     const menu = document.createElement('div');
     menu.className = 'card-context-menu';
     items.forEach(item => {
@@ -530,7 +515,6 @@ function openContextMenu(card, clientX, clientY) {
     });
     document.body.appendChild(menu);
 
-    // Keep it on-screen
     const menuRect = menu.getBoundingClientRect();
     const left = Math.min(clientX, window.innerWidth - menuRect.width - 8);
     const top = Math.min(clientY, window.innerHeight - menuRect.height - 8);
@@ -539,6 +523,38 @@ function openContextMenu(card, clientX, clientY) {
 
     activeContextMenu = menu;
     setTimeout(() => document.addEventListener('mousedown', onContextMenuOutsideClick, true), 0);
+}
+
+function openContextMenu(card, clientX, clientY) {
+    closeContextMenu();
+
+    const items = [];
+    const expandBtn = card.querySelector('[data-nav-expand]');
+    const detailAction = card.dataset.detailAction;
+    if (expandBtn) {
+        items.push({ label: 'View Details', onClick: () => expandBtn.click() });
+    } else if (detailAction && typeof window[detailAction] === 'function') {
+        items.push({ label: 'View Details', onClick: () => window[detailAction]() });
+    }
+    const jumpBtn = card.querySelector('[data-nav-jump]');
+    const sourceView = card.dataset.sourceView;
+    if (jumpBtn) {
+        items.push({ label: 'Go to Source', onClick: () => jumpBtn.click() });
+    } else if (sourceView) {
+        items.push({ label: 'Go to Source', onClick: () => { if (typeof switchView === 'function') switchView(sourceView); } });
+    }
+    const group = card.closest('.dash-card-group');
+    if (group) {
+        items.push({ label: 'Split from Group', onClick: () => { if (typeof window.__dashSplitGroup === 'function') window.__dashSplitGroup(group); } });
+    }
+    renderContextMenu(items, clientX, clientY);
+}
+
+function openGroupContextMenu(wrapper, clientX, clientY) {
+    closeContextMenu();
+    renderContextMenu([
+        { label: 'Split Group', onClick: () => { if (typeof window.__dashSplitGroup === 'function') window.__dashSplitGroup(wrapper); } }
+    ], clientX, clientY);
 }
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeContextMenu(); });
@@ -762,20 +778,38 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     'use strict';
 
     const STORAGE_KEY = 'dashboardCanvasLayout';
+    const GROUPS_KEY = 'dashboardCanvasGroups';
     const BREAKPOINT = 860;
     const EDGE_ZONE = 10;
     const MIN_W = 220, MIN_H = 140;
+    const MERGE_ZONE = 0.25; // outer 25% of a card's width is the "drop here to combine" zone
     const CURSORS = { n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize', ne: 'nesw-resize', sw: 'nesw-resize', nw: 'nwse-resize', se: 'nwse-resize' };
 
-    let activeCard = null;
-    let activeMode = null; // 'move' | one of the CURSORS keys (resize direction)
+    let activeItem = null;   // the positioned element actually being dragged/resized (a card OR a group wrapper)
+    let activeMode = null;   // 'move' | one of the CURSORS keys
     let startClientX = 0, startClientY = 0;
     let startRect = null;
+    let mergeTarget = null;  // { card, side } — set while dragging over a valid merge zone
+    let mergeIndicatorEl = null;
+
+    let activeDivider = null; // a group's divider being dragged to change the split ratio
+    let dividerStartX = 0, dividerStartRatio = 0.5, dividerGroupWidth = 0;
 
     function canvas() { return document.getElementById('dashboardCanvas'); }
     function isCanvasMode() { return window.innerWidth > BREAKPOINT; }
 
-    function getCanvasCards() {
+    // Top-level positionable items — standalone cards and group wrappers.
+    // Cards living inside a group are NOT in this list (their position comes
+    // from flex-basis within the group, not from the layout store).
+    function getPositionedItems() {
+        const el = canvas();
+        if (!el) return [];
+        return Array.from(el.querySelectorAll('.canvas-positioned-item'));
+    }
+
+    // Every real card, whether standalone or currently inside a group — used
+    // for wiring interactions (each card keeps its own context menu etc).
+    function getAllCards() {
         const el = canvas();
         if (!el) return [];
         return Array.from(el.querySelectorAll('.dash-card[data-card-id]'));
@@ -790,9 +824,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             'banner':        { x: 0,      y: 0,   w: leftW,  h: 300 },
             'schedule-mini': { x: 0,      y: 320, w: leftW,  h: 320 },
             'todo':          { x: 0,      y: 660, w: leftW,  h: 220 },
-            'timer-mini':    { x: rightX, y: 0,   w: rightW, h: 260 },
-            'weather':       { x: rightX, y: 280, w: rightW, h: 220 },
-            'calendar':      { x: rightX, y: 520, w: rightW, h: 380 }
+            'weather':       { x: rightX, y: 0,   w: rightW, h: 220 },
+            'date-countdown': { x: rightX, y: 240, w: rightW, h: 260 }
         };
         return DEFAULTS[cardId] || { x: 0, y: 0, w: leftW, h: 260 };
     }
@@ -803,69 +836,214 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     }
     function saveLayout() {
         const layout = {};
-        getCanvasCards().forEach(card => {
-            layout[card.dataset.cardId] = {
-                x: parseFloat(card.style.left) || 0,
-                y: parseFloat(card.style.top) || 0,
-                w: parseFloat(card.style.width) || 0,
-                h: card.classList.contains('card-minimized')
-                    ? parseFloat(card.dataset.restoreHeight) || 260
-                    : (parseFloat(card.style.height) || 0),
-                minimized: card.classList.contains('card-minimized')
+        getPositionedItems().forEach(item => {
+            const key = item.dataset.cardId || item.dataset.groupId;
+            if (!key) return;
+            layout[key] = {
+                x: parseFloat(item.style.left) || 0,
+                y: parseFloat(item.style.top) || 0,
+                w: parseFloat(item.style.width) || 0,
+                h: item.classList.contains('card-minimized')
+                    ? parseFloat(item.dataset.restoreHeight) || 260
+                    : (parseFloat(item.style.height) || 0),
+                minimized: item.classList.contains('card-minimized')
             };
         });
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layout)); }
         catch (e) { console.error('Error saving canvas layout:', e); }
     }
 
-    function applyRect(card, rect) {
-        card.style.left = rect.x + 'px';
-        card.style.top = rect.y + 'px';
-        card.style.width = rect.w + 'px';
-        card.style.height = rect.h + 'px';
+    function loadGroups() {
+        try { const s = localStorage.getItem(GROUPS_KEY); return s ? JSON.parse(s) : {}; }
+        catch (e) { return {}; }
+    }
+    function saveGroups(groups) {
+        try { localStorage.setItem(GROUPS_KEY, JSON.stringify(groups)); }
+        catch (e) { console.error('Error saving canvas groups:', e); }
+    }
+
+    function applyRect(el, rect) {
+        el.style.left = rect.x + 'px';
+        el.style.top = rect.y + 'px';
+        el.style.width = rect.w + 'px';
+        el.style.height = rect.h + 'px';
     }
 
     function updateCanvasHeight() {
         const el = canvas();
         if (!el || !isCanvasMode()) return;
         let maxBottom = 0;
-        getCanvasCards().forEach(card => {
-            if (card.style.display === 'none') return;
-            const y = parseFloat(card.style.top) || 0;
-            const h = card.classList.contains('card-minimized') ? 56 : (parseFloat(card.style.height) || 0);
+        getPositionedItems().forEach(item => {
+            if (item.style.display === 'none') return;
+            const y = parseFloat(item.style.top) || 0;
+            const h = item.classList.contains('card-minimized') ? 56 : (parseFloat(item.style.height) || 0);
             maxBottom = Math.max(maxBottom, y + h);
         });
         el.style.minHeight = (maxBottom + 24) + 'px';
     }
 
-    function layoutCards() {
-        const el = canvas();
-        if (!el) return;
-        const canvasMode = isCanvasMode();
-        const canvasWidth = el.getBoundingClientRect().width || 900;
-        const layout = loadLayout();
+    // ---- Rebuild any saved groups on load, before laying out positions ----
+    function rebuildGroupsFromStorage() {
+        const groups = loadGroups();
+        let changed = false;
+        Object.keys(groups).forEach(groupId => {
+            if (document.querySelector(`[data-group-id="${groupId}"]`)) return;
+            const def = groups[groupId];
+            const cardA = document.querySelector(`.dash-card[data-card-id="${def.children[0]}"]`);
+            const cardB = document.querySelector(`.dash-card[data-card-id="${def.children[1]}"]`);
+            if (!cardA || !cardB || cardA.closest('.dash-card-group') || cardB.closest('.dash-card-group')) return;
+            buildGroupWrapper(cardA, cardB, def.ratio, groupId);
+        });
+        if (changed) saveGroups(groups);
+    }
 
-        getCanvasCards().forEach(card => {
-            const cardId = card.dataset.cardId;
-            card.classList.toggle('canvas-card', canvasMode);
-            if (!canvasMode) {
-                card.style.left = ''; card.style.top = ''; card.style.width = ''; card.style.height = '';
-                return;
-            }
-            const saved = layout[cardId];
-            const rect = saved
-                ? { x: saved.x, y: saved.y, w: saved.w, h: saved.h }
-                : getDefaultRect(cardId, canvasWidth);
-            applyRect(card, rect);
-            if (saved && saved.minimized) {
-                card.dataset.restoreHeight = rect.h + 'px';
-                card.classList.add('card-minimized');
-                card.style.height = '';
-                const btn = card.querySelector('.card-minimize-btn');
-                if (btn) { btn.textContent = '+'; btn.title = 'Restore'; }
+    function buildGroupWrapper(cardA, cardB, ratio, existingGroupId) {
+        const groupId = existingGroupId || ('group-' + Date.now());
+        const wrapper = document.createElement('div');
+        wrapper.className = 'dash-card-group canvas-positioned-item canvas-card';
+        wrapper.dataset.groupId = groupId;
+
+        const childA = document.createElement('div');
+        childA.className = 'group-child';
+        childA.style.flexBasis = (ratio * 100) + '%';
+
+        const divider = document.createElement('div');
+        divider.className = 'group-divider';
+        divider.dataset.groupId = groupId;
+        divider.title = 'Drag to resize the split';
+
+        const childB = document.createElement('div');
+        childB.className = 'group-child';
+        childB.style.flexBasis = ((1 - ratio) * 100) + '%';
+
+        [cardA, cardB].forEach(c => {
+            c.classList.remove('canvas-positioned-item');
+            c.classList.remove('card-minimized');
+            c.style.left = ''; c.style.top = ''; c.style.width = ''; c.style.height = '';
+            c.classList.add('grouped-card');
+            const minBtn = c.querySelector('.card-minimize-btn');
+            if (minBtn) { minBtn.style.display = 'none'; minBtn.textContent = '−'; minBtn.title = 'Minimize'; }
+            delete c.dataset.restoreHeight;
+        });
+
+        childA.appendChild(cardA);
+        childB.appendChild(cardB);
+        wrapper.appendChild(childA);
+        wrapper.appendChild(divider);
+        wrapper.appendChild(childB);
+
+        canvas().appendChild(wrapper);
+        wireDivider(divider);
+        wireGroupWrapper(wrapper);
+
+        return wrapper;
+    }
+
+    function mergeCards(draggedCard, targetCard, side) {
+        const el = canvas();
+        const canvasRect = el.getBoundingClientRect();
+        const targetRect = targetCard.getBoundingClientRect();
+        const draggedRect = draggedCard.getBoundingClientRect();
+
+        const groupRect = {
+            x: targetRect.left - canvasRect.left,
+            y: targetRect.top - canvasRect.top,
+            w: targetRect.width + draggedRect.width,
+            h: Math.max(targetRect.height, draggedRect.height)
+        };
+
+        const cardA = side === 'left' ? draggedCard : targetCard;
+        const cardB = side === 'left' ? targetCard : draggedCard;
+
+        const wrapper = buildGroupWrapper(cardA, cardB, 0.5);
+        applyRect(wrapper, groupRect);
+
+        const groups = loadGroups();
+        groups[wrapper.dataset.groupId] = {
+            children: [cardA.dataset.cardId, cardB.dataset.cardId],
+            ratio: 0.5
+        };
+        saveGroups(groups);
+
+        wireCanvasItem(wrapper);
+        saveLayout();
+        updateCanvasHeight();
+        if (typeof window.updateCardSizeClasses === 'function') window.updateCardSizeClasses();
+        if (typeof showToast === 'function') showToast('Cards combined — drag the divider to resize the split', 'success');
+    }
+
+    function splitGroup(wrapper) {
+        const groupId = wrapper.dataset.groupId;
+        const cards = Array.from(wrapper.querySelectorAll('.dash-card[data-card-id]'));
+        const el = canvas();
+        const canvasRect = el.getBoundingClientRect();
+        const groupRect = wrapper.getBoundingClientRect();
+        const groupX = groupRect.left - canvasRect.left;
+        const groupY = groupRect.top - canvasRect.top;
+        const halfW = Math.max(MIN_W, groupRect.width / 2 - 10);
+
+        cards.forEach((card, i) => {
+            card.classList.remove('grouped-card');
+            card.classList.add('canvas-positioned-item');
+            applyRect(card, { x: groupX + i * (halfW + 20), y: groupY, w: halfW, h: groupRect.height });
+            const minBtn = card.querySelector('.card-minimize-btn');
+            if (minBtn) minBtn.style.display = '';
+            canvas().appendChild(card);
+        });
+
+        wrapper.remove();
+
+        const groups = loadGroups();
+        delete groups[groupId];
+        saveGroups(groups);
+
+        saveLayout();
+        updateCanvasHeight();
+        if (typeof window.updateCardSizeClasses === 'function') window.updateCardSizeClasses();
+    }
+
+    // ---- Merge-zone detection while dragging a card ----
+    function ensureMergeIndicator() {
+        if (mergeIndicatorEl && document.body.contains(mergeIndicatorEl)) return mergeIndicatorEl;
+        mergeIndicatorEl = document.createElement('div');
+        mergeIndicatorEl.className = 'merge-zone-indicator';
+        document.body.appendChild(mergeIndicatorEl);
+        return mergeIndicatorEl;
+    }
+
+    function checkMergeTarget(draggedCard, clientX, clientY) {
+        mergeTarget = null;
+        const indicator = ensureMergeIndicator();
+        indicator.style.display = 'none';
+
+        getPositionedItems().forEach(item => {
+            if (item === draggedCard || item.dataset.groupId) return; // no merging into an existing group (v1: 2-card cap)
+            const cardId = item.dataset.cardId;
+            if (!cardId) return;
+            const rect = item.getBoundingClientRect();
+            const withinVertical = clientY > rect.top && clientY < rect.bottom;
+            if (!withinVertical) return;
+            const zoneW = rect.width * MERGE_ZONE;
+            if (clientX >= rect.left && clientX < rect.left + zoneW) {
+                mergeTarget = { card: item, side: 'left' };
+            } else if (clientX <= rect.right && clientX > rect.right - zoneW) {
+                mergeTarget = { card: item, side: 'right' };
             }
         });
-        updateCanvasHeight();
+
+        if (mergeTarget) {
+            const rect = mergeTarget.card.getBoundingClientRect();
+            const barX = mergeTarget.side === 'left' ? rect.left : rect.right - 4;
+            indicator.style.display = 'block';
+            indicator.style.left = barX + 'px';
+            indicator.style.top = rect.top + 'px';
+            indicator.style.height = rect.height + 'px';
+        }
+    }
+
+    function clearMergeTarget() {
+        mergeTarget = null;
+        if (mergeIndicatorEl) mergeIndicatorEl.style.display = 'none';
     }
 
     function getResizeDirection(card, clientX, clientY) {
@@ -885,26 +1063,27 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         return null;
     }
 
-    function wireCanvasCard(card) {
+    // ---- Wire a single card (whether standalone or inside a group) ----
+    function wireCard(card) {
         if (card.dataset.canvasWired === '1') return;
         card.dataset.canvasWired = '1';
 
         card.addEventListener('mousemove', (e) => {
-            if (activeCard || !isCanvasMode() || card.classList.contains('card-minimized')) return;
+            if (activeItem || !isCanvasMode() || card.classList.contains('card-minimized') || card.closest('.dash-card-group')) return;
             const dir = getResizeDirection(card, e.clientX, e.clientY);
             card.style.cursor = dir ? CURSORS[dir] : '';
         });
-        card.addEventListener('mouseleave', () => { if (!activeCard) card.style.cursor = ''; });
+        card.addEventListener('mouseleave', () => { if (!activeItem) card.style.cursor = ''; });
 
         card.addEventListener('mousedown', (e) => {
-            if (!isCanvasMode() || card.classList.contains('card-minimized')) return;
+            if (!isCanvasMode() || card.classList.contains('card-minimized') || card.closest('.dash-card-group')) return;
             if (e.target.closest('button, a, input, textarea, select, .card-drag-handle')) return;
             const dir = getResizeDirection(card, e.clientX, e.clientY);
             if (!dir) return;
             startInteraction(e, card, dir);
         });
         card.addEventListener('touchstart', (e) => {
-            if (!isCanvasMode() || card.classList.contains('card-minimized')) return;
+            if (!isCanvasMode() || card.classList.contains('card-minimized') || card.closest('.dash-card-group')) return;
             if (e.target.closest('button, a, input, textarea, select, .card-drag-handle')) return;
             const t = e.touches[0];
             const dir = getResizeDirection(card, t.clientX, t.clientY);
@@ -914,8 +1093,14 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 
         const handle = card.querySelector('.card-drag-handle');
         if (handle) {
-            handle.addEventListener('mousedown', (e) => startInteraction(e, card, 'move'));
-            handle.addEventListener('touchstart', (e) => startInteraction(e, card, 'move'), { passive: false });
+            handle.addEventListener('mousedown', (e) => {
+                const group = card.closest('.dash-card-group');
+                startInteraction(e, group || card, 'move', group ? null : card);
+            });
+            handle.addEventListener('touchstart', (e) => {
+                const group = card.closest('.dash-card-group');
+                startInteraction(e, group || card, 'move', group ? null : card);
+            }, { passive: false });
         }
 
         card.addEventListener('contextmenu', (e) => {
@@ -927,32 +1112,93 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         ensureMinimizeButton(card);
     }
 
-    function startInteraction(e, card, mode) {
+    function wireGroupWrapper(wrapper) {
+        if (wrapper.dataset.canvasWired === '1') return;
+        wrapper.dataset.canvasWired = '1';
+
+        wrapper.addEventListener('mousemove', (e) => {
+            if (activeItem || !isCanvasMode() || wrapper.classList.contains('card-minimized')) return;
+            if (e.target.closest('.group-divider, .dash-card')) { wrapper.style.cursor = ''; return; }
+            const dir = getResizeDirection(wrapper, e.clientX, e.clientY);
+            wrapper.style.cursor = dir ? CURSORS[dir] : '';
+        });
+        wrapper.addEventListener('mouseleave', () => { if (!activeItem) wrapper.style.cursor = ''; });
+
+        wrapper.addEventListener('mousedown', (e) => {
+            if (!isCanvasMode() || wrapper.classList.contains('card-minimized')) return;
+            if (e.target.closest('.group-divider, button, a, input, textarea, select, .card-drag-handle')) return;
+            const dir = getResizeDirection(wrapper, e.clientX, e.clientY);
+            if (!dir) return;
+            startInteraction(e, wrapper, dir);
+        });
+
+        wrapper.addEventListener('contextmenu', (e) => {
+            if (!isCanvasMode() || e.target.closest('.dash-card')) return; // let individual card menus take priority
+            e.preventDefault();
+            openGroupContextMenu(wrapper, e.clientX, e.clientY);
+        });
+
+        wrapper.querySelectorAll('.dash-card[data-card-id]').forEach(wireCard);
+    }
+
+    function wireCanvasItem(item) {
+        if (item.dataset.groupId) wireGroupWrapper(item);
+        else wireCard(item);
+    }
+
+    function wireDivider(divider) {
+        divider.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const wrapper = divider.closest('.dash-card-group');
+            const childA = wrapper.querySelector('.group-child');
+            activeDivider = divider;
+            dividerStartX = e.clientX;
+            dividerStartRatio = parseFloat(childA.style.flexBasis) / 100 || 0.5;
+            dividerGroupWidth = wrapper.getBoundingClientRect().width;
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+        });
+    }
+
+    function startInteraction(e, item, mode, dragSourceCard) {
         if (e.button && e.button !== 0) return;
         e.preventDefault();
         e.stopPropagation();
-        activeCard = card;
+        activeItem = item;
         activeMode = mode;
+        activeItem.dataset.dragSourceCardId = dragSourceCard ? dragSourceCard.dataset.cardId : '';
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         startClientX = clientX;
         startClientY = clientY;
         const el = canvas();
         const canvasRect = el.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
         startRect = {
-            x: cardRect.left - canvasRect.left,
-            y: cardRect.top - canvasRect.top,
-            w: cardRect.width,
-            h: cardRect.height
+            x: itemRect.left - canvasRect.left,
+            y: itemRect.top - canvasRect.top,
+            w: itemRect.width,
+            h: itemRect.height
         };
-        card.classList.add(mode === 'move' ? 'dragging' : 'resizing');
+        item.classList.add(mode === 'move' ? 'dragging' : 'resizing');
         document.body.style.cursor = mode === 'move' ? 'grabbing' : CURSORS[mode];
         document.body.style.userSelect = 'none';
     }
 
     function onMove(e) {
-        if (!activeCard) return;
+        if (activeDivider) {
+            const dx = e.clientX - dividerStartX;
+            const newRatio = Math.min(0.8, Math.max(0.2, dividerStartRatio + dx / dividerGroupWidth));
+            const wrapper = activeDivider.closest('.dash-card-group');
+            const childA = wrapper.querySelector('.group-child');
+            const childB = wrapper.querySelectorAll('.group-child')[1];
+            childA.style.flexBasis = (newRatio * 100) + '%';
+            childB.style.flexBasis = ((1 - newRatio) * 100) + '%';
+            return;
+        }
+
+        if (!activeItem) return;
         e.preventDefault();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -982,35 +1228,112 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         x = Math.max(0, Math.min(x, canvasWidth - 40));
         y = Math.max(0, y);
 
-        activeCard.style.left = x + 'px';
-        activeCard.style.top = y + 'px';
-        activeCard.style.width = w + 'px';
-        activeCard.style.height = h + 'px';
+        activeItem.style.left = x + 'px';
+        activeItem.style.top = y + 'px';
+        activeItem.style.width = w + 'px';
+        activeItem.style.height = h + 'px';
+
+        // Only single (non-grouped) cards being MOVED can trigger a merge — not resizes, not group wrappers.
+        const sourceCardId = activeItem.dataset.dragSourceCardId;
+        if (activeMode === 'move' && sourceCardId && !activeItem.dataset.groupId) {
+            checkMergeTarget(activeItem, clientX, clientY);
+        }
 
         updateCanvasHeight();
     }
 
     function onEnd() {
-        if (!activeCard) return;
-        activeCard.classList.remove('dragging', 'resizing');
+        if (activeDivider) {
+            const wrapper = activeDivider.closest('.dash-card-group');
+            const groups = loadGroups();
+            if (wrapper && groups[wrapper.dataset.groupId]) {
+                const childA = wrapper.querySelector('.group-child');
+                groups[wrapper.dataset.groupId].ratio = parseFloat(childA.style.flexBasis) / 100 || 0.5;
+                saveGroups(groups);
+            }
+            activeDivider = null;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            return;
+        }
+
+        if (!activeItem) return;
+        const item = activeItem;
+        item.classList.remove('dragging', 'resizing');
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
-        activeCard = null;
+
+        if (mergeTarget && !item.dataset.groupId) {
+            const target = mergeTarget.card;
+            const side = mergeTarget.side;
+            clearMergeTarget();
+            activeItem = null;
+            activeMode = null;
+            mergeCards(item, target, side);
+            return;
+        }
+
+        clearMergeTarget();
+        activeItem = null;
         activeMode = null;
         saveLayout();
         if (typeof window.updateCardSizeClasses === 'function') window.updateCardSizeClasses();
     }
 
+    function layoutCards() {
+        const el = canvas();
+        if (!el) return;
+        rebuildGroupsFromStorage();
+
+        const canvasMode = isCanvasMode();
+        const canvasWidth = el.getBoundingClientRect().width || 900;
+        const layout = loadLayout();
+
+        getPositionedItems().forEach(item => {
+            const key = item.dataset.cardId || item.dataset.groupId;
+            item.classList.toggle('canvas-card', canvasMode);
+            if (!canvasMode) {
+                item.style.left = ''; item.style.top = ''; item.style.width = ''; item.style.height = '';
+                return;
+            }
+            const saved = layout[key];
+            const rect = saved
+                ? { x: saved.x, y: saved.y, w: saved.w, h: saved.h }
+                : getDefaultRect(key, canvasWidth);
+            applyRect(item, rect);
+            if (saved && saved.minimized) {
+                item.dataset.restoreHeight = rect.h + 'px';
+                item.classList.add('card-minimized');
+                item.style.height = '';
+                const btn = item.querySelector('.card-minimize-btn');
+                if (btn) { btn.textContent = '+'; btn.title = 'Restore'; }
+            }
+        });
+        updateCanvasHeight();
+    }
+
     function initCanvasCards() {
         const el = canvas();
         if (!el) return;
-        getCanvasCards().forEach(wireCanvasCard);
+        rebuildGroupsFromStorage();
+        getPositionedItems().forEach(wireCanvasItem);
         layoutCards();
     }
 
     function resetCanvas() {
         try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-        getCanvasCards().forEach(card => {
+        try { localStorage.removeItem(GROUPS_KEY); } catch (e) {}
+        document.querySelectorAll('.dash-card-group').forEach(wrapper => {
+            wrapper.querySelectorAll('.dash-card[data-card-id]').forEach(card => {
+                card.classList.remove('grouped-card');
+                card.classList.add('canvas-positioned-item');
+                const minBtn = card.querySelector('.card-minimize-btn');
+                if (minBtn) minBtn.style.display = '';
+                canvas().appendChild(card);
+            });
+            wrapper.remove();
+        });
+        getAllCards().forEach(card => {
             card.classList.remove('card-minimized');
             const btn = card.querySelector('.card-minimize-btn');
             if (btn) { btn.textContent = '−'; btn.title = 'Minimize'; }
@@ -1034,6 +1357,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     window.__dashCanvasReset = resetCanvas;
     window.__dashCanvasSave = saveLayout;
     window.__dashCanvasUpdateHeight = updateCanvasHeight;
+    window.__dashSplitGroup = splitGroup;
 })();
 
 // ============================================================

@@ -21,10 +21,15 @@
         // Load any saved countdown
         loadSavedCountdown();
 
+        // Always render something into the dashboard card — either the
+        // restored live countdown or the empty-state date picker.
+        updateDashboardCountdown();
+
         // Expose globally for calendar.js
         window.startCountdown = startCountdown;
         window.stopCountdown = stopCountdown;
         window.clearCountdown = clearCountdown;
+        window.updateDashboardCountdown = updateDashboardCountdown;
     }
 
     // ----- START COUNTDOWN -----
@@ -188,7 +193,6 @@
     // ----- UPDATE DASHBOARD COUNTDOWN -----
     function updateDashboardCountdown() {
         const panel = document.getElementById('dashDateCountdown');
-        const hubPanel = document.getElementById('hubCountdownDisplay');
 
         const buildCountdownHTML = () => {
             if (!targetDate) return '';
@@ -201,6 +205,7 @@
                     <div class="dash-countdown-card countdown-complete">
                         <div class="countdown-icon">🎉</div>
                         <div class="countdown-title">Countdown Complete!</div>
+                        <button class="matrix-btn" onclick="clearCountdown()" style="margin-top: 8px; font-size: 0.75rem; padding: 4px 12px;">Clear</button>
                     </div>
                 `;
             }
@@ -221,10 +226,6 @@
 
             return `
                 <div class="dash-countdown-card">
-                    <div class="dash-countdown-header">
-                        <span class="dash-countdown-icon">⏳</span>
-                        <span class="dash-countdown-title">Upcoming Event</span>
-                    </div>
                     <div class="dash-countdown-date">${targetDateStr}</div>
                     <div class="dash-countdown-display">
                         <span class="dash-countdown-value">${dd}d ${hh}h ${mm}m</span>
@@ -234,34 +235,43 @@
             `;
         };
 
-        const html = buildCountdownHTML();
+        const html = buildCountdownHTML() || buildEmptyCountdownState();
 
         if (panel) {
             panel.innerHTML = html;
-            panel.style.display = html ? 'block' : 'none';
-        }
-
-        if (hubPanel) {
-            hubPanel.innerHTML = html;
+            panel.style.display = 'block';
         }
     }
+
+    // ----- EMPTY STATE: pick a date directly from the dashboard card -----
+    function buildEmptyCountdownState() {
+        return `
+            <div class="dash-countdown-empty">
+                <div class="dash-countdown-empty-text">No countdown set</div>
+                <div class="dash-countdown-empty-picker">
+                    <input type="date" id="dashCountdownDateInput" class="dash-countdown-date-input" />
+                    <button class="matrix-btn" onclick="window.__setDashCountdown()" style="font-size: 0.75rem; padding: 4px 12px;">Set</button>
+                </div>
+            </div>
+        `;
+    }
+
+    window.__setDashCountdown = function() {
+        const input = document.getElementById('dashCountdownDateInput');
+        if (input && input.value) startCountdown(input.value);
+    };
 
     // ----- SHOW COUNTDOWN PANELS -----
     function showCountdownPanels() {
         const schedulePanel = document.getElementById('dateCountdownPanel');
-        const dashPanel = document.getElementById('dashDateCountdown');
-
         if (schedulePanel) schedulePanel.style.display = 'block';
-        if (dashPanel) dashPanel.style.display = 'block';
     }
 
     // ----- HIDE COUNTDOWN PANELS -----
     function hideCountdownPanels() {
         const schedulePanel = document.getElementById('dateCountdownPanel');
-        const dashPanel = document.getElementById('dashDateCountdown');
-
         if (schedulePanel) schedulePanel.style.display = 'none';
-        if (dashPanel) dashPanel.style.display = 'none';
+        updateDashboardCountdown();
     }
 
     // ----- INITIALIZE ON LOAD -----

@@ -1,17 +1,8 @@
 ﻿// Service Worker for Workspace Hub PWA
-const CACHE_NAME = 'workspace-hub-v14';
+const CACHE_NAME = 'workspace-hub-v13';
 const STATIC_ASSETS = [
   'index.html',
   'TUTORIAL.md',
-
-  // TinyBase sync layer
-  'WorkspaceShared/tinybase.iife.js',
-  'WorkspaceShared/tinybase-partykit.iife.js',
-  'WorkspaceShared/tinybase-partykit-server.iife.js',
-  'WorkspaceShared/tinybase-ws-client.iife.js',
-  'WorkspaceShared/tinybase-ws-server.iife.js',
-  'WorkspaceShared/partysocket.iife.js',
-  'WorkspaceShared/tinybase-store.js',
 
   // CSS - core
   'WorkspaceCore/reset.css',

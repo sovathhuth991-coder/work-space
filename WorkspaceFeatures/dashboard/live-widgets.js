@@ -248,19 +248,17 @@ function initWeatherMiniCard() {
 function initLiveWidgets() {
     ensureLiveWidgetStyles();
     initScheduleMiniCard();
-    initTimerMiniCard();
     initWeatherMiniCard();
 
     // Fold the new cards into the existing show/hide "Customize" panel
     // and drag/resize/minimize system, if it's present.
     if (typeof DEFAULT_CARD_VISIBILITY === 'object') {
-        ['schedule-mini', 'timer-mini', 'weather'].forEach(id => {
+        ['schedule-mini', 'weather'].forEach(id => {
             if (!(id in DEFAULT_CARD_VISIBILITY)) DEFAULT_CARD_VISIBILITY[id] = true;
         });
     }
     if (typeof CARD_LABELS === 'object') {
         CARD_LABELS['schedule-mini'] = "📅 Today's Agenda";
-        CARD_LABELS['timer-mini'] = '⏱ Focus Timer';
         CARD_LABELS['weather'] = '🌤 Weather';
     }
     if (typeof applyCardVisibility === 'function') applyCardVisibility();
