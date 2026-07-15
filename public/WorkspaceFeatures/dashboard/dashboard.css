@@ -26,7 +26,8 @@
     width: 100%;
 }
 
-.dash-card.canvas-card {
+.dash-card.canvas-card,
+.dash-card-group.canvas-card {
     position: absolute;
     margin: 0;
     box-sizing: border-box;
@@ -50,11 +51,95 @@
         min-height: 0 !important;
     }
 
-    .dash-card.canvas-card {
+    .dash-card.canvas-card,
+    .dash-card-group.canvas-card {
         position: static;
         width: 100% !important;
         height: auto !important;
     }
+
+    .dash-card-group {
+        flex-direction: column !important;
+    }
+
+    .group-divider {
+        display: none;
+    }
+}
+
+/* ============================================================
+   CARD GROUPS – two cards combined side-by-side into one
+   movable/resizable unit (drag a card onto another's left/right
+   edge to create one; right-click → Split to undo). The group
+   wrapper is itself a canvas-positioned item; the two children
+   just fill their share of it via flex-basis.
+   ============================================================ */
+.dash-card-group {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.dash-card-group.dragging,
+.dash-card-group.resizing {
+    box-shadow: 0 12px 40px rgba(124, 109, 240, 0.4);
+    z-index: 1000;
+}
+
+.group-child {
+    position: relative;
+    min-width: 0;
+    height: 100%;
+    container-type: inline-size;
+}
+
+.group-child .dash-card {
+    height: 100%;
+}
+
+.group-child .dash-card.canvas-card {
+    position: static;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.group-divider {
+    flex: 0 0 6px;
+    cursor: ew-resize;
+    background: var(--border-color);
+    position: relative;
+}
+
+.group-divider:hover,
+.group-divider:active {
+    background: var(--accent-1);
+}
+
+/* Responsive text scaling inside a group's children as the split
+   ratio (or the group's own size) makes one side narrower. */
+@container (max-width: 260px) {
+    .group-child h3 { font-size: 0.85rem; }
+    .group-child .stat-value { font-size: 1.1rem; }
+    .group-child .card-eyebrow { font-size: 0.65rem; }
+}
+
+@container (max-width: 180px) {
+    .group-child h3 { font-size: 0.75rem; }
+    .group-child .card-controls .matrix-btn { display: none; }
+}
+
+/* ---- Merge preview: shown while dragging a card near another's edge ---- */
+.merge-zone-indicator {
+    position: fixed;
+    width: 5px;
+    background: var(--accent-1);
+    border-radius: 3px;
+    box-shadow: 0 0 12px var(--accent-1);
+    z-index: 900;
+    pointer-events: none;
+    display: none;
 }
 
 /* ---- Per-card accent identity ----
@@ -68,9 +153,8 @@
 .dash-card[data-card-id="banner"] { --card-accent: #7c6df0; }
 .dash-card[data-card-id="todo"] { --card-accent: #10b981; }
 .dash-card[data-card-id="schedule-mini"] { --card-accent: #5b8def; }
-.dash-card[data-card-id="timer-mini"] { --card-accent: #f97316; }
 .dash-card[data-card-id="weather"] { --card-accent: #22d3ee; }
-.dash-card[data-card-id="calendar"] { --card-accent: #a78bfa; }
+.dash-card[data-card-id="date-countdown"] { --card-accent: #a78bfa; }
 .dash-card[data-card-id="widgets"] { --card-accent: #f59e0b; }
 
 /* ---- Resize hotzones: cursor swaps when near an edge/corner,
@@ -131,12 +215,19 @@
     padding: 0;
     box-shadow: none;
     overflow: visible;
-    opacity: 0;
-    transform: translateY(20px);
     transition: opacity 0.4s ease, transform 0.4s ease, order 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dash-card.card-visible {
+/* Only the dashboard's own cards do the fade-in-on-load animation (driven by
+   animateCardsIn() adding .card-visible) — cards elsewhere that reuse this
+   class for styling (e.g. Analytics) render normally instead of being stuck
+   at opacity:0 forever since nothing ever adds .card-visible for them. */
+.dashboard-grid .dash-card {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.dashboard-grid .dash-card.card-visible {
     opacity: 1;
     transform: translateY(0);
 }

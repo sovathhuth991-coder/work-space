@@ -655,6 +655,67 @@
     z-index: 1;
 }
 
+/* ---- Merged stat tiles: two stat cards combined side-by-side ---- */
+.stat-card-group {
+    grid-column: span 2;
+}
+
+.stat-group-inner {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.stat-group-child {
+    flex: 1 1 50%;
+    min-width: 0;
+}
+
+.stat-group-child .stat-card {
+    height: 100%;
+}
+
+.stat-group-divider {
+    flex: 0 0 2px;
+    background: var(--border-color);
+}
+
+@media (max-width: 520px) {
+    .stat-card-group { grid-column: span 1; }
+    .stat-group-inner { flex-direction: column; }
+    .stat-group-divider { flex-basis: 2px; height: 2px; }
+}
+
+/* ---- Day Streak sparkline: 7 small bars, one per day ---- */
+.streak-sparkline {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    margin-top: 10px;
+    height: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.streak-bar {
+    flex: 1;
+    height: 6px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    transition: height var(--transition-fast), background var(--transition-fast);
+}
+
+.streak-bar.active {
+    height: 16px;
+    background: #8b5cf6;
+}
+
+.streak-bar.is-today {
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5);
+}
+
 /* ---- Streak badge ---- */
 .streak-badge {
     display: inline-flex;

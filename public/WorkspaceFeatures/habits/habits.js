@@ -1,26 +1,9 @@
 // WorkspaceJS/habits.js
 
-let habits = [];
-let habitsUnsub = null;
-
-function loadHabits() {
-    if (window.TinyBaseStore) {
-        habits = window.TinyBaseStore.getTable('habits').map(row => {
-            const { _id, ...rest } = row;
-            return rest;
-        }) || [];
-    } else {
-        habits = JSON.parse(localStorage.getItem('habits') || '[]');
-    }
-}
+let habits = JSON.parse(localStorage.getItem('habits') || '[]');
 
 function saveHabits() {
-    const data = habits.map(item => ({ ...item, _id: item.name || `habit_${Date.now()}` }));
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setTable('habits', data);
-    } else {
-        localStorage.setItem('habits', JSON.stringify(habits));
-    }
+    localStorage.setItem('habits', JSON.stringify(habits));
 }
 
 function renderHabits() {
@@ -41,6 +24,7 @@ function renderHabits() {
         const checked = habit.history && habit.history[today] === true;
         const streak = calculateHabitStreak(habit);
 
+        // Build mini calendar for this habit
         let calHtml = '<div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-top:8px;">';
         ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
             calHtml += `<div style="text-align:center;font-size:0.5rem;color:var(--text-muted);">${d}</div>`;
@@ -78,15 +62,20 @@ function calculateHabitStreak(habit) {
     let d = new Date();
     d.setHours(0,0,0,0);
     const history = habit.history || {};
+    // Check from today backwards
     for (let i = 0; i < 365; i++) {
         const key = d.toDateString();
         if (history[key] === true) {
             streak++;
         } else {
+            // If it's today and not checked, we don't break because we want streak from last completed day
+            // Actually we want consecutive days from today going backwards, so if today is unchecked, streak is 0
             if (i === 0 && history[key] !== true) {
+                // today unchecked – streak is 0
                 streak = 0;
                 break;
             } else {
+                // break on first missing day after today
                 break;
             }
         }
@@ -122,24 +111,13 @@ function deleteHabit(index) {
     }
 }
 
-function initHabitsStore() {
-    loadHabits();
-    if (window.TinyBaseStore) {
-        habitsUnsub = window.TinyBaseStore.on('habits', () => {
-            loadHabits();
-            renderHabits();
-        });
-    }
-}
-
-function destroyHabitsStore() {
-    if (habitsUnsub) { habitsUnsub(); habitsUnsub = null; }
-}
+// Initial render
+document.addEventListener('DOMContentLoaded', () => {
+    renderHabits();
+});
 
 // Expose functions globally
 window.renderHabits = renderHabits;
 window.addHabit = addHabit;
 window.toggleHabit = toggleHabit;
 window.deleteHabit = deleteHabit;
-window.initHabitsStore = initHabitsStore;
-window.destroyHabitsStore = destroyHabitsStore;

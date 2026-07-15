@@ -908,6 +908,32 @@ function updateStreakDisplay() {
     `;
     const statStreak = document.getElementById('statStreak');
     if (statStreak) statStreak.textContent = streak;
+    renderStreakSparkline();
+}
+
+function renderStreakSparkline() {
+    const el = document.getElementById('streakSparkline');
+    if (!el) return;
+    const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+    const activeDates = new Set();
+    completedSessions.forEach(session => {
+        const d = new Date(session.timestamp);
+        d.setHours(0, 0, 0, 0);
+        activeDates.add(d.getTime());
+    });
+
+    const days = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        days.push({ active: activeDates.has(d.getTime()), isToday: i === 0 });
+    }
+
+    el.innerHTML = days.map(d =>
+        `<span class="streak-bar ${d.active ? 'active' : ''} ${d.isToday ? 'is-today' : ''}"></span>`
+    ).join('');
 }
 
 function updateSidebarProgress() {

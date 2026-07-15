@@ -543,17 +543,24 @@ function openContextMenu(card, clientX, clientY) {
     } else if (sourceView) {
         items.push({ label: 'Go to Source', onClick: () => { if (typeof switchView === 'function') switchView(sourceView); } });
     }
-    const group = card.closest('.dash-card-group');
-    if (group) {
-        items.push({ label: 'Split from Group', onClick: () => { if (typeof window.__dashSplitGroup === 'function') window.__dashSplitGroup(group); } });
+    const canvasGroup = card.closest('.dash-card-group');
+    const statGroup = card.closest('.stat-card-group');
+    if (canvasGroup) {
+        items.push({ label: 'Split from Group', onClick: () => { if (typeof window.__dashSplitGroup === 'function') window.__dashSplitGroup(canvasGroup); } });
+    } else if (statGroup) {
+        items.push({ label: 'Split from Group', onClick: () => { if (typeof window.__dashSplitStatGroup === 'function') window.__dashSplitStatGroup(statGroup); } });
     }
     renderContextMenu(items, clientX, clientY);
 }
 
 function openGroupContextMenu(wrapper, clientX, clientY) {
     closeContextMenu();
+    const isStatGroup = wrapper.classList.contains('stat-card-group');
     renderContextMenu([
-        { label: 'Split Group', onClick: () => { if (typeof window.__dashSplitGroup === 'function') window.__dashSplitGroup(wrapper); } }
+        { label: 'Split Group', onClick: () => {
+            const fn = isStatGroup ? window.__dashSplitStatGroup : window.__dashSplitGroup;
+            if (typeof fn === 'function') fn(wrapper);
+        } }
     ], clientX, clientY);
 }
 
@@ -569,10 +576,16 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 (function() {
     'use strict';
 
+    const GROUPS_KEY = 'dashboardStatGroups';
+    const MERGE_ZONE = 0.25;
+
     let activeCard = null;
     let isDragging = false;
     let startX = 0, startY = 0;
     let dropZoneIndicator = null;
+    let mergeIndicator = null;
+    let pendingMergeTarget = null; // { card, side }
+    let pendingReorderTargetId = null;
 
     function container() { return document.querySelector('.dash-stats-container'); }
 
@@ -591,9 +604,104 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         visible.forEach((card, index) => setOrder(card, index + 1));
     }
 
+    function loadGroups() {
+        try { const s = localStorage.getItem(GROUPS_KEY); return s ? JSON.parse(s) : {}; }
+        catch (e) { return {}; }
+    }
+    function saveGroups(groups) {
+        try { localStorage.setItem(GROUPS_KEY, JSON.stringify(groups)); }
+        catch (e) { console.error('Error saving stat groups:', e); }
+    }
+
+    function rebuildGroupsFromStorage() {
+        const groups = loadGroups();
+        Object.keys(groups).forEach(groupId => {
+            if (document.querySelector(`[data-group-id="${groupId}"]`)) return;
+            const def = groups[groupId];
+            const cardA = document.querySelector(`.dash-stats-container .dash-card[data-card-id="${def.children[0]}"]`);
+            const cardB = document.querySelector(`.dash-stats-container .dash-card[data-card-id="${def.children[1]}"]`);
+            if (!cardA || !cardB || cardA.closest('.stat-card-group') || cardB.closest('.stat-card-group')) return;
+            const wrapper = buildStatGroupWrapper(cardA, cardB, groupId);
+            setOrder(wrapper, def.order || 0);
+        });
+    }
+
+    function buildStatGroupWrapper(cardA, cardB, existingGroupId) {
+        const groupId = existingGroupId || ('group-stat-' + Date.now());
+        const wrapper = document.createElement('div');
+        wrapper.className = 'dash-card stat-card-group';
+        wrapper.dataset.groupId = groupId;
+        wrapper.style.gridColumn = 'span 2';
+
+        const inner = document.createElement('div');
+        inner.className = 'stat-group-inner';
+
+        const childA = document.createElement('div');
+        childA.className = 'stat-group-child';
+        const divider = document.createElement('div');
+        divider.className = 'stat-group-divider';
+        const childB = document.createElement('div');
+        childB.className = 'stat-group-child';
+
+        [cardA, cardB].forEach(c => {
+            c.style.order = '';
+            c.classList.add('grouped-card');
+        });
+
+        childA.appendChild(cardA);
+        childB.appendChild(cardB);
+        inner.appendChild(childA);
+        inner.appendChild(divider);
+        inner.appendChild(childB);
+        wrapper.appendChild(inner);
+
+        container().appendChild(wrapper);
+        wireStatGroupWrapper(wrapper);
+        return wrapper;
+    }
+
+    function mergeStatCards(draggedCard, targetCard, side) {
+        const targetOrder = getOrder(targetCard);
+        const cardA = side === 'left' ? draggedCard : targetCard;
+        const cardB = side === 'left' ? targetCard : draggedCard;
+
+        const wrapper = buildStatGroupWrapper(cardA, cardB);
+        setOrder(wrapper, targetOrder);
+        renumber();
+
+        const groups = loadGroups();
+        groups[wrapper.dataset.groupId] = {
+            children: [cardA.dataset.cardId, cardB.dataset.cardId],
+            order: getOrder(wrapper)
+        };
+        saveGroups(groups);
+        saveLayout();
+        if (typeof showToast === 'function') showToast('Stats combined — right-click to split', 'success');
+    }
+
+    function splitStatGroup(wrapper) {
+        const groupId = wrapper.dataset.groupId;
+        const cards = Array.from(wrapper.querySelectorAll('.dash-card[data-card-id]'));
+        const order = getOrder(wrapper);
+        cards.forEach((card, i) => {
+            card.classList.remove('grouped-card');
+            container().appendChild(card);
+            setOrder(card, order + i * 0.5);
+        });
+        wrapper.remove();
+
+        const groups = loadGroups();
+        delete groups[groupId];
+        saveGroups(groups);
+
+        renumber();
+        saveLayout();
+    }
+
     function initStatCards() {
         const box = container();
         if (!box) return;
+        rebuildGroupsFromStorage();
         const cards = box.querySelectorAll('.dash-card[data-card-id]');
         if (!cards.length) return;
 
@@ -602,20 +710,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             if (!card.style.order) setOrder(card, index + 1);
         });
 
-        cards.forEach(card => {
-            if (card.dataset.statWired === '1') return;
-            card.dataset.statWired = '1';
-            const handle = card.querySelector('.card-drag-handle');
-            if (handle) {
-                handle.addEventListener('mousedown', (e) => startDrag(e, card));
-                handle.addEventListener('touchstart', (e) => startDrag(e, card), { passive: false });
-            }
-            ensureMinimizeButton(card);
-            card.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                openContextMenu(card, e.clientX, e.clientY);
-            });
-        });
+        cards.forEach(wireStatCard);
+        Array.from(box.querySelectorAll('.stat-card-group')).forEach(wireStatGroupWrapper);
 
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onEnd);
@@ -637,6 +733,37 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             `;
             box.appendChild(dropZoneIndicator);
         }
+        if (!mergeIndicator || !document.body.contains(mergeIndicator)) {
+            mergeIndicator = document.createElement('div');
+            mergeIndicator.className = 'merge-zone-indicator';
+            document.body.appendChild(mergeIndicator);
+        }
+    }
+
+    function wireStatCard(card) {
+        if (card.dataset.statWired === '1') return;
+        card.dataset.statWired = '1';
+        const handle = card.querySelector('.card-drag-handle');
+        if (handle) {
+            handle.addEventListener('mousedown', (e) => startDrag(e, card));
+            handle.addEventListener('touchstart', (e) => startDrag(e, card), { passive: false });
+        }
+        ensureMinimizeButton(card);
+        card.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openContextMenu(card, e.clientX, e.clientY);
+        });
+    }
+
+    function wireStatGroupWrapper(wrapper) {
+        if (wrapper.dataset.statWired === '1') return;
+        wrapper.dataset.statWired = '1';
+        wrapper.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.dash-card[data-card-id]')) return; // let the child card's own menu win
+            e.preventDefault();
+            openGroupContextMenu(wrapper, e.clientX, e.clientY);
+        });
+        wrapper.querySelectorAll('.dash-card[data-card-id]').forEach(wireStatCard);
     }
 
     function startDrag(e, card) {
@@ -666,14 +793,41 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     function showDropZone(cursorX, cursorY) {
         const box = container();
         if (!box || !dropZoneIndicator) return;
+        pendingMergeTarget = null;
+        mergeIndicator.style.display = 'none';
+
         let closestCard = null, closestDist = Infinity;
         getVisibleStatCards().forEach(card => {
-            if (card === activeCard) return;
+            if (card === activeCard || card.closest('.stat-card-group')) return; // v1: no merging into an existing group
             const rect = card.getBoundingClientRect();
+
+            const withinVertical = cursorY > rect.top && cursorY < rect.bottom;
+            if (withinVertical) {
+                const zoneW = rect.width * MERGE_ZONE;
+                if (cursorX >= rect.left && cursorX < rect.left + zoneW) {
+                    pendingMergeTarget = { card, side: 'left' };
+                } else if (cursorX <= rect.right && cursorX > rect.right - zoneW) {
+                    pendingMergeTarget = { card, side: 'right' };
+                }
+            }
+
             const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
             const dist = Math.sqrt((cursorX - cx) ** 2 + (cursorY - cy) ** 2);
             if (dist < closestDist) { closestDist = dist; closestCard = card; }
         });
+
+        if (pendingMergeTarget) {
+            dropZoneIndicator.style.display = 'none';
+            const rect = pendingMergeTarget.card.getBoundingClientRect();
+            const barX = pendingMergeTarget.side === 'left' ? rect.left : rect.right - 4;
+            mergeIndicator.style.display = 'block';
+            mergeIndicator.style.left = barX + 'px';
+            mergeIndicator.style.top = rect.top + 'px';
+            mergeIndicator.style.height = rect.height + 'px';
+            pendingReorderTargetId = null;
+            return;
+        }
+
         if (closestCard && closestDist < 250) {
             const rect = closestCard.getBoundingClientRect();
             const boxRect = box.getBoundingClientRect();
@@ -682,9 +836,10 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             dropZoneIndicator.style.top = (rect.top - boxRect.top) + 'px';
             dropZoneIndicator.style.width = rect.width + 'px';
             dropZoneIndicator.style.height = rect.height + 'px';
-            dropZoneIndicator.dataset.targetId = closestCard.dataset.cardId;
+            pendingReorderTargetId = closestCard.dataset.cardId;
         } else {
             dropZoneIndicator.style.display = 'none';
+            pendingReorderTargetId = null;
         }
     }
 
@@ -695,17 +850,29 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         card.style.transition = '';
         card.style.zIndex = '';
         if (dropZoneIndicator) dropZoneIndicator.style.display = 'none';
+        if (mergeIndicator) mergeIndicator.style.display = 'none';
 
         const transform = card.style.transform;
         const match = transform.match(/translate\(([^p]+)px,\s*([^p]+)px\)/);
         if (match) {
             const deltaX = parseFloat(match[1]), deltaY = parseFloat(match[2]);
             if (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20) {
-                const targetId = dropZoneIndicator?.dataset?.targetId;
-                if (targetId && targetId !== card.dataset.cardId) reorder(card.dataset.cardId, targetId);
+                if (pendingMergeTarget) {
+                    card.style.transform = '';
+                    isDragging = false;
+                    activeCard = null;
+                    mergeStatCards(card, pendingMergeTarget.card, pendingMergeTarget.side);
+                    pendingMergeTarget = null;
+                    return;
+                }
+                if (pendingReorderTargetId && pendingReorderTargetId !== card.dataset.cardId) {
+                    reorder(card.dataset.cardId, pendingReorderTargetId);
+                }
             }
             card.style.transform = '';
         }
+        pendingMergeTarget = null;
+        pendingReorderTargetId = null;
         isDragging = false;
         activeCard = null;
     }
@@ -755,14 +922,17 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     }
 
     function resetStats() {
+        Array.from(document.querySelectorAll('.dash-stats-container .stat-card-group')).forEach(splitStatGroup);
         getVisibleStatCards().forEach(card => { card.style.order = ''; });
         try { localStorage.removeItem('dashboardStatLayout'); } catch (e) {}
+        try { localStorage.removeItem(GROUPS_KEY); } catch (e) {}
     }
 
     window.__dashStatsInit = initStatCards;
     window.__dashStatsReset = resetStats;
     window.__dashStatsRenumber = renumber;
     window.__dashStatsSave = saveLayout;
+    window.__dashSplitStatGroup = splitStatGroup;
 })();
 
 // ============================================================

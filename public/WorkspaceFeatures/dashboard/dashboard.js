@@ -1,33 +1,13 @@
-﻿const DEFAULT_DASH_TODOS = [
+const DEFAULT_DASH_TODOS = [
     { id: "todo_1", text: "Open today's lesson page", done: false },
     { id: "todo_2", text: "Add one study block", done: false },
     { id: "todo_3", text: "Check off completed tasks", done: false }
 ];
+let dashTodos = JSON.parse(localStorage.getItem("dashTodos") || "null") || DEFAULT_DASH_TODOS;
+
+function saveDashTodos() { localStorage.setItem("dashTodos", JSON.stringify(dashTodos)); }
+
 const DEFAULT_QUICK_NOTES = [];
-let dashTodos = [];
-let dashTodosUnsub = null;
-let quickNotes = [];
-let quickNotesUnsub = null;
-
-function loadDashTodos() {
-    if (window.TinyBaseStore) {
-        dashTodos = window.TinyBaseStore.getTable('dashTodos').map(row => {
-            const { _id, ...rest } = row;
-            return rest;
-        }) || [];
-    } else {
-        dashTodos = JSON.parse(localStorage.getItem("dashTodos") || "null") || DEFAULT_DASH_TODOS;
-    }
-}
-
-function saveDashTodos() {
-    const data = dashTodos.map(item => ({ ...item, _id: item.id }));
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setTable('dashTodos', data);
-    } else {
-        localStorage.setItem("dashTodos", JSON.stringify(dashTodos));
-    }
-}
 
 function renderDashTodos() {
     document.querySelectorAll("#dashStrikeList, #todoStrikeList").forEach(container => {
@@ -39,7 +19,7 @@ function renderDashTodos() {
                     <span class="checkmark"></span>
                     <span class="task-text">${escapeHtml(todo.text)}</span>
                 </label>
-                <button class="todo-delete-btn" title="Delete task">âœ•</button>
+                <button class="todo-delete-btn" title="Delete task">✕</button>
             </li>
         `).join("");
 
@@ -61,7 +41,7 @@ function renderDashTodos() {
     const dashEyebrow = document.getElementById('dashTodoEyebrow');
     if (dashEyebrow) {
         const openCount = dashTodos.filter(t => !t.done).length;
-        dashEyebrow.textContent = `TASKS Â· ${openCount} OPEN`;
+        dashEyebrow.textContent = `TASKS · ${openCount} OPEN`;
     }
 }
 
@@ -128,7 +108,7 @@ function updateDashProgress(saveFromDom = true) {
     if (todayEvents.length > 0) {
         const sd = todayEvents.filter(e => e.completed).length;
         pct = Math.round((sd / todayEvents.length) * 100);
-        label = `${sd} / ${todayEvents.length} today`;
+        label = `${sd} / ${todayEvents.length}`;
     } else if (total > 0) {
         pct = Math.round((done / total) * 100);
     }
@@ -194,12 +174,12 @@ function updateHubSessionsWidget(current, next, todayEvents) {
         html += `
             <div class="session-item current-session" style="padding: 10px; font-size: 0.85rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-size: 0.75rem; color: #34d399; font-weight: 600;">â— ACTIVE</span>
+                    <span style="font-size: 0.75rem; color: #34d399; font-weight: 600;">● ACTIVE</span>
                     <span style="font-size: 0.7rem; color: var(--text-muted);">NOW</span>
                 </div>
                 <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(current.title)}</div>
                 <div style="display: flex; gap: 8px; font-size: 0.75rem; color: var(--text-muted);">
-                    <span style="color: #34d399;">â± Active</span>
+                    <span style="color: #34d399;">⏱ Active</span>
                 </div>
             </div>
         `;
@@ -216,7 +196,7 @@ function updateHubSessionsWidget(current, next, todayEvents) {
                     </div>
                     <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(taskName)}</div>
                     <div style="display: flex; gap: 8px; font-size: 0.75rem; color: var(--text-muted);">
-                        <span style="color: #34d399;">â± ${focusTime}</span>
+                        <span style="color: #34d399;">⏱ ${focusTime}</span>
                     </div>
                 </div>
             `;
@@ -225,7 +205,7 @@ function updateHubSessionsWidget(current, next, todayEvents) {
     if (!current && recentSessions.length === 0) {
         html = `
             <div class="session-history-empty" style="padding: 16px 8px;">
-                <div style="font-size: 1.2rem; margin-bottom: 4px;">ðŸ“Š</div>
+                <div style="font-size: 1.2rem; margin-bottom: 4px;">📊</div>
                 <div style="color: var(--text-muted); font-size: 0.75rem;">No sessions yet</div>
             </div>
         `;
@@ -271,7 +251,7 @@ function renderAllSessions(current, next, todayEvents) {
             const endAmpm = endHours >= 12 ? 'PM' : 'AM';
             const endFormattedHours = endHours % 12 || 12;
             const endFormattedMinutes = String(endMinutes).padStart(2, '0');
-            return `${timeStr} â€“ ${endFormattedHours}:${endFormattedMinutes} ${endAmpm}`;
+            return `${timeStr} – ${endFormattedHours}:${endFormattedMinutes} ${endAmpm}`;
         }
         return timeStr;
     };
@@ -279,18 +259,18 @@ function renderAllSessions(current, next, todayEvents) {
     if (current) {
         const currentStart = current.start || 'Now';
         const currentEnd = current.end || '';
-        const timeRange = currentEnd ? `${currentStart} â€“ ${currentEnd}` : currentStart;
+        const timeRange = currentEnd ? `${currentStart} – ${currentEnd}` : currentStart;
         html += `
             <div class="session-item current-session" data-action="showSessionDetailsModal" title="Click to view current session details">
                 <div class="session-time-range">${timeRange}</div>
                 <div class="session-info">
                     <div class="session-name">${escapeHtml(current.title)}</div>
                     <div class="session-stats">
-                        <span class="session-stat focus">â± Active</span>
+                        <span class="session-stat focus">⏱ Active</span>
                     </div>
                 </div>
                 <span class="session-badge">NOW</span>
-                <div class="session-arrow">â†’</div>
+                <div class="session-arrow">→</div>
             </div>
         `;
     }
@@ -307,12 +287,12 @@ function renderAllSessions(current, next, todayEvents) {
                     <div class="session-info">
                         <div class="session-name">${escapeHtml(taskName)}</div>
                         <div class="session-stats">
-                            <span class="session-stat focus">â± ${focusTime}</span>
-                            <span class="session-stat break">â˜• ${breakTime}</span>
-                            <span class="session-stat total">â³ ${totalDuration}</span>
+                            <span class="session-stat focus">⏱ ${focusTime}</span>
+                            <span class="session-stat break">☕ ${breakTime}</span>
+                            <span class="session-stat total">⏳ ${totalDuration}</span>
                         </div>
                     </div>
-                    <div class="session-arrow">â†’</div>
+                    <div class="session-arrow">→</div>
                 </div>
             `;
         });
@@ -320,7 +300,7 @@ function renderAllSessions(current, next, todayEvents) {
     if (!current && todaySessions.length === 0) {
         html = `
             <div class="session-history-empty">
-                <div style="font-size: 2rem; margin-bottom: 8px;">ðŸ“Š</div>
+                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
                 <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your progress</div>
             </div>
@@ -343,11 +323,11 @@ function updateQuickJumpLinks() {
     const recentLessons = document.getElementById("dashRecentLessons");
     const recentLibs = document.getElementById("dashRecentLibs");
     const activePage = (typeof hubState !== 'undefined' && hubState?.pages) ? hubState.pages[hubState.activePageId] : null;
-    if (recentLessons && activePage) recentLessons.innerHTML = `<span style="color:#e2e8f0;">ðŸ“„ ${escapeHtml(activePage.title)}</span>`;
+    if (recentLessons && activePage) recentLessons.innerHTML = `<span style="color:#e2e8f0;">📄 ${escapeHtml(activePage.title)}</span>`;
     else if (recentLessons) recentLessons.innerHTML = `<span style="color:#475569;">No open lesson</span>`;
     if (recentLibs && libraryItems.length > 0) {
         const recent = libraryItems.slice(-3).reverse();
-        recentLibs.innerHTML = recent.map(item => `<a href="${escapeHtml(item.url)}" target="_blank" style="color:#38bdf8;display:block;padding:2px 0;">ðŸ”— ${escapeHtml(item.title)}</a>`).join('');
+        recentLibs.innerHTML = recent.map(item => `<a href="${escapeHtml(item.url)}" target="_blank" style="color:#38bdf8;display:block;padding:2px 0;">🔗 ${escapeHtml(item.title)}</a>`).join('');
     } else if (recentLibs) {
         recentLibs.innerHTML = `<span style="color:#475569;">No bookmarks yet</span>`;
     }
@@ -382,7 +362,7 @@ function updateDailyStats() {
     if (total === 0) {
         el.textContent = 'No tasks scheduled for today';
     } else {
-        el.textContent = `â­ ${pct}% complete Â· ${done}/${total} today`;
+        el.textContent = `⭐ ${pct}% complete · ${done}/${total} today`;
     }
 }
 
@@ -399,7 +379,7 @@ function renderSessionHistory() {
     if (todaySessions.length === 0) {
         container.innerHTML = `
             <div class="session-history-empty">
-                <div style="font-size: 2rem; margin-bottom: 8px;">ðŸ“Š</div>
+                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
                 <div style="color: var(--text-muted); font-size: 0.9rem;">No completed sessions yet today</div>
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your history</div>
             </div>
@@ -424,12 +404,12 @@ function renderSessionHistory() {
                 <div class="session-history-info">
                     <div class="session-history-task-name">${escapeHtml(taskName)}</div>
                     <div class="session-history-duration">
-                        <span class="focus-time">â± ${focusTime}</span>
-                        <span class="break-time">â˜• ${breakTime}</span>
-                        <span>â³ ${totalDuration}</span>
+                        <span class="focus-time">⏱ ${focusTime}</span>
+                        <span class="break-time">☕ ${breakTime}</span>
+                        <span>⏳ ${totalDuration}</span>
                     </div>
                 </div>
-                <div class="session-history-arrow">â†’</div>
+                <div class="session-history-arrow">→</div>
             </div>
         `;
     }).join('');
@@ -531,7 +511,7 @@ window.showSessionDetailsModal = function(sessionTimestamp) {
     html += `<div style="background: var(--bg-primary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;"><div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">Total Time</div><div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary);">${formatTimeShort(totalTimeToday)}</div></div>`;
     html += `</div>`;
     if (todaySessions.length > 0 || (currentFocus > 0 || currentBreak > 0)) {
-        html += `<h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">ðŸ“‹ Session Timeline</h3>`;
+        html += `<h3 style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">📋 Session Timeline</h3>`;
         html += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
         todaySessions.slice().reverse().forEach((session, index) => {
             const time = new Date(session.timestamp);
@@ -545,10 +525,10 @@ window.showSessionDetailsModal = function(sessionTimestamp) {
             html += `<div style="min-width: 100px; font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">${timeStr}</div>`;
             html += `<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(session.label)}</div>`;
             html += `<div style="display: flex; gap: 12px; font-size: 0.75rem; align-items: center; flex-wrap: wrap;">`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â±</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.focusSeconds)}</span></div>`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â˜•</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.breakSeconds)}</span></div>`;
-            if (session.idleSeconds > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â¸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.idleSeconds)}</span></div>`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â³</span><span style="color: var(--text-secondary); font-variant-numeric: tabular-nums;">${formatTimeShort(sessionDuration)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏱</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.focusSeconds)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">☕</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.breakSeconds)}</span></div>`;
+            if (session.idleSeconds > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(session.idleSeconds)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏳</span><span style="color: var(--text-secondary); font-variant-numeric: tabular-nums;">${formatTimeShort(sessionDuration)}</span></div>`;
             if (efficiency > 0) html += `<div style="margin-left: auto; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); color: var(--accent-1);">${efficiency}%</div>`;
             html += `</div></div></div>`;
         });
@@ -557,17 +537,17 @@ window.showSessionDetailsModal = function(sessionTimestamp) {
             const currentEfficiency = currentDuration > 0 ? Math.round((currentFocus / currentDuration) * 100) : 0;
             html += `<div style="background: rgba(124, 109, 240, 0.05); padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--accent-1); border-left: 3px solid var(--accent-1); display: flex; align-items: center; gap: 12px;">`;
             html += `<div style="min-width: 100px; font-size: 0.8rem; color: var(--accent-1); font-weight: 600;">NOW</div>`;
-            html += `<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">ðŸŸ¢ Current Session</div>`;
+            html += `<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">🟢 Current Session</div>`;
             html += `<div style="display: flex; gap: 12px; font-size: 0.75rem; align-items: center; flex-wrap: wrap;">`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â±</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentFocus)}</span></div>`;
-            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â˜•</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentBreak)}</span></div>`;
-            if (currentIdle > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">â¸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentIdle)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏱</span><span style="color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentFocus)}</span></div>`;
+            html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">☕</span><span style="color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentBreak)}</span></div>`;
+            if (currentIdle > 0) html += `<div style="display: flex; align-items: center; gap: 4px;"><span style="color: var(--text-muted);">⏸</span><span style="color: #95a5a6; font-weight: 600; font-variant-numeric: tabular-nums;">${formatTimeShort(currentIdle)}</span></div>`;
             html += `<div style="margin-left: auto; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; background: rgba(52, 211, 153, 0.15); color: #34d399;">${currentEfficiency}% focus</div>`;
             html += `</div></div></div>`;
         }
         html += `</div>`;
     } else {
-        html += `<div style="text-align: center; padding: 48px 16px; color: var(--text-muted);"><div style="font-size: 3rem; margin-bottom: 16px;">ðŸ“Š</div><div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No sessions yet today</div><div style="font-size: 0.9rem;">Start a focus session to see your progress here</div></div>`;
+        html += `<div style="text-align: center; padding: 48px 16px; color: var(--text-muted);"><div style="font-size: 3rem; margin-bottom: 16px;">📊</div><div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No sessions yet today</div><div style="font-size: 0.9rem;">Start a focus session to see your progress here</div></div>`;
     }
     content.innerHTML = html;
     modal.style.display = 'flex';
@@ -621,58 +601,162 @@ function updateFocusGoalDisplay() {
     const messageEl = document.getElementById('focusGoalMessage');
     if (messageEl) {
         let message = '';
-        if (percentage === 0) message = 'ðŸš€ Ready to start?';
-        else if (percentage < 25) message = 'ðŸ’ª Great start!';
-        else if (percentage < 50) message = 'ðŸ”¥ Keep it up!';
-        else if (percentage < 75) message = 'âš¡ Almost there!';
-        else if (percentage < 100) message = 'ðŸŽ¯ So close!';
-        else message = 'ðŸ† Goal achieved! Amazing!';
+        if (percentage === 0) message = '🚀 Ready to start?';
+        else if (percentage < 25) message = '💪 Great start!';
+        else if (percentage < 50) message = '🔥 Keep it up!';
+        else if (percentage < 75) message = '⚡ Almost there!';
+        else if (percentage < 100) message = '🎯 So close!';
+        else message = '🏆 Goal achieved! Amazing!';
         messageEl.textContent = message;
     }
 }
 function editFocusGoal() {
-    const currentGoal = getFocusGoal();
-    const newGoal = prompt('Set your daily focus goal (in minutes):', currentGoal.minutes);
-    if (newGoal && !isNaN(newGoal) && parseInt(newGoal) > 0) {
-        saveFocusGoal(parseInt(newGoal));
-        updateFocusGoalDisplay();
-        if (typeof showNotification === 'function') showNotification('Daily focus goal updated!', 'success');
+    openFocusGoalModal();
+}
+function openFocusGoalModal() {
+    const goal = getFocusGoal();
+    const hoursInput = document.getElementById('focusGoalHoursInput');
+    const minutesInput = document.getElementById('focusGoalMinutesInput');
+    if (hoursInput) hoursInput.value = Math.floor(goal.minutes / 60);
+    if (minutesInput) minutesInput.value = goal.minutes % 60;
+    const modal = document.getElementById('focusGoalModal');
+    if (modal) modal.style.display = 'flex';
+}
+function closeFocusGoalModal() {
+    const modal = document.getElementById('focusGoalModal');
+    if (modal) modal.style.display = 'none';
+}
+function saveFocusGoalModal() {
+    const hoursInput = document.getElementById('focusGoalHoursInput');
+    const minutesInput = document.getElementById('focusGoalMinutesInput');
+    const hours = Math.max(0, parseInt(hoursInput && hoursInput.value, 10) || 0);
+    const minutes = Math.max(0, Math.min(59, parseInt(minutesInput && minutesInput.value, 10) || 0));
+    const totalMinutes = hours * 60 + minutes;
+    if (totalMinutes <= 0) {
+        if (typeof showNotification === 'function') showNotification('Goal must be more than 0 minutes', 'error');
+        return;
     }
+    saveFocusGoal(totalMinutes);
+    updateFocusGoalDisplay();
+    closeFocusGoalModal();
+    if (typeof showNotification === 'function') showNotification('Daily focus goal updated!', 'success');
+}
+window.editFocusGoal = editFocusGoal;
+window.openFocusGoalModal = openFocusGoalModal;
+window.closeFocusGoalModal = closeFocusGoalModal;
+window.saveFocusGoalModal = saveFocusGoalModal;
+
+function closeGenericDetailModal() {
+    const modal = document.getElementById('genericDetailModal');
+    if (modal) modal.style.display = 'none';
 }
 
-function loadQuickNotes() {
-    if (window.TinyBaseStore) {
-        quickNotes = window.TinyBaseStore.getTable('quickNotes').map(row => {
-            const { _id, ...rest } = row;
-            return rest;
-        }) || [];
+function showTasksDoneTodayModal() {
+    const modal = document.getElementById('genericDetailModal');
+    const titleEl = document.getElementById('genericDetailTitle');
+    const content = document.getElementById('genericDetailContent');
+    if (!modal || !content) return;
+    if (titleEl) titleEl.textContent = 'Tasks Done Today';
+
+    const todayEvents = (typeof events !== 'undefined' ? events : []).filter(e => e.day === getTimeMetrics().todayName);
+    let items = [];
+    if (todayEvents.length > 0) {
+        items = todayEvents.filter(e => e.completed).map(e => ({ name: e.title, time: e.start || '' }));
     } else {
-        quickNotes = JSON.parse(localStorage.getItem('quickNotes') || 'null') || DEFAULT_QUICK_NOTES;
+        items = (typeof dashTodos !== 'undefined' ? dashTodos : []).filter(t => t.done).map(t => ({ name: t.text, time: '' }));
     }
-}
 
-function saveQuickNotes() {
-    const data = quickNotes.map(item => ({ ...item, _id: item.text + item.timestamp }));
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setTable('quickNotes', data);
+    if (items.length === 0) {
+        content.innerHTML = `<div style="padding:32px 16px; text-align:center; color:var(--text-muted);">No tasks completed yet today.</div>`;
     } else {
-        localStorage.setItem('quickNotes', JSON.stringify(quickNotes));
+        content.innerHTML = `<div style="display:flex; flex-direction:column; gap:10px; padding: 4px;">${items.map(i => `
+            <div style="display:flex; align-items:center; gap:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:12px 14px;">
+                <span style="color:#10b981; font-weight:700;">✓</span>
+                <span style="flex:1; color:var(--text-primary);">${escapeHtml(i.name || '')}</span>
+                ${i.time ? `<span style="color:var(--text-muted); font-size:0.8rem;">${escapeHtml(i.time)}</span>` : ''}
+            </div>
+        `).join('')}</div>`;
     }
+    modal.style.display = 'flex';
 }
 
-function initDashboardStore() {
-    loadDashTodos();
-    loadQuickNotes();
-    if (window.TinyBaseStore) {
-        dashTodosUnsub = window.TinyBaseStore.on('dashTodos', () => { loadDashTodos(); renderDashTodos(); });
-        quickNotesUnsub = window.TinyBaseStore.on('quickNotes', () => { loadQuickNotes(); renderQuickNotes(); });
-    }
+let lessonFoldersFilterBucket = 'today';
+function showLessonFoldersModal() {
+    lessonFoldersFilterBucket = 'today';
+    renderLessonFoldersModal();
+    const modal = document.getElementById('genericDetailModal');
+    if (modal) modal.style.display = 'flex';
 }
 
-function destroyDashboardStore() {
-    if (dashTodosUnsub) { dashTodosUnsub(); dashTodosUnsub = null; }
-    if (quickNotesUnsub) { quickNotesUnsub(); quickNotesUnsub = null; }
+function setLessonFoldersFilter(bucket) {
+    lessonFoldersFilterBucket = bucket;
+    renderLessonFoldersModal();
 }
+window.setLessonFoldersFilter = setLessonFoldersFilter;
+
+function renderLessonFoldersModal() {
+    const titleEl = document.getElementById('genericDetailTitle');
+    const content = document.getElementById('genericDetailContent');
+    if (!content) return;
+    if (titleEl) titleEl.textContent = 'Lesson Folders';
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
+    const sevenDaysAgo = startOfToday - 6 * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = startOfToday - 29 * 24 * 60 * 60 * 1000;
+
+    const allFolders = (typeof hubState !== 'undefined' && hubState.folders) ? Object.values(hubState.folders) : [];
+    const withDates = allFolders.filter(f => typeof f.createdAt === 'number');
+
+    const buckets = {
+        today: withDates.filter(f => f.createdAt >= startOfToday),
+        yesterday: withDates.filter(f => f.createdAt >= startOfYesterday && f.createdAt < startOfToday),
+        week: withDates.filter(f => f.createdAt >= sevenDaysAgo),
+        month: withDates.filter(f => f.createdAt >= thirtyDaysAgo)
+    };
+
+    const tabs = [
+        { id: 'today', label: 'Today' },
+        { id: 'yesterday', label: 'Yesterday' },
+        { id: 'week', label: 'This Week' },
+        { id: 'month', label: 'This Month' }
+    ];
+
+    const tabsHtml = tabs.map(t => `
+        <button onclick="setLessonFoldersFilter('${t.id}')"
+            style="padding:6px 14px; border-radius:99px; font-size:0.8rem; cursor:pointer; font-family:inherit;
+                   border:1px solid ${lessonFoldersFilterBucket === t.id ? 'var(--accent-1)' : 'var(--border-color)'};
+                   background:${lessonFoldersFilterBucket === t.id ? 'var(--accent-1)' : 'transparent'};
+                   color:${lessonFoldersFilterBucket === t.id ? '#fff' : 'var(--text-secondary)'};">${t.label}</button>
+    `).join('');
+
+    const list = buckets[lessonFoldersFilterBucket] || [];
+    const listHtml = list.length === 0
+        ? `<div style="padding:32px 16px; text-align:center; color:var(--text-muted);">No folders created in this range.</div>`
+        : `<div style="display:flex; flex-direction:column; gap:10px;">${list.map(f => `
+            <div style="display:flex; align-items:center; gap:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:12px 14px;">
+                <span>📁</span>
+                <span style="flex:1; color:var(--text-primary);">${escapeHtml(f.title || '')}</span>
+                <span style="color:var(--text-muted); font-size:0.8rem;">${new Date(f.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            </div>
+        `).join('')}</div>`;
+
+    const noDateNote = allFolders.length > withDates.length
+        ? `<div style="margin-top:14px; font-size:0.75rem; color:var(--text-muted);">${allFolders.length - withDates.length} older folder(s) created before this filter existed aren't dated, so they won't appear here.</div>`
+        : '';
+
+    content.innerHTML = `
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">${tabsHtml}</div>
+        ${listHtml}
+        ${noDateNote}
+    `;
+}
+window.closeGenericDetailModal = closeGenericDetailModal;
+window.showTasksDoneTodayModal = showTasksDoneTodayModal;
+window.showLessonFoldersModal = showLessonFoldersModal;
+let quickNotes = JSON.parse(localStorage.getItem('quickNotes') || 'null') || DEFAULT_QUICK_NOTES;
+function saveQuickNotes() { localStorage.setItem('quickNotes', JSON.stringify(quickNotes)); }
 function renderQuickNotes() {
     const container = document.getElementById('quickNotesList');
     if (!container) return;
@@ -795,13 +879,13 @@ function calculateStreak() {
 }
 
 function getStreakEmoji(streak) {
-    if (streak === 0) return 'ðŸ’¤';
-    if (streak < 3) return 'ðŸŒ±';
-    if (streak < 7) return 'ðŸ”¥';
-    if (streak < 14) return 'ðŸ”¥ðŸ”¥';
-    if (streak < 30) return 'ðŸ”¥ðŸ”¥ðŸ”¥';
-    if (streak < 60) return 'âš¡âš¡âš¡';
-    return 'ðŸ†ðŸ”¥âš¡';
+    if (streak === 0) return '💤';
+    if (streak < 3) return '🌱';
+    if (streak < 7) return '🔥';
+    if (streak < 14) return '🔥🔥';
+    if (streak < 30) return '🔥🔥🔥';
+    if (streak < 60) return '⚡⚡⚡';
+    return '🏆🔥⚡';
 }
 function getStreakColor(streak) {
     if (streak === 0) return 'var(--text-muted)';
@@ -912,9 +996,9 @@ const DEFAULT_CARD_VISIBILITY = {
     'stat-tasks': true, 'stat-schedule': true, 'stat-lessons': true, 'stat-streak': true
 };
 const CARD_LABELS = {
-    'banner': 'ðŸŽ¯ Today\'s Focus', 'todo': 'â˜‘ Master To-Do',
-    'widgets': 'ðŸ“¦ Custom Widgets', 'stat-tasks': 'âœ“ Tasks Done',
-    'stat-schedule': 'â–¦ Today\'s Tasks', 'stat-lessons': 'â–£ Lesson Folders', 'stat-streak': 'ðŸ”¥ Day Streak'
+    'banner': '🎯 Today\'s Focus', 'todo': '☑ Master To-Do',
+    'widgets': '📦 Custom Widgets', 'stat-tasks': '✓ Tasks Done',
+    'stat-schedule': '▦ Today\'s Tasks', 'stat-lessons': '▣ Lesson Folders', 'stat-streak': '🔥 Day Streak'
 };
 function loadCardVisibility() {
     try { const saved = localStorage.getItem('dashboardCardVisibility'); if (saved) return JSON.parse(saved); } catch (e) {}
@@ -1059,8 +1143,8 @@ function renderMiniCalendar() {
             <div class="mini-calendar-header">
                 <span class="mc-month">${monthNames[month]} ${year}</span>
                 <div class="mc-nav">
-                    <button data-mc-action="prev" title="Previous month">â€¹</button>
-                    <button data-mc-action="next" title="Next month">â€º</button>
+                    <button data-mc-action="prev" title="Previous month">‹</button>
+                    <button data-mc-action="next" title="Next month">›</button>
                 </div>
             </div>
             <div class="mini-calendar-weekdays">${dayNames.map(n => `<span>${n}</span>`).join('')}</div>
@@ -1080,35 +1164,35 @@ function renderMiniCalendar() {
     container.querySelector('[data-mc-action="prev"]')?.addEventListener('click', () => { miniCalendarDate.setMonth(miniCalendarDate.getMonth() - 1); renderMiniCalendar(); });
     container.querySelector('[data-mc-action="next"]')?.addEventListener('click', () => { miniCalendarDate.setMonth(miniCalendarDate.getMonth() + 1); renderMiniCalendar(); });
 }
-function initMiniCalendar() {
+function initDateCountdownCard() {
     const grid = document.querySelector('.dashboard-grid');
     if (!grid) return;
-    if (document.querySelector('.dash-card[data-card-id="calendar"]')) return;
-    const calendarCard = document.createElement('div');
-    calendarCard.className = 'dash-card';
-    calendarCard.setAttribute('data-card-id', 'calendar');
-    calendarCard.setAttribute('data-source-view', 'schedule-view');
-    calendarCard.innerHTML = `
+    if (document.querySelector('.dash-card[data-card-id="date-countdown"]')) return;
+    const countdownCard = document.createElement('div');
+    countdownCard.className = 'dash-card';
+    countdownCard.setAttribute('data-card-id', 'date-countdown');
+    countdownCard.setAttribute('data-source-view', 'schedule-view');
+    countdownCard.innerHTML = `
         <div class="card-glow-border"></div>
         <div class="card-inner">
             <div class="card-header-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h3 style="margin:0;">ðŸ“… Calendar</h3>
+                <h3 style="margin:0;">⏳ Countdown</h3>
                 <div class="card-controls">
-                    <span class="card-drag-handle" title="Drag to move">â ¿</span>
+                    <span class="card-drag-handle" title="Drag to move">⠿</span>
                 </div>
             </div>
-            <div id="dashMiniCalendar"></div>
+            <div id="dashDateCountdown"></div>
         </div>
     `;
     const slot = document.getElementById('liveWidgetsSlot');
     if (slot) {
-        slot.appendChild(calendarCard);
+        slot.appendChild(countdownCard);
     } else {
         const statsContainer = grid.querySelector('.dash-stats-container');
-        if (statsContainer) grid.insertBefore(calendarCard, statsContainer);
-        else grid.appendChild(calendarCard);
+        if (statsContainer) grid.insertBefore(countdownCard, statsContainer);
+        else grid.appendChild(countdownCard);
     }
-    renderMiniCalendar();
+    if (typeof updateDashboardCountdown === 'function') updateDashboardCountdown();
     if (typeof initDashboardCards === 'function') initDashboardCards();
 }
 function toggleDashboardFocusMode() {
@@ -1134,7 +1218,7 @@ function initDashboardEnhancements() {
     initLastUpdatedTimestamps();
     applyCardVisibility();
     initSparklines();
-    initMiniCalendar();
+    initDateCountdownCard();
     const customizeBtn = document.querySelector('[data-action="toggleCardVisibility"]');
     if (customizeBtn) customizeBtn.addEventListener('click', toggleCardVisibility);
     const closeBtn = document.querySelector('[data-action="closeCardVisibility"]');
@@ -1154,7 +1238,3 @@ if (document.readyState === 'loading') {
 } else {
     setTimeout(initDashboardEnhancements, 200);
 }
-
-// Expose store init globally
-window.initDashboardStore = initDashboardStore;
-window.destroyDashboardStore = destroyDashboardStore;

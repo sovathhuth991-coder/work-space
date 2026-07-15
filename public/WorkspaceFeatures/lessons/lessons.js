@@ -14,19 +14,6 @@ const DEFAULT_HUB_STATE = {
 
 // ----- State Loading -----
 function loadHubState() {
-    if (window.TinyBaseStore) {
-        const table = window.TinyBaseStore.getTable('hubState');
-        if (table && table.length) {
-            const row = table[0];
-            const { _id, ...state } = row;
-            if (state.rootFolderIds) return state;
-            if (state.folders && typeof state.folders === 'object') {
-                state.rootFolderIds = Object.keys(state.folders);
-                return state;
-            }
-            return JSON.parse(JSON.stringify(DEFAULT_HUB_STATE));
-        }
-    }
     try {
         const stored = localStorage.getItem("hubState");
         if (stored) {
@@ -66,46 +53,9 @@ function migrateFromOldFormat(oldState) {
 }
 
 let hubState = loadHubState();
-let collapsedFolders = {};
-let lessonsUnsub = null;
-
-function loadCollapsedFolders() {
-    if (window.TinyBaseStore) {
-        const val = window.TinyBaseStore.getValue('collapsedFolders');
-        collapsedFolders = (typeof val === 'object' && val !== null) ? val : {};
-    } else {
-        collapsedFolders = JSON.parse(localStorage.getItem("collapsedFolders") || "{}");
-    }
-}
-
-function saveHubState() {
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setValue('hubState', hubState);
-    } else {
-        localStorage.setItem("hubState", JSON.stringify(hubState));
-    }
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setValue('collapsedFolders', collapsedFolders);
-    } else {
-        localStorage.setItem("collapsedFolders", JSON.stringify(collapsedFolders));
-    }
-}
-
-function initLessonsStore() {
-    loadCollapsedFolders();
-    if (window.TinyBaseStore) {
-        lessonsUnsub = window.TinyBaseStore.on('hubState', () => {
-            hubState = loadHubState();
-        });
-        lessonsUnsub = window.TinyBaseStore.on('collapsedFolders', () => {
-            loadCollapsedFolders();
-        });
-    }
-}
-
-function destroyLessonsStore() {
-    if (lessonsUnsub) { lessonsUnsub(); lessonsUnsub = null; }
-}
+console.log('hubState initial:', hubState);
+console.log('hubState.rootFolderIds:', Array.isArray(hubState.rootFolderIds) ? hubState.rootFolderIds : 'MISSING');
+let collapsedFolders = JSON.parse(localStorage.getItem("collapsedFolders") || "{}");
 let currentSearchQuery = '';
 
 // ============================================================
@@ -192,26 +142,13 @@ function showSaveIndicator() {
 }
 
 function saveHubState() {
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setValue('hubState', hubState);
-    } else {
-        localStorage.setItem("hubState", JSON.stringify(hubState));
-    }
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setValue('collapsedFolders', collapsedFolders);
-    } else {
-        localStorage.setItem("collapsedFolders", JSON.stringify(collapsedFolders));
-    }
+    localStorage.setItem("hubState", JSON.stringify(hubState));
     if (typeof updateDashboardStats === 'function') updateDashboardStats();
     showSaveIndicator();
 }
 
 function saveCollapsedFolders() {
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setValue('collapsedFolders', collapsedFolders);
-    } else {
-        localStorage.setItem("collapsedFolders", JSON.stringify(collapsedFolders));
-    }
+    localStorage.setItem("collapsedFolders", JSON.stringify(collapsedFolders));
 }
 
 function refreshWorkspace() {
@@ -559,7 +496,7 @@ async function showLessonContextMenu(e, context) {
                     if (result && result.value) {
                         const name = result.value;
                         const id = `folder_${Date.now()}`;
-                        hubState.folders[id] = { id, title: name.trim(), icon: '📁', children: [] };
+                        hubState.folders[id] = { id, title: name.trim(), icon: '📁', children: [], createdAt: Date.now() };
                         hubState.rootFolderIds.push(id);
                         refreshWorkspace();
                         showToast(`✅ Folder "${escapeHtml(name.trim())}" created!`, 'success');
@@ -578,7 +515,7 @@ async function showLessonContextMenu(e, context) {
                         const parent = hubState.folders[folderId];
                         if (!parent) { showToast('Folder not found.', 'error'); return; }
                         const id = `folder_${Date.now()}`;
-                        hubState.folders[id] = { id, title: name.trim(), icon: '📁', children: [] };
+                        hubState.folders[id] = { id, title: name.trim(), icon: '📁', children: [], createdAt: Date.now() };
                         parent.children.push(id);
                         refreshWorkspace();
                         showToast(`✅ Subfolder "${escapeHtml(name.trim())}" created!`, 'success');
@@ -1872,7 +1809,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (result && result.value) {
                     const name = result.value;
                     const id = `folder_${Date.now()}`;
-                    hubState.folders[id] = { id, title: name.trim(), icon: '📁', children: [] };
+                    hubState.folders[id] = { id, title: name.trim(), icon: '📁', children: [], createdAt: Date.now() };
                     hubState.rootFolderIds.push(id);
                     refreshWorkspace();
                     showToast(`✅ Folder "${escapeHtml(name.trim())}" created!`, 'success');
@@ -2266,7 +2203,5 @@ window.toggleFindBar = toggleFindBar;
 window.addNewBlockToPage = addNewBlockToPage;
 window.exportPageAsHTML = exportPageAsHTML;
 window.toggleExportOptions = toggleExportOptions;
-window.initLessonsStore = initLessonsStore;
-window.destroyLessonsStore = destroyLessonsStore;
 
 console.log('📚 lessons.js loaded with backup/restore and XSS fixes.');

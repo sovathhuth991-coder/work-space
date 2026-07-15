@@ -2,38 +2,10 @@
 // WIDGETS – FIXED: Only add default audio if no audio widgets exist
 // ============================================================
 
-let customWidgets = [];
-let widgetsUnsub = null;
-
-function loadCustomWidgets() {
-    if (window.TinyBaseStore) {
-        customWidgets = window.TinyBaseStore.getTable('customWidgets').map(row => {
-            const { _id, ...rest } = row;
-            return rest;
-        }) || [];
-    } else {
-        customWidgets = JSON.parse(localStorage.getItem('customWidgets') || '[]');
-    }
-}
+let customWidgets = JSON.parse(localStorage.getItem('customWidgets') || '[]');
 
 function saveCustomWidgets() {
-    const data = customWidgets.map(item => ({ ...item, _id: item.id }));
-    if (window.TinyBaseStore) {
-        window.TinyBaseStore.setTable('customWidgets', data);
-    } else {
-        localStorage.setItem('customWidgets', JSON.stringify(customWidgets));
-    }
-}
-
-function initWidgetsStore() {
-    loadCustomWidgets();
-    if (window.TinyBaseStore) {
-        widgetsUnsub = window.TinyBaseStore.on('customWidgets', () => { loadCustomWidgets(); renderWidgets(); });
-    }
-}
-
-function destroyWidgetsStore() {
-    if (widgetsUnsub) { widgetsUnsub(); widgetsUnsub = null; }
+    localStorage.setItem('customWidgets', JSON.stringify(customWidgets));
 }
 
 function renderWidgets() {
@@ -105,16 +77,12 @@ function renderWidgets() {
                 const widgetId = widget.id;
                 const audioSrc = widget.src || '';
                 const label = widget.label || '';
-                const title = widget.title || '🎵 Audio';
 
                 content = `
                     <div class="custom-audio-player" data-widget-id="${widgetId}">
                         <audio class="custom-audio-element" src="${escapeHtml(audioSrc)}" preload="metadata" loop></audio>
                         <div class="audio-player-inner">
-                            <div class="audio-info">
-                                <span class="audio-title">${escapeHtml(title)}</span>
-                                ${label ? `<span class="audio-label">${escapeHtml(label)}</span>` : ''}
-                            </div>
+                            ${label ? `<div class="audio-info"><span class="audio-label">${escapeHtml(label)}</span></div>` : ''}
                             <div class="audio-controls">
                                 <button class="audio-play-btn" onclick="toggleAudioPlayer('${widgetId}')">
                                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -359,7 +327,16 @@ function deleteWidget(id) {
         customWidgets.push({
             id: `widget_${Date.now() + 1}`,
             type: 'chart',
-            title: '📊 Progress Overview'
+            title: "This Week's Task Progress"
+        });
+        saveCustomWidgets();
+    }
+
+    // Rename any existing widget still using the old default title
+    const renamed = customWidgets.some(w => w.type === 'chart' && w.title === '📊 Progress Overview');
+    if (renamed) {
+        customWidgets.forEach(w => {
+            if (w.type === 'chart' && w.title === '📊 Progress Overview') w.title = "This Week's Task Progress";
         });
         saveCustomWidgets();
     }
@@ -374,5 +351,3 @@ window.updateAudioProgress = updateAudioProgress;
 window.setVolume = setVolume;
 window.toggleMute = toggleMute;
 window.initAudioPlayers = initAudioPlayers;
-window.initWidgetsStore = initWidgetsStore;
-window.destroyWidgetsStore = destroyWidgetsStore;

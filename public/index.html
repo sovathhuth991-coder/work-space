@@ -49,9 +49,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-    <!-- ===== Firebase SDK ===== -->
-    <script src="https://cdn.jsdelivr.net/npm/firebase@9.22.0/firebase-app-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/firebase@9.22.0/firebase-database-compat.js"></script>
     <!-- ===== CSS Modules ===== -->
     <link rel="stylesheet" href="WorkspaceCore/reset.css" />
     <link rel="stylesheet" href="WorkspaceCore/variables.css" />
@@ -329,8 +326,8 @@
                     <div class="dash-stats-container">
 
                         <div class="dash-card stat-card" data-card-id="stat-tasks" data-action="switchView"
-                            data-view="todo-view" data-source-view="todo-view" role="button" tabindex="0"
-                            aria-label="View Master To-Do">
+                            data-view="todo-view" data-source-view="todo-view" data-detail-action="showTasksDoneTodayModal"
+                            role="button" tabindex="0" aria-label="View Master To-Do">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
@@ -365,8 +362,8 @@
                         </div>
 
                         <div class="dash-card stat-card" data-card-id="stat-lessons" data-action="switchView"
-                            data-view="lessons-view" data-source-view="lessons-view" role="button" tabindex="0"
-                            aria-label="View Lessons">
+                            data-view="lessons-view" data-source-view="lessons-view" data-detail-action="showLessonFoldersModal"
+                            role="button" tabindex="0" aria-label="View Lessons">
                             <div class="card-glow-border"></div>
                             <div class="card-inner">
                                 <div class="card-header-drag" style="margin-bottom:8px;">
@@ -418,18 +415,8 @@
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
                                     </div>
                                 </div>
-                                <div class="banner-progress">
-                                    <div class="progress-label">
-                                        <span>Daily completion</span>
-                                        <span id="dashProgressPercent">0%</span>
-                                    </div>
-                                    <div class="progress-bar-bg">
-                                        <div class="progress-bar-fill" id="dashProgressBar"></div>
-                                    </div>
-                                </div>
                                 <!-- Daily Focus Goal -->
-                                <div id="dailyFocusGoal"
-                                    style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                                <div id="dailyFocusGoal">
                                     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                                         <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
                                             <svg viewBox="0 0 80 80"
@@ -1279,6 +1266,44 @@
                 </div>
             </div>
 
+            <!-- ===== GENERIC STAT DETAIL MODAL (Tasks Done today, Lesson Folders) ===== -->
+            <div id="genericDetailModal" class="diagram-modal">
+                <div class="modal-content" style="max-width: 560px;">
+                    <div class="modal-header-bar">
+                        <h2 class="modal-header-title" id="genericDetailTitle">Details</h2>
+                        <button class="close-btn" data-action="closeGenericDetailModal">✕</button>
+                    </div>
+                    <div id="genericDetailContent"></div>
+                </div>
+            </div>
+
+            <!-- ===== FOCUS GOAL MODAL ===== -->
+            <div id="focusGoalModal" class="diagram-modal">
+                <div class="modal-content" style="max-width: 360px;">
+                    <div class="modal-header-bar">
+                        <h2 class="modal-header-title">Set Daily Focus Goal</h2>
+                        <button class="close-btn" data-action="closeFocusGoalModal">✕</button>
+                    </div>
+                    <div style="padding: 4px 4px 8px;">
+                        <div style="display:flex; gap:12px; align-items:flex-end; margin-bottom: 20px;">
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Hours</label>
+                                <input type="number" id="focusGoalHoursInput" min="0" max="12"
+                                    style="width:100%; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:1rem; font-family:inherit; box-sizing:border-box;" />
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">Minutes</label>
+                                <input type="number" id="focusGoalMinutesInput" min="0" max="59" step="5"
+                                    style="width:100%; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:1rem; font-family:inherit; box-sizing:border-box;" />
+                            </div>
+                        </div>
+                        <button class="matrix-btn" data-action="saveFocusGoalModal"
+                            style="width:100%; padding:10px; background:var(--accent-solid); color:#fff; border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; font-size:0.9rem;">Save
+                            Goal</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- ===== TUTORIAL GUIDE MODAL ===== -->
             <div id="tutorialGuideModal" class="diagram-modal">
                 <div class="modal-content" style="max-width: 900px;">
@@ -1696,11 +1721,6 @@
     ============================================================ -->
     <script type="text/javascript" src="WorkspaceCore/init-globals.js"></script>
     <script type="text/javascript" src="WorkspaceCore/config.js"></script>
-    <!-- ===== TinyBase (local data store + sync) ===== -->
-    <script type="text/javascript" src="WorkspaceShared/tinybase.iife.js"></script>
-    <script type="text/javascript" src="WorkspaceShared/tinybase-store.js"></script>
-    <!-- ===== Firebase Sync ===== -->
-    <script type="text/javascript" src="WorkspaceShared/firebase-sync.js"></script>
     <!-- Accounts (Phase 1) — see docs/SYNC-PLAN.md. Config must load before sync.js. -->
     <script type="text/javascript" src="WorkspaceCore/supabase-config.js"></script>
     <script type="text/javascript" src="WorkspaceShared/sync.js"></script>

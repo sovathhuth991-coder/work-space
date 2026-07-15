@@ -121,7 +121,6 @@
   function getTable(tableId) {
     try { const obj = store.getTable(tableId); return Object.values(obj || {}); } catch (_) { return []; }
   }
-  }
 
   function getRow(tableId, rowId) {
     try { return store.getRow(tableId, rowId); } catch (_) { return null; }
