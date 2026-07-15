@@ -12,7 +12,7 @@ const LIVE_WIDGET_REFRESH_MS = 1000;
 
 function buildLiveWidgetCard(cardId, icon, title, bodyHtml) {
     const card = document.createElement('div');
-    card.className = 'dash-card live-widget-card';
+    card.className = 'dash-card live-widget-card canvas-card canvas-positioned-item';
     card.setAttribute('data-card-id', cardId);
     card.innerHTML = `
         <div class="card-glow-border"></div>

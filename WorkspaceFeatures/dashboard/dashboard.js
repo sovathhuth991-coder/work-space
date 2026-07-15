@@ -7,6 +7,8 @@ let dashTodos = JSON.parse(localStorage.getItem("dashTodos") || "null") || DEFAU
 
 function saveDashTodos() { localStorage.setItem("dashTodos", JSON.stringify(dashTodos)); }
 
+const DEFAULT_QUICK_NOTES = [];
+
 function renderDashTodos() {
     document.querySelectorAll("#dashStrikeList, #todoStrikeList").forEach(container => {
         if (!container) return;

@@ -1486,6 +1486,12 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         const el = canvas();
         if (!el) return;
         rebuildGroupsFromStorage();
+        // Register every standalone canvas card (e.g. banner, todo) as a
+        // positionable item. Grouped children are skipped — they live inside a
+        // .dash-card-group and are positioned by flex-basis, not the layout store.
+        el.querySelectorAll('.dash-card.canvas-card[data-card-id]').forEach(card => {
+            if (!card.closest('.dash-card-group')) card.classList.add('canvas-positioned-item');
+        });
         getPositionedItems().forEach(wireCanvasItem);
         layoutCards();
     }

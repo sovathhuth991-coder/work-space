@@ -2,6 +2,7 @@
 const CACHE_NAME = 'workspace-hub-v13';
 const STATIC_ASSETS = [
   'index.html',
+  'TUTORIAL.md',
 
   // CSS - core
   'WorkspaceCore/reset.css',
