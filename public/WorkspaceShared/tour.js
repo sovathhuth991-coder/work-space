@@ -6,6 +6,7 @@ function startTour() {
   if (tourActive) return;
   const steps = [
     { target: '#dashboard-view', title: 'Dashboard', content: 'Your command center – see today\'s progress and live session.' },
+    { target: '#dashboardCanvas', title: 'Customise Dashboard Cards', content: 'Drag a card by its ⠿ handle to move it. Drop one card onto another to combine them into a group with a divider. To separate them again, right‑click the group and choose “Split Group” (or right‑click a card → “Split from Group”). Drag a card’s edge or corner to resize it. Use the ⚙️ Customize button to show/hide cards.' },
     { target: '#schedule-view', title: 'Weekly Schedule', content: 'Plan your week. Click any day to add tasks.' },
     { target: '#timer-view', title: 'Focus Timer', content: 'Stay locked in with a pomodoro timer linked to your schedule.' },
     { target: '#todo-view', title: 'Master To-Do', content: 'Manage your global task list. Check items off as you go.' },
