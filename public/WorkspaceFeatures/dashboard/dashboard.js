@@ -1195,7 +1195,7 @@ function initDateCountdownCard() {
     if (!grid) return;
     if (document.querySelector('.dash-card[data-card-id="date-countdown"]')) return;
     const countdownCard = document.createElement('div');
-    countdownCard.className = 'dash-card';
+    countdownCard.className = 'dash-card canvas-card canvas-positioned-item';
     countdownCard.setAttribute('data-card-id', 'date-countdown');
     countdownCard.setAttribute('data-source-view', 'schedule-view');
     countdownCard.innerHTML = `
