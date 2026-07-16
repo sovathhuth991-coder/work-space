@@ -3,6 +3,15 @@ let activeTaskCategory = "all";
 
 function saveMyTasks() { localStorage.setItem("myTasks", JSON.stringify(myTasks)); updateTaskCategoryCounts(); updateDashboardStats(); if (window.pushMyTasks) window.pushMyTasks(); }
 
+// Bridge for sync.js: reassigning `myTasks` from another script by name
+// (e.g. `window.myTasks = x`) would NOT affect this file's own `myTasks`
+// binding — top-level `let` isn't a window property. This function is
+// defined here specifically so it can do the reassignment directly.
+function setMyTasks(newTasks) {
+    myTasks = Array.isArray(newTasks) ? newTasks : [];
+}
+window.setMyTasks = setMyTasks;
+
 function updateTaskCategoryCounts() {
     ["all", "codes", "teachers", "fun", "general"].forEach(cat => {
         const el = document.getElementById(`cat-count-${cat}`);

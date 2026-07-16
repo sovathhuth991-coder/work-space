@@ -112,8 +112,10 @@ async function pushToCloud(table, localKey) {
 }
 
 // Generic: pull this user's rows from `table` and merge into `localKey`.
-// `afterMerge`, if provided, is called once after a successful merge so the
-// right UI can re-render. Returns the Supabase error (or null).
+// `afterMerge(mergedArray)`, if provided, is called once after a successful
+// merge — the caller is responsible for updating whatever in-memory
+// variable the feature actually renders from (e.g. tasks.js's `myTasks`),
+// not just localStorage. Returns the Supabase error (or null).
 async function pullFromCloud(table, localKey, afterMerge) {
     const user = await getCurrentUser();
     if (!user) return null;
@@ -133,8 +135,9 @@ async function pullFromCloud(table, localKey, afterMerge) {
     }
 
     if (changed) {
-        localStorage.setItem(localKey, JSON.stringify([...byId.values()]));
-        if (typeof afterMerge === 'function') afterMerge();
+        const merged = [...byId.values()];
+        localStorage.setItem(localKey, JSON.stringify(merged));
+        if (typeof afterMerge === 'function') afterMerge(merged);
     }
     return null;
 }
@@ -151,7 +154,12 @@ async function deleteItemInCloud(table, id) {
 async function pushMyTasks() { return await pushToCloud('tasks', 'myTasks'); }
 
 async function pullMyTasks() {
-    return await pullFromCloud('tasks', 'myTasks', () => {
+    return await pullFromCloud('tasks', 'myTasks', (merged) => {
+        // This is the critical step that was missing: without it, the pull
+        // above correctly updates localStorage, but tasks.js's own `myTasks`
+        // variable — the one renderMyTasks() actually reads — never changes,
+        // so pulled data silently never appears until a manual page reload.
+        if (typeof window.setMyTasks === 'function') window.setMyTasks(merged);
         if (typeof renderMyTasks === 'function') renderMyTasks();
         if (typeof updateDashboardStats === 'function') updateDashboardStats();
     });
