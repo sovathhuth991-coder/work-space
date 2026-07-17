@@ -78,15 +78,14 @@
                 const savedDate = new Date(data.timestamp).toDateString();
                 const today = new Date().toDateString();
 
-                // If it's a new day, reset the times
+                // If it's a new day, reset today's totals (session history
+                // persists across the week — see checkWeekChange())
                 if (savedDate !== today) {
                     focusSeconds = 0;
                     breakSeconds = 0;
                     idleSeconds = 0;
                     idleStartTime = null;
                     saveAccumulatedTime();
-                    // Also clear completed sessions for the new day
-                    localStorage.removeItem('completedSessions');
                 } else {
                     focusSeconds = data.focusSeconds || 0;
                     breakSeconds = data.breakSeconds || 0;
@@ -275,6 +274,7 @@
             timestamp: Date.now()
         });
         localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+        if (typeof renderSessionHistory === 'function') renderSessionHistory();
 
         // Also dispatch an event so the dashboard can update
         document.dispatchEvent(new CustomEvent('sessionCompleted', {
@@ -509,7 +509,12 @@
         }
     }
 
-    // ----- Check for day change and reset if needed -----
+    // ----- Check for day change and reset TODAY'S TOTALS if needed -----
+    // (completedSessions history is handled separately by checkWeekChange —
+    // it used to get wiped here every single day, which is why weekly
+    // features elsewhere in the dashboard, like the streak sparkline and
+    // month calendar, never had more than one day of real data to work
+    // with.)
     function checkDayChange() {
         const currentDate = new Date().toDateString();
         if (currentDate !== lastCheckedDate) {
@@ -523,8 +528,6 @@
             stopAccumulation();
             saveAccumulatedTime();
             updateUI();
-            // Clear completed sessions for new day
-            localStorage.removeItem('completedSessions');
             // Reset current session
             if (sessionInterval) {
                 clearInterval(sessionInterval);
@@ -537,7 +540,24 @@
             sessionBreakStartTime = null;
             sessionIdleStartTime = null;
             updateCurrentSessionDisplay();
-            console.log('🕛 Daily reset at midnight - timers cleared');
+            console.log('🕛 Daily reset at midnight - today\'s totals cleared (session history persists for the week)');
+        }
+    }
+
+    // ----- Check for week change and reset session HISTORY if needed -----
+    function checkWeekChange() {
+        if (typeof getWeekId !== 'function') return;
+        const currentWeekId = getWeekId(new Date());
+        const storedWeekId = localStorage.getItem('sessionHistoryWeekId');
+        if (storedWeekId !== currentWeekId) {
+            // Only clear if a previous week was actually stored — first run
+            // ever shouldn't wipe anything, it just establishes a baseline.
+            if (storedWeekId !== null) {
+                localStorage.removeItem('completedSessions');
+                console.log('📅 New week — session history reset');
+            }
+            localStorage.setItem('sessionHistoryWeekId', currentWeekId);
+            if (typeof renderSessionHistory === 'function') renderSessionHistory();
         }
     }
 
@@ -577,9 +597,13 @@
     // ----- Start periodic day change check -----
     function startDayChangeMonitor() {
         checkDayChange();
+        checkWeekChange();
 
         if (!window.dayCheckInterval) {
-            window.dayCheckInterval = setInterval(checkDayChange, 60000);
+            window.dayCheckInterval = setInterval(function() {
+                checkDayChange();
+                checkWeekChange();
+            }, 60000);
         }
 
         if (!window.taskAdvanceInterval) {
@@ -623,7 +647,10 @@
         }
 
         if (!window.dayCheckInterval) {
-            window.dayCheckInterval = setInterval(checkDayChange, 60000);
+            window.dayCheckInterval = setInterval(function() {
+                checkDayChange();
+                checkWeekChange();
+            }, 60000);
         }
     }
 
@@ -675,26 +702,35 @@
         const selectedOpt = taskSelector.options[taskSelector.selectedIndex];
         const label = selectedOpt?.dataset?.title || taskSelector.value || 'Untitled';
         const scheduled = parseInt(scheduledInput.value) || 0;
-        const focusMins = Math.floor(focusSeconds / 60);
-        const focusSecs = focusSeconds % 60;
-        const breakMins = Math.floor(breakSeconds / 60);
-        const breakSecs = breakSeconds % 60;
-        const idleMins = Math.floor(idleSeconds / 60);
-        const idleSecs = idleSeconds % 60;
         const scheduledSecs = scheduled * 60;
         const totalSecs = focusSeconds + breakSeconds + idleSeconds;
         const efficiency = scheduledSecs > 0 ? Math.round((focusSeconds / scheduledSecs) * 100) : 0;
-        const focusPercentage = totalSecs > 0 ? Math.round((focusSeconds / totalSecs) * 100) : 0;
 
-        const summary = `📊 SESSION COMPLETE: ${label}\n` +
-                        `📅 Scheduled: ${scheduled} min\n` +
-                        `⏱ Focus: ${focusMins}m ${focusSecs}s (${focusPercentage}%)\n` +
-                        `☕ Break: ${breakMins}m ${breakSecs}s\n` +
-                        `⏸ Idle: ${idleMins}m ${idleSecs}s\n` +
-                        `🎯 Efficiency: ${efficiency}%`;
+        // Log into the same history the auto-advance path uses, so manually
+        // ended sessions show up in Session History too — previously this
+        // only wrote to a separate, older `sessionHistory` key with no
+        // visible UI of its own.
+        if (totalSecs >= 5) {
+            const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+            completedSessions.push({
+                taskName: label,
+                taskStart: selectedOpt?.dataset?.start || '',
+                taskEnd: selectedOpt?.dataset?.end || '',
+                focusSeconds, breakSeconds, idleSeconds,
+                totalSeconds: totalSecs,
+                timestamp: Date.now()
+            });
+            localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+            if (typeof renderSessionHistory === 'function') renderSessionHistory();
+        }
 
-        alert(summary);
+        if (typeof showToast === 'function') {
+            showToast(`✅ ${label} logged — ${formatTime(focusSeconds)} focus (${efficiency}% of scheduled)`, 'success', 6000);
+        } else {
+            alert(`📊 SESSION COMPLETE: ${label}\nFocus: ${formatTime(focusSeconds)} · Break: ${formatTime(breakSeconds)} · Idle: ${formatTime(idleSeconds)}\nEfficiency: ${efficiency}%`);
+        }
 
+        // Legacy key some older code may still read — kept for compatibility.
         const history = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
         history.push({
             label,
