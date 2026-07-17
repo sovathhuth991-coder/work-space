@@ -139,13 +139,33 @@
 /* ─── Per-condition gradients ───
    Right (brighter) ends are kept dark enough that the white .details
    text on that side stays legible. */
-.weather-current[data-cond="sunny"]   { background: linear-gradient(135deg, #f97316, #d97706); }
-.weather-current[data-cond="cloudy"]  { background: linear-gradient(135deg, #475569, #64748b); }
-.weather-current[data-cond="rain"]    { background: linear-gradient(135deg, #1e3a8a, #0284c7); }
-.weather-current[data-cond="snow"]    { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
-.weather-current[data-cond="thunder"] { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
-.weather-current[data-cond="fog"]     { background: linear-gradient(135deg, #9ca3af, #d1d5db); }
-.weather-current[data-cond="wind"]    { background: linear-gradient(135deg, #0e7490, #0891b2); }
+.weather-current[data-cond="sunny"] {
+    background: linear-gradient(135deg, #f97316, #d97706);
+}
+
+.weather-current[data-cond="cloudy"] {
+    background: linear-gradient(135deg, #475569, #64748b);
+}
+
+.weather-current[data-cond="rain"] {
+    background: linear-gradient(135deg, #1e3a8a, #0284c7);
+}
+
+.weather-current[data-cond="snow"] {
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+}
+
+.weather-current[data-cond="thunder"] {
+    background: linear-gradient(135deg, #4c1d95, #7c3aed);
+}
+
+.weather-current[data-cond="fog"] {
+    background: linear-gradient(135deg, #9ca3af, #d1d5db);
+}
+
+.weather-current[data-cond="wind"] {
+    background: linear-gradient(135deg, #0e7490, #0891b2);
+}
 
 /* Pale buckets need dark text + a light shadow for legibility */
 .weather-current[data-cond="snow"] .temp,
@@ -190,13 +210,33 @@
     background: var(--day-accent, var(--accent-1));
 }
 
-.weather-day-card[data-cond="sunny"]   { --day-accent: #fbbf24; }
-.weather-day-card[data-cond="cloudy"]  { --day-accent: #64748b; }
-.weather-day-card[data-cond="rain"]    { --day-accent: #0ea5e9; }
-.weather-day-card[data-cond="snow"]    { --day-accent: #cbd5e1; }
-.weather-day-card[data-cond="thunder"] { --day-accent: #7c3aed; }
-.weather-day-card[data-cond="fog"]     { --day-accent: #9ca3af; }
-.weather-day-card[data-cond="wind"]    { --day-accent: #22d3ee; }
+.weather-day-card[data-cond="sunny"] {
+    --day-accent: #fbbf24;
+}
+
+.weather-day-card[data-cond="cloudy"] {
+    --day-accent: #64748b;
+}
+
+.weather-day-card[data-cond="rain"] {
+    --day-accent: #0ea5e9;
+}
+
+.weather-day-card[data-cond="snow"] {
+    --day-accent: #cbd5e1;
+}
+
+.weather-day-card[data-cond="thunder"] {
+    --day-accent: #7c3aed;
+}
+
+.weather-day-card[data-cond="fog"] {
+    --day-accent: #9ca3af;
+}
+
+.weather-day-card[data-cond="wind"] {
+    --day-accent: #22d3ee;
+}
 
 .weather-day-card:hover {
     transform: translateY(-6px);
@@ -299,9 +339,9 @@
 .weather-error {
     text-align: center;
     padding: 40px;
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.05);
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: var(--status-danger);
+    background: rgba(231, 76, 60, 0.05);
+    border: 1px solid rgba(231, 76, 60, 0.25);
     border-radius: var(--radius-lg);
 }
 

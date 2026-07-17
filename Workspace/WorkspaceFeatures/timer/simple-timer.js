@@ -90,7 +90,11 @@
     function addCustomTimer(minutes) {
         const mins = parseInt(minutes);
         if (isNaN(mins) || mins <= 0 || mins > 999) {
-            alert('Please enter a valid number of minutes (1-999)');
+            if (typeof showToast === 'function') {
+                showToast('Please enter a valid number of minutes (1-999)', 'warning');
+            } else {
+                alert('Please enter a valid number of minutes (1-999)');
+            }
             return;
         }
 
