@@ -928,6 +928,7 @@
                         <div class="time-block idle-block">
                             <div class="time-label">Idle Time</div>
                             <div class="time-value" id="idleTimeDisplay">00:00</div>
+                            <div class="time-subtitle">away from keyboard</div>
                         </div>
                         <div class="time-block total-block">
                             <div class="time-label">Total Time</div>
@@ -976,6 +977,7 @@
                         <div class="time-block idle-block current-idle-block">
                             <div class="time-label">Idle Time</div>
                             <div class="time-value" id="sessionIdleDisplay">00:00</div>
+                            <div class="time-subtitle">before you start</div>
                         </div>
                         <div class="time-block total-block current-total-block">
                             <div class="time-label">Total Time</div>
@@ -991,6 +993,13 @@
                         <div class="session-tracker-title">📊 Today's Sessions</div>
                     </div>
                     <div id="sessionHistoryList" class="session-history-list"></div>
+                </div>
+
+                <!-- ===== MODE TOGGLE (always visible) ===== -->
+                <div class="pomodoro-mode-toggle"
+                    style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
+                    <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
+                    <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
                 </div>
 
                 <!-- ===== SIMPLE COUNTDOWN TIMER ===== -->
@@ -1063,13 +1072,6 @@
                     </div>
 
                     <p style="font-size: 0.75rem; color: var(--text-muted);">Simple countdown timer</p>
-                </div>
-
-                <!-- ===== MODE TOGGLE (always visible) ===== -->
-                <div class="pomodoro-mode-toggle"
-                    style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
-                    <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
-                    <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
                 </div>
 
                 <!-- ===== POMODORO MODE ===== -->
