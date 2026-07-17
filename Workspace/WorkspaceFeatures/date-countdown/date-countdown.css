@@ -1,0 +1,211 @@
+/* ============================================================
+   DATE COUNTDOWN STYLES
+   ============================================================ */
+
+/* ----- Schedule View Countdown Card ----- */
+.countdown-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-elevated);
+    animation: fadeIn 0.3s ease;
+}
+
+.countdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.countdown-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.countdown-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.countdown-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.countdown-target-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.countdown-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+}
+
+.countdown-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-1);
+    font-family: 'Inter', monospace;
+    line-height: 1;
+}
+
+.countdown-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 6px;
+}
+
+.countdown-separator {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.countdown-complete {
+    text-align: center;
+    padding: 32px;
+}
+
+.countdown-complete .countdown-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.countdown-complete .countdown-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.countdown-complete .countdown-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* ----- Dashboard Countdown Card ----- */
+.dash-countdown-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-elevated);
+    animation: fadeIn 0.3s ease;
+}
+
+.dash-countdown-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.dash-countdown-icon {
+    font-size: 1.2rem;
+}
+
+.dash-countdown-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dash-countdown-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.dash-countdown-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dash-countdown-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-1);
+    font-family: 'Inter', monospace;
+}
+
+.dash-countdown-card.countdown-complete {
+    text-align: center;
+    padding: 24px;
+}
+
+.dash-countdown-card.countdown-complete .countdown-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.dash-countdown-card.countdown-complete .countdown-title {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+/* ----- Animations ----- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ----- Responsive Adjustments ----- */
+@media (max-width: 768px) {
+    .countdown-display {
+        gap: 8px;
+    }
+
+    .countdown-unit {
+        min-width: 55px;
+    }
+
+    .countdown-value {
+        font-size: 1.5rem;
+    }
+
+    .countdown-label {
+        font-size: 0.7rem;
+    }
+
+    .countdown-separator {
+        font-size: 1.2rem;
+    }
+
+    .dash-countdown-value {
+        font-size: 0.95rem;
+    }
+}

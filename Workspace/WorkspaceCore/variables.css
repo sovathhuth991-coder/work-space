@@ -1,0 +1,129 @@
+:root {
+    --bg-primary: #0a0a12;
+    --bg-secondary: #12121e;
+    --bg-surface: rgba(18, 18, 30, 0.85);
+    --bg-card: rgba(24, 24, 40, 0.7);
+    --bg-card-hover: rgba(30, 30, 50, 0.8);
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-color-hover: rgba(124, 109, 240, 0.3);
+    --border-glow: rgba(124, 109, 240, 0.2);
+    --text-primary: #f1f1f7;
+    --text-secondary: #b0b0c8;
+    --text-muted: #6b6b85;
+    --accent-1: #7c6df0;
+    --accent-2: #5b8def;
+    /* Default for buttons/badges/icons — reach for this first.
+       Reserve --accent-gradient for one or two signature spots
+       (primary CTA, hero element) rather than every surface. */
+    --accent-solid: var(--accent-1);
+    --accent-gradient: linear-gradient(135deg, #7c6df0, #5b8def);
+    --accent-glow: rgba(124, 109, 240, 0.4);
+
+    /* Navigation item colors */
+    --nav-dashboard: #7c6df0;
+    --nav-schedule: #5b8def;
+    --nav-timer: #3b82f6;
+    --nav-weather: #f97316;
+    --nav-todo: #10b981;
+    --nav-analytics: #8b5cf6;
+    --nav-lessons: #ec4899;
+    --nav-library: #ec4899;
+    --nav-graph: #06b6d4;
+    --nav-habits: #10b981;
+    --nav-journal: #f59e0b;
+    --nav-tutorial: #ec4899;
+    --nav-ai: #14b8a6;
+    --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 22px rgba(124, 109, 240, 0.08);
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.3);
+    --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.5);
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-width: 280px;
+
+    /* Status color — was hardcoded green/cyan in layout.css,
+       which meant it ignored every theme preset below. */
+    --status-online: #10b981;
+
+    /* Dashboard "mission control" system — cards read as live/nominal
+       (cyan) or needing attention (amber) instead of uniform purple glow.
+       Reuses --nav-schedule/--nav-lessons rather than inventing new hex,
+       so the dashboard accent language stays tied to the nav palette. */
+    --status-live: var(--nav-schedule);
+    --status-attention: var(--nav-journal);
+    --bracket-color: rgba(255, 255, 255, 0.22);
+    --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+    /* Event category colors — single source of truth. The event form's
+       #category <select> only ever offers study/work/personal/fitness/
+       social/other; these match schedule-modal.css's .badge-* colors
+       exactly so all three places categories appear (badges, month-grid
+       dots, weekly mini-dots) render the same color for the same event. */
+    --cat-study: var(--accent-1);
+    --cat-work: #3b82f6;
+    --cat-personal: #34d399;
+    --cat-fitness: #fb923c;
+    --cat-social: #f472b6;
+    --cat-other: #94a3b8;
+
+    /* Type scale — replaces 15 one-off font-size values that had
+       crept in over time (including a literal duplicate: 0.8rem
+       and 0.80rem used for two different elements). Named so future
+       additions reuse a step instead of picking a new number. */
+    --text-2xs: 0.6rem;
+    --text-xs: 0.7rem;
+    --text-sm: 0.75rem;
+    --text-base-sm: 0.8rem;
+    --text-base: 0.85rem;
+    --text-md: 0.9rem;
+    --text-lg: 1rem;
+    --text-xl: 1.2rem;
+    --text-2xl: 1.6rem;
+    --text-3xl: 1.8rem;
+    --text-4xl: 2.4rem;
+    --text-display: 4rem;
+
+    /* Layering scale — replaces ad-hoc z-index numbers scattered across
+       the CSS with no naming, several of which collided by accident
+       (multiple unrelated elements sharing 1000, others sharing 9999).
+       That kind of collision is exactly what caused the mobile sidebar
+       bug: a backdrop and the sidebar it was meant to sit behind ended
+       up fighting over stacking order with no documented relationship
+       between their numbers. New z-index needs should reach for one of
+       these instead of guessing a bigger number than whatever's
+       currently winning. */
+    --z-raised: 50;
+    --z-dropdown: 1000;
+    --z-overlay: 9000;
+    --z-sticky-header: 9998;
+    --z-modal: 10000;
+    --z-toast: 10001;
+}
+
+/* Custom scrollbar – will be applied globally */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-1);
+    border-radius: 99px;
+    transition: var(--transition);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-2);
+}
+
+* {
+    scrollbar-color: var(--accent-1) var(--bg-primary);
+    scrollbar-width: thin;
+}

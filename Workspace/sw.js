@@ -1,0 +1,223 @@
+﻿// Service Worker for Workspace Hub PWA
+const CACHE_NAME = 'workspace-hub-v15';
+const STATIC_ASSETS = [
+  'index.html',
+  'TUTORIAL.md',
+
+  // CSS - core
+  'WorkspaceCore/reset.css',
+  'WorkspaceCore/variables.css',
+  'WorkspaceCore/layout.css',
+  'WorkspaceCore/mobile.css',
+
+  // CSS - features
+  'WorkspaceFeatures/schedule/schedule.css',
+  'WorkspaceFeatures/schedule/schedule-modal.css',
+  'WorkspaceShared/drag-drop.css',
+  'WorkspaceFeatures/dashboard/dashboard.css',
+  'WorkspaceFeatures/weather/weather.css',
+  'WorkspaceFeatures/lessons/lessons.css',
+  'WorkspaceFeatures/tasks/tasks.css',
+  'WorkspaceFeatures/library/library.css',
+  'WorkspaceFeatures/dashboard/widgets.css',
+  'WorkspaceShared/modals.css',
+  'WorkspaceShared/animations.css',
+  'WorkspaceFeatures/analytics/analytics.css',
+  'WorkspaceFeatures/dev-tools/dev-tools.css',
+  'WorkspaceFeatures/timer/timer-enhancements.css',
+  'WorkspaceFeatures/timer/pomodoro.css',
+  'WorkspaceFeatures/journal/journal.css',
+  'WorkspaceFeatures/date-countdown/date-countdown.css',
+  'WorkspaceFeatures/reading/reading.css',
+  'WorkspaceShared/fab-buttons.css',
+  'WorkspaceFeatures/command-palette/command-palette.css',
+
+  // JS - core
+  'WorkspaceCore/init-globals.js',
+  'WorkspaceCore/config.js',
+  'WorkspaceCore/supabase-config.js',
+  'WorkspaceShared/sync.js',
+  'WorkspaceCore/helpers.js',
+
+  // JS - ui
+  'WorkspaceShared/theme.js',
+  'WorkspaceShared/notifications.js',
+  'WorkspaceFeatures/analytics/analytics.js',
+  'WorkspaceShared/undo-redo.js',
+  'WorkspaceShared/drag-drop.js',
+  'WorkspaceShared/context-menu.js',
+  'WorkspaceFeatures/dashboard/dashboard.js',
+  'WorkspaceFeatures/dashboard/live-widgets.js',
+  'WorkspaceFeatures/weather/weather.js',
+  'WorkspaceFeatures/tasks/tasks.js',
+  'WorkspaceFeatures/library/library.js',
+  'WorkspaceFeatures/dashboard/widgets.js',
+  'WorkspaceFeatures/date-countdown/date-countdown.js',
+  'WorkspaceFeatures/dev-tools/dev-tools.js',
+  'WorkspaceShared/sparkles.js',
+  'WorkspaceFeatures/schedule/templates.js',
+  'WorkspaceFeatures/schedule/ical-export.js',
+  'WorkspaceShared/tour.js',
+  'WorkspaceShared/interactive-tutorial.js',
+  'WorkspaceShared/help-mode.js',
+  'WorkspaceShared/ux-enhancements.js',
+  'WorkspaceFeatures/ai-assistant/ai-assistant.css',
+  'WorkspaceFeatures/ai-assistant/ai-assistant.js',
+  'WorkspaceFeatures/ai-assistant/ai-context.js',
+  'WorkspaceFeatures/ai-assistant/ai-tools.js',
+  'WorkspaceFeatures/journal/journal-ui.js',
+  'WorkspaceCore/app.js',
+  'WorkspaceFeatures/command-palette/command-palette.js',
+
+  // JS - engines
+  'WorkspaceFeatures/schedule/schedule-core.js',
+  'WorkspaceFeatures/schedule/schedule-planner.js',
+  'WorkspaceFeatures/lessons/lessons.js',
+  'WorkspaceFeatures/timer/simple-timer.js',
+  'WorkspaceFeatures/timer/pomodoro.js',
+  'WorkspaceFeatures/timer/session-tracker.js',
+  'WorkspaceFeatures/graph/graph.js',
+  'WorkspaceFeatures/schedule/calendar.js',
+  'WorkspaceFeatures/habits/habits.js',
+  'WorkspaceFeatures/journal/journal.js',
+  'WorkspaceFeatures/reading/reading.js',
+
+  // Manifest & icons
+  'manifest.json',
+  'site.webmanifest',
+  'favicon.ico',
+  'favicon.svg',
+  'favicon-96x96.png',
+  'apple-touch-icon.png',
+  'web-app-manifest-192x192.png',
+  'web-app-manifest-512x512.png'
+];
+
+// Install event - cache static assets
+self.addEventListener('install', (event) => {
+  console.log('[SW] Installing service worker...');
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('[SW] Caching static assets');
+        return cache.addAll(STATIC_ASSETS);
+      })
+      .then(() => {
+        console.log('[SW] Installation complete');
+        return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('[SW] Installation failed:', error);
+      })
+  );
+});
+
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating service worker...');
+  event.waitUntil(
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((name) => name !== CACHE_NAME)
+            .map((name) => {
+              console.log('[SW] Deleting old cache:', name);
+              return caches.delete(name);
+            })
+        );
+      })
+      .then(() => {
+        console.log('[SW] Activation complete');
+        return self.clients.claim();
+      })
+  );
+});
+
+// Fetch event - serve from cache, fallback to network
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // Skip chrome-extension and other non-http(s) requests
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
+  // Stale-while-revalidate: serve the cached asset immediately (instant
+  // load + offline support) and refresh the cache from the network in the
+  // background. This means edits to cached files (CSS/JS/HTML/icons) show up
+  // after a reload WITHOUT needing to bump CACHE_NAME — the background fetch
+  // picks up the new file and the next load serves it.
+  event.respondWith(
+    caches.open(CACHE_NAME).then((cache) => {
+      return caches.match(request).then((cachedResponse) => {
+        const networkResponse = fetch(request)
+          .then((response) => {
+            // Only cache successful same-origin responses
+            if (response && response.status === 200 && response.type === 'basic') {
+              cache.put(request, response.clone());
+            }
+            return response;
+          })
+          .catch(() => {
+            // Network failed — fall back to the offline page for navigations
+            if (request.mode === 'navigate') {
+              return caches.match('index.html');
+            }
+          });
+
+        // Return the cached response right away if we have one; otherwise wait
+        // for the network. The background network fetch still runs to refresh cache.
+        return cachedResponse || networkResponse;
+      });
+    })
+  );
+});
+
+// Handle background sync (for future use)
+self.addEventListener('sync', (event) => {
+  console.log('[SW] Background sync:', event.tag);
+  if (event.tag === 'background-sync') {
+    event.waitUntil(doBackgroundSync());
+  }
+});
+
+function doBackgroundSync() {
+  console.log('[SW] Performing background sync...');
+  return Promise.resolve();
+}
+
+// Handle push notifications (for future use)
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push notification received');
+  const options = {
+    body: event.data ? event.data.text() : 'New notification',
+    icon: 'web-app-manifest-192x192.png',
+    badge: 'web-app-manifest-192x192.png',
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification('Workspace Hub', options)
+  );
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked');
+  event.notification.close();
+
+  event.waitUntil(
+    clients.openWindow('index.html')
+  );
+});

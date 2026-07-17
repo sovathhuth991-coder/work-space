@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "no-duplicate-selectors": true,
+    "declaration-block-no-duplicate-properties": [
+      true,
+      { "ignore": ["consecutive-duplicates-with-different-values"] }
+    ],
+    "no-duplicate-at-import-rules": true,
+    "block-no-empty": true,
+    "no-empty-source": true,
+    "declaration-block-no-shorthand-property-overrides": true
+  }
+}
