@@ -110,6 +110,37 @@
     filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
 }
 
+/* ---- Breathing pulse while a session is actively running ----
+   Previously the ring was completely static the entire 25 minutes
+   unless you hovered it or a phase completed. Scoped to the blurred
+   glow layer only (not the digits or the progress arc) so this
+   reads as ambient presence rather than distracting the countdown. */
+.pomodoro-running .pomodoro-ring-glow {
+    animation: pomodoroBreathe 4s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+@keyframes pomodoroBreathe {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(1.015);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pomodoro-running .pomodoro-ring-glow {
+        animation: none;
+    }
+}
+
 /* ---- Display ---- */
 .pomodoro-display {
     font-size: 4.5rem;

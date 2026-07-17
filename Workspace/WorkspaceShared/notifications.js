@@ -6,18 +6,48 @@ function requestNotificationPermission() {
     }
 }
 
-function sendNotification(title, body, icon = '📅') {
+function sendNotification(title, body, icon = '📅', tag = 'schedule-notification') {
     if (!('Notification' in window)) {
         console.log(`[Notification] ${title}: ${body}`);
         return;
     }
     if (Notification.permission !== 'granted') return;
     try {
-        const n = new Notification(title, { body, icon, badge: icon, tag: 'schedule-notification' });
+        const n = new Notification(title, { body, icon, badge: icon, tag });
         n.onclick = () => { window.focus(); n.close(); };
         setTimeout(() => n.close(), 5000);
     } catch (e) {
         console.warn('Notification failed:', e);
+    }
+}
+
+// Short two-tone chime (C5 then G5) via Web Audio API. No audio file
+// needed — the app's only existing audio asset is a 5.8MB ambience
+// track, the wrong tool for a short completion cue — so this works
+// immediately with no extra download.
+function playChime() {
+    try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        const ctx = new Ctx();
+        const now = ctx.currentTime;
+        [523.25, 783.99].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            const start = now + i * 0.15;
+            gain.gain.setValueAtTime(0, start);
+            gain.gain.linearRampToValueAtTime(0.2, start + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.4);
+        });
+        setTimeout(() => ctx.close(), 800);
+    } catch (e) {
+        console.warn('playChime failed:', e);
     }
 }
 

@@ -208,8 +208,17 @@
                 timerStartTime = null;
                 updateDisplay();
 
-                // Timer complete - simple alert
-                alert('⏰ Timer complete!');
+                // Sound + system notification so this is noticeable even if
+                // the tab isn't focused, plus a non-blocking toast instead
+                // of alert() — alert() freezes the whole page and, like the
+                // old signal, is silent if you're not already looking here.
+                if (typeof playChime === 'function') playChime();
+                if (typeof sendNotification === 'function') {
+                    sendNotification('⏰ Timer', 'Timer complete!', '⏰', 'simple-timer-notification');
+                }
+                if (typeof showToast === 'function') {
+                    showToast('⏰ Timer complete!', 'success', 5000);
+                }
 
                 // Reset to initial state
                 updateTimerState('ready');

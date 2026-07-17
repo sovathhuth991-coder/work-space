@@ -104,16 +104,16 @@
 }
 
 .timer-state-indicator.running {
-    background: rgba(46, 204, 113, 0.15);
-    border-color: rgba(46, 204, 113, 0.3);
-    color: #2ecc71;
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--status-online);
     animation: pulse 2s infinite;
 }
 
 .timer-state-indicator.paused {
-    background: rgba(243, 156, 18, 0.15);
-    border-color: rgba(243, 156, 18, 0.3);
-    color: #f39c12;
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: var(--status-attention);
 }
 
 .state-dot {
@@ -455,38 +455,38 @@
 }
 
 .current-session-tracker .time-block.current-focus-block::before {
-    color: #2ecc71;
+    color: var(--status-online);
 }
 
 .current-session-tracker .time-block.current-break-block::before {
-    color: #f39c12;
+    color: var(--status-attention);
 }
 
 .current-session-tracker .time-block.current-idle-block::before {
-    color: #95a5a6;
+    color: var(--text-muted);
 }
 
 .current-session-tracker .time-block.current-total-block::before {
-    color: #7c6df0;
+    color: var(--accent-1);
 }
 
 .current-session-tracker .time-block.current-focus-block .time-value {
-    color: #2ecc71;
-    text-shadow: 0 0 12px rgba(46, 204, 113, 0.4);
+    color: var(--status-online);
+    text-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
 }
 
 .current-session-tracker .time-block.current-break-block .time-value {
-    color: #f39c12;
-    text-shadow: 0 0 12px rgba(243, 156, 18, 0.4);
+    color: var(--status-attention);
+    text-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
 }
 
 .current-session-tracker .time-block.current-idle-block .time-value {
-    color: #95a5a6;
-    text-shadow: 0 0 12px rgba(149, 165, 166, 0.4);
+    color: var(--text-muted);
+    text-shadow: 0 0 12px rgba(107, 107, 133, 0.4);
 }
 
 .current-session-tracker .time-block.current-total-block .time-value {
-    color: #7c6df0;
+    color: var(--accent-1);
     text-shadow: 0 0 12px rgba(124, 109, 240, 0.4);
 }
 
@@ -502,7 +502,7 @@
     position: relative;
     background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
     border-radius: 12px;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--accent-2);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -515,7 +515,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #3498db, transparent);
+    background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
     opacity: 0.5;
 }
 
@@ -564,15 +564,15 @@
 }
 
 .task-selector-wrapper select:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.1);
     outline: none;
 }
 
 .auto-link-badge {
     font-size: 0.75rem;
-    color: #2ecc71;
-    background: rgba(46, 204, 113, 0.15);
+    color: var(--status-online);
+    background: rgba(16, 185, 129, 0.15);
     padding: 4px 12px;
     border-radius: 12px;
     font-weight: 600;
@@ -612,8 +612,8 @@
 }
 
 .scheduled-input-wrapper input:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.1);
     outline: none;
 }
 
@@ -653,23 +653,23 @@
 }
 
 .time-block.focus-block::before {
-    color: #2ecc71;
+    color: var(--status-online);
 }
 
 .time-block.break-block::before {
-    color: #f39c12;
+    color: var(--status-attention);
 }
 
 .time-block.progress-block::before {
-    color: #3498db;
+    color: var(--accent-2);
 }
 
 .time-block.idle-block::before {
-    color: #95a5a6;
+    color: var(--text-muted);
 }
 
 .time-block.total-block::before {
-    color: #7c6df0;
+    color: var(--accent-1);
 }
 
 .time-block:hover {
@@ -696,27 +696,27 @@
 }
 
 .time-block.focus-block .time-value {
-    color: #2ecc71;
-    text-shadow: 0 0 12px rgba(46, 204, 113, 0.4);
+    color: var(--status-online);
+    text-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
 }
 
 .time-block.break-block .time-value {
-    color: #f39c12;
-    text-shadow: 0 0 12px rgba(243, 156, 18, 0.4);
+    color: var(--status-attention);
+    text-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
 }
 
 .time-block.progress-block .time-value {
-    color: #3498db;
-    text-shadow: 0 0 12px rgba(52, 152, 219, 0.4);
+    color: var(--accent-2);
+    text-shadow: 0 0 12px rgba(91, 141, 239, 0.4);
 }
 
 .time-block.idle-block .time-value {
-    color: #95a5a6;
-    text-shadow: 0 0 12px rgba(149, 165, 166, 0.4);
+    color: var(--text-muted);
+    text-shadow: 0 0 12px rgba(107, 107, 133, 0.4);
 }
 
 .time-block.total-block .time-value {
-    color: #7c6df0;
+    color: var(--accent-1);
     text-shadow: 0 0 12px rgba(124, 109, 240, 0.4);
 }
 
@@ -739,11 +739,11 @@
 
 .session-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #3498db, #2ecc71);
+    background: linear-gradient(90deg, var(--accent-2), var(--status-online));
     border-radius: 99px;
     transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+    box-shadow: 0 0 20px rgba(91, 141, 239, 0.5);
 }
 
 .session-progress-fill::after {
@@ -777,25 +777,23 @@
 }
 
 .session-btn-reset {
-    background: #c0392b;
+    background: var(--status-danger);
     color: #fff;
 }
 
 .session-btn-reset:hover {
-    background: #e74c3c;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.4);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 }
 
 .session-btn-end {
-    background: #2ecc71;
+    background: var(--status-online);
     color: #1a1a1a;
 }
 
 .session-btn-end:hover {
-    background: #27ae60;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .session-btn:active {
@@ -849,19 +847,19 @@
 
 /* ---- Focus Mode Indicator ---- */
 .focus-mode-active #sessionTracker {
-    border-left-color: #2ecc71;
-    box-shadow: 0 0 30px rgba(46, 204, 113, 0.2);
+    border-left-color: var(--status-online);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
 }
 
 .focus-mode-active #sessionTracker::before {
-    background: linear-gradient(90deg, transparent, #2ecc71, transparent);
+    background: linear-gradient(90deg, transparent, var(--status-online), transparent);
 }
 
 .break-mode-active #sessionTracker {
-    border-left-color: #f39c12;
-    box-shadow: 0 0 30px rgba(243, 156, 18, 0.2);
+    border-left-color: var(--status-attention);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
 }
 
 .break-mode-active #sessionTracker::before {
-    background: linear-gradient(90deg, transparent, #f39c12, transparent);
+    background: linear-gradient(90deg, transparent, var(--status-attention), transparent);
 }
