@@ -376,22 +376,42 @@ function renderSessionHistory() {
         return sessionDate === today;
     });
     todaySessions.sort((a, b) => b.timestamp - a.timestamp);
-    if (todaySessions.length === 0) {
-        container.innerHTML = `
-            <div class="session-history-empty">
-                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
-                <div style="color: var(--text-muted); font-size: 0.9rem;">No completed sessions yet today</div>
-                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your history</div>
-            </div>
-        `;
-        return;
-    }
+
     const formatTimeShort = (sec) => {
         const m = Math.floor(sec / 60);
         const s = sec % 60;
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     };
-    container.innerHTML = todaySessions.map((session, index) => {
+
+    // The session currently in progress, if any — shown even though it
+    // hasn't been saved to completedSessions yet.
+    const live = (typeof window.getCurrentSessionData === 'function') ? window.getCurrentSessionData() : null;
+    const liveHtml = (live && live.taskName && live.totalSeconds > 0) ? `
+        <div class="session-history-item session-history-live" title="Still in progress">
+            <div class="session-history-time">🔴 Now</div>
+            <div class="session-history-info">
+                <div class="session-history-task-name">${escapeHtml(live.taskName)}</div>
+                <div class="session-history-duration">
+                    <span class="focus-time">⏱ ${formatTimeShort(live.focusSeconds || 0)}</span>
+                    <span class="break-time">☕ ${formatTimeShort(live.breakSeconds || 0)}</span>
+                    <span>⏳ ${formatTimeShort(live.totalSeconds || 0)}</span>
+                </div>
+            </div>
+        </div>
+    ` : '';
+
+    if (todaySessions.length === 0 && !liveHtml) {
+        container.innerHTML = `
+            <div class="session-history-empty">
+                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your history</div>
+            </div>
+        `;
+        return;
+    }
+
+    const completedHtml = todaySessions.map((session, index) => {
         const time = new Date(session.timestamp);
         const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
         const taskName = session.taskName || 'Untitled Session';
@@ -413,7 +433,11 @@ function renderSessionHistory() {
             </div>
         `;
     }).join('');
-    container.querySelectorAll('.session-history-item').forEach(item => {
+
+    container.innerHTML = liveHtml + completedHtml;
+    // The live entry has no saved timestamp yet, so it's excluded from
+    // the click-to-detail wiring below — nothing to look up mid-session.
+    container.querySelectorAll('.session-history-item:not(.session-history-live)').forEach(item => {
         item.addEventListener('click', function() {
             const timestamp = parseInt(this.dataset.sessionTimestamp);
             showSessionDetailsModal(timestamp);

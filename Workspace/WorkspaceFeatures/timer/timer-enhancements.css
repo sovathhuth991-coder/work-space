@@ -569,6 +569,30 @@
     outline: none;
 }
 
+/* Read-only current-task display — replaces the old manual dropdown.
+   No cursor/focus states since there's nothing to interact with; it
+   always just reflects whatever the schedule says is current. */
+.current-task-display {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 180px;
+}
+
+.session-btn-history {
+    background: var(--accent-2);
+    color: #fff;
+}
+
+.session-btn-history:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(91, 141, 239, 0.4);
+}
+
 .auto-link-badge {
     font-size: 0.75rem;
     color: var(--status-online);
