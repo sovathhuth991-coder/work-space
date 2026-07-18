@@ -225,8 +225,11 @@ const JournalUI = {
                     errorMsg.style.display = 'none';
                     textarea.style.borderColor = '';
                 }, 3000);
+            } else if (typeof showToast === 'function') {
+                showToast('Please write something in your journal entry.', 'warning');
             } else {
-                // Fallback to alert if error element doesn't exist
+                // Last-resort fallback if neither the inline error element
+                // nor showToast is available
                 alert('Please write something in your journal entry.');
             }
             return;

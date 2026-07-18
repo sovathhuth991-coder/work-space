@@ -6,7 +6,7 @@
     'use strict';
 
     // ----- DOM refs (Daily Totals) -----
-    const taskSelector = document.getElementById('taskSelector');
+    const currentTaskDisplay = document.getElementById('currentTaskDisplay');
     const scheduledInput = document.getElementById('trackerScheduled');
     const focusDisplay = document.getElementById('focusTimeDisplay');
     const breakDisplay = document.getElementById('breakTimeDisplay');
@@ -29,6 +29,13 @@
     const sessionTotalDisplay = document.getElementById('sessionTotalDisplay');
     const currentSessionTaskName = document.getElementById('currentSessionTaskName');
     const currentSessionTaskTime = document.getElementById('currentSessionTaskTime');
+
+    // The current task is now read-only — always whatever the schedule says
+    // is active/next, no manual override. currentTaskData replaces what
+    // used to be read off the selected <option>; todayTasksCache is the
+    // ordered list autoAdvanceTask() walks through.
+    let currentTaskData = null;
+    let todayTasksCache = [];
 
     // ----- State (Daily Totals) -----
     let focusSeconds = 0;
@@ -78,15 +85,14 @@
                 const savedDate = new Date(data.timestamp).toDateString();
                 const today = new Date().toDateString();
 
-                // If it's a new day, reset the times
+                // If it's a new day, reset today's totals (session history
+                // persists across the week — see checkWeekChange())
                 if (savedDate !== today) {
                     focusSeconds = 0;
                     breakSeconds = 0;
                     idleSeconds = 0;
                     idleStartTime = null;
                     saveAccumulatedTime();
-                    // Also clear completed sessions for the new day
-                    localStorage.removeItem('completedSessions');
                 } else {
                     focusSeconds = data.focusSeconds || 0;
                     breakSeconds = data.breakSeconds || 0;
@@ -275,6 +281,7 @@
             timestamp: Date.now()
         });
         localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+        if (typeof renderSessionHistory === 'function') renderSessionHistory();
 
         // Also dispatch an event so the dashboard can update
         document.dispatchEvent(new CustomEvent('sessionCompleted', {
@@ -359,6 +366,13 @@
         if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(sessionIdleSeconds);
         const total = sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds;
         if (sessionTotalDisplay) sessionTotalDisplay.textContent = formatTime(total);
+
+        // Keep the history panel's live "in progress" entry current while
+        // it's open — no point re-rendering it while hidden.
+        const historyCard = document.getElementById('sessionHistoryCard');
+        if (historyCard && historyCard.style.display !== 'none' && typeof renderSessionHistory === 'function') {
+            renderSessionHistory();
+        }
     }
 
     // ----- Update current session task info -----
@@ -388,12 +402,8 @@
         previousTaskId = newTaskId;
 
         // Update current session task info
-        const opt = taskSelector.options[taskSelector.selectedIndex];
-        if (opt && opt.value) {
-            const taskTitle = opt.dataset.title || opt.textContent.split(' (')[0];
-            const taskStart = opt.dataset.start || '';
-            const taskEnd = opt.dataset.end || '';
-            updateCurrentSessionTaskInfo(taskTitle, taskStart, taskEnd);
+        if (currentTaskData) {
+            updateCurrentSessionTaskInfo(currentTaskData.title, currentTaskData.start, currentTaskData.end);
         }
 
         // Start/resume current session tracking
@@ -402,13 +412,42 @@
         }
     }
 
-    // ----- Populate the task dropdown -----
-    function populateTaskDropdown() {
+    // ----- Apply a task as "current" — updates the read-only display,
+    // scheduled-minutes field, badge, and fires handleTaskChange only if
+    // the task actually changed (avoids resetting the session every tick) -----
+    function applyCurrentTask(task) {
+        const newId = task.id || (task.title + task.start);
+        const changed = !currentTaskData || currentTaskData.id !== newId;
+
+        currentTaskData = { id: newId, title: task.title, start: task.start, end: task.end };
+
+        if (currentTaskDisplay) {
+            const marker = task.isActive ? ' 🔴' : (task.isUpcoming ? ' ⏳' : '');
+            currentTaskDisplay.textContent = `${task.title} (${task.start}–${task.end})${marker}`;
+        }
+
+        const startM = timeToMinutes(task.start);
+        const endM = timeToMinutes(task.end);
+        const dur = endM - startM;
+        if (dur > 0) scheduledInput.value = dur;
+        autoLabelBadge.textContent = '✅ Linked to task';
+        autoLabelBadge.style.color = '#2ecc71';
+
+        if (changed) {
+            handleTaskChange(newId);
+            updateUI();
+        }
+    }
+
+    // ----- Determine and display the current task (read-only, no manual
+    // switching — always follows the clock against today's schedule) -----
+    function updateCurrentTaskDisplay() {
         const tasks = getTodayTasks();
-        taskSelector.innerHTML = '<option value="">— Select a task —</option>';
+        todayTasksCache = tasks;
 
         if (tasks.length === 0) {
-            taskSelector.innerHTML += '<option value="" disabled>No tasks scheduled for today</option>';
+            currentTaskData = null;
+            if (currentTaskDisplay) currentTaskDisplay.textContent = 'No tasks scheduled for today';
             autoLabelBadge.textContent = '📭 No tasks';
             autoLabelBadge.style.color = '#888';
             updateCurrentSessionTaskInfo('No tasks today', '', '');
@@ -417,53 +456,24 @@
 
         const nowHHMM = getCurrentHHMM();
         const nowMinutes = timeToMinutes(nowHHMM);
-        let autoSelectId = null;
-        let autoSelectIndex = 0;
+        let selected = null;
 
-        tasks.forEach((task, index) => {
+        for (const task of tasks) {
             const startM = timeToMinutes(task.start);
             const endM = timeToMinutes(task.end);
             const isActive = (nowMinutes >= startM && nowMinutes < endM);
             const isUpcoming = (nowMinutes < startM);
-            const label = `${task.title} (${task.start}–${task.end})${isActive ? ' 🔴' : ''}${isUpcoming ? ' ⏳' : ''}`;
-            const opt = document.createElement('option');
-            opt.value = task.id || 'task-' + index;
-            opt.textContent = label;
-            opt.dataset.start = task.start;
-            opt.dataset.end = task.end;
-            opt.dataset.title = task.title;
-            opt.dataset.duration = endM - startM;
-            taskSelector.appendChild(opt);
-
-            if (isActive && autoSelectId === null) {
-                autoSelectId = opt.value;
-                autoSelectIndex = index;
-            } else if (isUpcoming && autoSelectId === null) {
-                autoSelectId = opt.value;
-                autoSelectIndex = index;
+            if (isActive) {
+                selected = { ...task, isActive: true, isUpcoming: false };
+                break;
             }
-        });
-
-        if (autoSelectId === null && tasks.length > 0) {
-            autoSelectId = taskSelector.options[1]?.value || null;
-            autoSelectIndex = 0;
-        }
-
-        if (autoSelectId) {
-            taskSelector.value = autoSelectId;
-            const selectedOpt = taskSelector.querySelector(`option[value="${autoSelectId}"]`);
-            if (selectedOpt) {
-                const dur = parseInt(selectedOpt.dataset.duration);
-                if (dur > 0) scheduledInput.value = dur;
-                autoLabelBadge.textContent = '✅ Auto‑linked';
-                autoLabelBadge.style.color = '#2ecc71';
+            if (isUpcoming && !selected) {
+                selected = { ...task, isActive: false, isUpcoming: true };
             }
-            // Initialize the current session for auto-selected task
-            handleTaskChange(autoSelectId);
-        } else {
-            autoLabelBadge.textContent = 'No matching task';
-            autoLabelBadge.style.color = '#888';
         }
+        if (!selected) selected = { ...tasks[0], isActive: false, isUpcoming: false };
+
+        applyCurrentTask(selected);
     }
 
     // ----- Update UI (Daily Totals) -----
@@ -509,7 +519,12 @@
         }
     }
 
-    // ----- Check for day change and reset if needed -----
+    // ----- Check for day change and reset TODAY'S TOTALS if needed -----
+    // (completedSessions history is handled separately by checkWeekChange —
+    // it used to get wiped here every single day, which is why weekly
+    // features elsewhere in the dashboard, like the streak sparkline and
+    // month calendar, never had more than one day of real data to work
+    // with.)
     function checkDayChange() {
         const currentDate = new Date().toDateString();
         if (currentDate !== lastCheckedDate) {
@@ -523,8 +538,6 @@
             stopAccumulation();
             saveAccumulatedTime();
             updateUI();
-            // Clear completed sessions for new day
-            localStorage.removeItem('completedSessions');
             // Reset current session
             if (sessionInterval) {
                 clearInterval(sessionInterval);
@@ -537,39 +550,42 @@
             sessionBreakStartTime = null;
             sessionIdleStartTime = null;
             updateCurrentSessionDisplay();
-            console.log('🕛 Daily reset at midnight - timers cleared');
+            console.log('🕛 Daily reset at midnight - today\'s totals cleared (session history persists for the week)');
+        }
+    }
+
+    // ----- Check for week change and reset session HISTORY if needed -----
+    function checkWeekChange() {
+        if (typeof getWeekId !== 'function') return;
+        const currentWeekId = getWeekId(new Date());
+        const storedWeekId = localStorage.getItem('sessionHistoryWeekId');
+        if (storedWeekId !== currentWeekId) {
+            // Only clear if a previous week was actually stored — first run
+            // ever shouldn't wipe anything, it just establishes a baseline.
+            if (storedWeekId !== null) {
+                localStorage.removeItem('completedSessions');
+                console.log('📅 New week — session history reset');
+            }
+            localStorage.setItem('sessionHistoryWeekId', currentWeekId);
+            if (typeof renderSessionHistory === 'function') renderSessionHistory();
         }
     }
 
     // ----- Auto-advance to next task when current task expires -----
     function autoAdvanceTask() {
-        if (!taskSelector || taskSelector.options.length <= 1) return;
+        if (!currentTaskData || todayTasksCache.length <= 1) return;
 
         const nowHHMM = getCurrentHHMM();
         const nowMinutes = timeToMinutes(nowHHMM);
-        const currentIndex = taskSelector.selectedIndex;
-        const currentOpt = taskSelector.options[currentIndex];
-        if (!currentOpt || !currentOpt.dataset.end) return;
-
-        const currentEndMinutes = timeToMinutes(currentOpt.dataset.end);
+        const currentEndMinutes = timeToMinutes(currentTaskData.end);
 
         if (nowMinutes >= currentEndMinutes) {
-            let nextIndex = currentIndex + 1;
-            while (nextIndex < taskSelector.options.length) {
-                const nextOpt = taskSelector.options[nextIndex];
-                if (nextOpt.value && !nextOpt.disabled) {
-                    // Save current session before switching
-                    handleTaskChange(nextOpt.value);
-
-                    taskSelector.selectedIndex = nextIndex;
-
-                    const event = new Event('change');
-                    taskSelector.dispatchEvent(event);
-
-                    console.log('⏭ Auto-advanced to next task:', nextOpt.textContent);
-                    break;
-                }
-                nextIndex++;
+            const currentIndex = todayTasksCache.findIndex(t => (t.id || t.title + t.start) === currentTaskData.id);
+            for (let i = currentIndex + 1; i < todayTasksCache.length; i++) {
+                const next = todayTasksCache[i];
+                applyCurrentTask({ ...next, isActive: true, isUpcoming: false });
+                console.log('⏭ Auto-advanced to next task:', next.title);
+                break;
             }
         }
     }
@@ -577,9 +593,13 @@
     // ----- Start periodic day change check -----
     function startDayChangeMonitor() {
         checkDayChange();
+        checkWeekChange();
 
         if (!window.dayCheckInterval) {
-            window.dayCheckInterval = setInterval(checkDayChange, 60000);
+            window.dayCheckInterval = setInterval(function() {
+                checkDayChange();
+                checkWeekChange();
+            }, 60000);
         }
 
         if (!window.taskAdvanceInterval) {
@@ -623,7 +643,10 @@
         }
 
         if (!window.dayCheckInterval) {
-            window.dayCheckInterval = setInterval(checkDayChange, 60000);
+            window.dayCheckInterval = setInterval(function() {
+                checkDayChange();
+                checkWeekChange();
+            }, 60000);
         }
     }
 
@@ -672,29 +695,37 @@
 
     // ----- End Session -----
     function endSession() {
-        const selectedOpt = taskSelector.options[taskSelector.selectedIndex];
-        const label = selectedOpt?.dataset?.title || taskSelector.value || 'Untitled';
+        const label = currentTaskData?.title || 'Untitled';
         const scheduled = parseInt(scheduledInput.value) || 0;
-        const focusMins = Math.floor(focusSeconds / 60);
-        const focusSecs = focusSeconds % 60;
-        const breakMins = Math.floor(breakSeconds / 60);
-        const breakSecs = breakSeconds % 60;
-        const idleMins = Math.floor(idleSeconds / 60);
-        const idleSecs = idleSeconds % 60;
         const scheduledSecs = scheduled * 60;
         const totalSecs = focusSeconds + breakSeconds + idleSeconds;
         const efficiency = scheduledSecs > 0 ? Math.round((focusSeconds / scheduledSecs) * 100) : 0;
-        const focusPercentage = totalSecs > 0 ? Math.round((focusSeconds / totalSecs) * 100) : 0;
 
-        const summary = `📊 SESSION COMPLETE: ${label}\n` +
-                        `📅 Scheduled: ${scheduled} min\n` +
-                        `⏱ Focus: ${focusMins}m ${focusSecs}s (${focusPercentage}%)\n` +
-                        `☕ Break: ${breakMins}m ${breakSecs}s\n` +
-                        `⏸ Idle: ${idleMins}m ${idleSecs}s\n` +
-                        `🎯 Efficiency: ${efficiency}%`;
+        // Log into the same history the auto-advance path uses, so manually
+        // ended sessions show up in Session History too — previously this
+        // only wrote to a separate, older `sessionHistory` key with no
+        // visible UI of its own.
+        if (totalSecs >= 5) {
+            const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+            completedSessions.push({
+                taskName: label,
+                taskStart: currentTaskData?.start || '',
+                taskEnd: currentTaskData?.end || '',
+                focusSeconds, breakSeconds, idleSeconds,
+                totalSeconds: totalSecs,
+                timestamp: Date.now()
+            });
+            localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+            if (typeof renderSessionHistory === 'function') renderSessionHistory();
+        }
 
-        alert(summary);
+        if (typeof showToast === 'function') {
+            showToast(`✅ ${label} logged — ${formatTime(focusSeconds)} focus (${efficiency}% of scheduled)`, 'success', 6000);
+        } else {
+            alert(`📊 SESSION COMPLETE: ${label}\nFocus: ${formatTime(focusSeconds)} · Break: ${formatTime(breakSeconds)} · Idle: ${formatTime(idleSeconds)}\nEfficiency: ${efficiency}%`);
+        }
 
+        // Legacy key some older code may still read — kept for compatibility.
         const history = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
         history.push({
             label,
@@ -819,19 +850,17 @@
             scheduledInput.addEventListener('input', updateUI);
         }
 
-        // When task selector changes, update scheduled time AND handle session switch
-        taskSelector.addEventListener('change', function() {
-            const opt = this.options[this.selectedIndex];
-            if (opt && opt.dataset.duration) {
-                const dur = parseInt(opt.dataset.duration);
-                if (dur > 0) scheduledInput.value = dur;
-                autoLabelBadge.textContent = '✅ Linked to task';
-                autoLabelBadge.style.color = '#2ecc71';
-            }
-            // Handle task switch (save old session, start new one)
-            handleTaskChange(this.value);
-            updateUI();
-        });
+        // Toggle the history panel open/closed
+        const viewHistoryBtn = document.getElementById('viewHistoryBtn');
+        const sessionHistoryCard = document.getElementById('sessionHistoryCard');
+        if (viewHistoryBtn && sessionHistoryCard) {
+            viewHistoryBtn.addEventListener('click', function() {
+                const isHidden = sessionHistoryCard.style.display === 'none';
+                sessionHistoryCard.style.display = isHidden ? 'block' : 'none';
+                viewHistoryBtn.textContent = isHidden ? '📊 Hide History' : '📊 View History';
+                if (isHidden && typeof renderSessionHistory === 'function') renderSessionHistory();
+            });
+        }
 
         // Load accumulated time from localStorage
         loadAccumulatedTime();
@@ -848,13 +877,13 @@
         }
 
         // Initial population and UI
-        populateTaskDropdown();
+        updateCurrentTaskDisplay();
         updateUI();
 
         // Also refresh when switching to timer view
         document.addEventListener('viewChanged', function(e) {
             if (e.detail.viewId === 'timer-view') {
-                populateTaskDropdown();
+                updateCurrentTaskDisplay();
                 updateUI();
                 startIdleTrackingOnLoad();
             }

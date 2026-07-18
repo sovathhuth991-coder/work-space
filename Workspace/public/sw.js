@@ -1,5 +1,5 @@
-ï»¿// Service Worker for Workspace Hub PWA
-const CACHE_NAME = 'workspace-hub-v13';
+// Service Worker for Workspace Hub PWA
+const CACHE_NAME = 'workspace-hub-v20260719060315';
 const STATIC_ASSETS = [
   'index.html',
   'TUTORIAL.md',
@@ -152,7 +152,7 @@ self.addEventListener('fetch', (event) => {
   // Stale-while-revalidate: serve the cached asset immediately (instant
   // load + offline support) and refresh the cache from the network in the
   // background. This means edits to cached files (CSS/JS/HTML/icons) show up
-  // after a reload WITHOUT needing to bump CACHE_NAME â€” the background fetch
+  // after a reload WITHOUT needing to bump CACHE_NAME — the background fetch
   // picks up the new file and the next load serves it.
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
@@ -166,7 +166,7 @@ self.addEventListener('fetch', (event) => {
             return response;
           })
           .catch(() => {
-            // Network failed â€” fall back to the offline page for navigations
+            // Network failed — fall back to the offline page for navigations
             if (request.mode === 'navigate') {
               return caches.match('index.html');
             }

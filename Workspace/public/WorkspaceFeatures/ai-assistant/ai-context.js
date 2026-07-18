@@ -118,6 +118,7 @@ function getSiteContextPromptBlock() {
     ).join('\n') || '  (nothing scheduled)';
 
     return `LIVE WORKSPACE SNAPSHOT (as of ${new Date(s.generatedAt).toLocaleTimeString()}):
+Today is ${s.scheduleToday.day}, ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
 Currently viewing: ${s.activeView}
 
 TASKS (${s.tasks.pending} pending / ${s.tasks.total} total):

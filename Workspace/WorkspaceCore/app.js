@@ -1113,9 +1113,12 @@ document.addEventListener('click', function(e) {
     const title = card.querySelector('h3')?.textContent || tutorial;
     showToast(`📖 Starting tutorial for ${title}...`, 'info');
 
-    // Optionally start the tour from that section
-    if (typeof startTour === 'function') {
-        setTimeout(() => startTour(), 300);
+    // Start the specific tutorial for the feature that was clicked —
+    // this used to call startTour(), a completely different, generic,
+    // fixed-content walkthrough from tour.js that ignored which card was
+    // clicked entirely. That's why every card produced identical content.
+    if (typeof startTutorial === 'function') {
+        setTimeout(() => startTutorial(tutorial), 300);
     }
 });
 

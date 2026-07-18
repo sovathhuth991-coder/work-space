@@ -212,6 +212,7 @@
         isRunning = true;
         phaseStartTime = Date.now();
         phaseRemainingAtStart = remainingSeconds;
+        elements.ringContainer?.classList.add('pomodoro-running');
 
         if (elements.startBtn) {
             elements.startBtn.style.display = 'none';
@@ -237,6 +238,7 @@
             clearInterval(pomoInterval);
             pomoInterval = null;
             isRunning = false;
+            elements.ringContainer?.classList.remove('pomodoro-running');
             remainingSeconds = 0;
             updateDisplay();
             phaseComplete();
@@ -244,6 +246,8 @@
     }
 
     function phaseComplete() {
+        const completedPhase = currentPhase;
+
         // Play notification sound via flash/visual
         const ringEl = elements.ringContainer;
         if (ringEl) {
@@ -254,6 +258,17 @@
         // Flash the title
         document.title = '⏰ Phase Complete! - Workspace Hub';
         setTimeout(() => { document.title = 'Workspace Hub'; }, 3000);
+
+        // Sound + system notification — a focus timer is only useful if you
+        // notice it ended, and the title/ring flash above are both silent
+        // and easy to miss the moment you're not looking at this tab.
+        if (typeof playChime === 'function') playChime();
+        if (typeof sendNotification === 'function') {
+            const msg = completedPhase === 'focus'
+                ? 'Focus session complete — time for a break.'
+                : "Break's over — back to focus.";
+            sendNotification('⏰ Pomodoro', msg, '🍅', 'pomodoro-notification');
+        }
 
         if (currentPhase === 'focus') {
             // Focus session completed
@@ -322,6 +337,7 @@
         pomoInterval = null;
         isRunning = false;
         phaseStartTime = null;
+        elements.ringContainer?.classList.remove('pomodoro-running');
 
         if (elements.startBtn) {
             elements.startBtn.style.display = 'inline-block';
@@ -340,6 +356,7 @@
         isRunning = false;
         phaseStartTime = null;
         cycleCount = 0;
+        elements.ringContainer?.classList.remove('pomodoro-running');
 
         preparePhase('ready');
         setPhase('ready');
@@ -365,6 +382,7 @@
         pomoInterval = null;
         isRunning = false;
         phaseStartTime = null;
+        elements.ringContainer?.classList.remove('pomodoro-running');
 
         const countdownShell = document.querySelector('.simple-timer-card');
         const pomodoroShell = document.getElementById('pomodoroShell');

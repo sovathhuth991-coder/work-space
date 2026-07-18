@@ -120,14 +120,27 @@
 /* Responsive text scaling inside a group's children as the split
    ratio (or the group's own size) makes one side narrower. */
 @container (max-width: 260px) {
-    .group-child h3 { font-size: 0.85rem; }
-    .group-child .stat-value { font-size: 1.1rem; }
-    .group-child .card-eyebrow { font-size: 0.65rem; }
+    .group-child h3 {
+        font-size: 0.85rem;
+    }
+
+    .group-child .stat-value {
+        font-size: 1.1rem;
+    }
+
+    .group-child .card-eyebrow {
+        font-size: 0.65rem;
+    }
 }
 
 @container (max-width: 180px) {
-    .group-child h3 { font-size: 0.75rem; }
-    .group-child .card-controls .matrix-btn { display: none; }
+    .group-child h3 {
+        font-size: 0.75rem;
+    }
+
+    .group-child .card-controls .matrix-btn {
+        display: none;
+    }
 }
 
 /* ---- Merge preview: shown while dragging a card near another's edge ---- */
@@ -150,17 +163,36 @@
     border-left-color: var(--card-accent, var(--status-live));
 }
 
-.dash-card[data-card-id="banner"] { --card-accent: #7c6df0; }
-.dash-card[data-card-id="todo"] { --card-accent: #10b981; }
-.dash-card[data-card-id="schedule-mini"] { --card-accent: #5b8def; }
-.dash-card[data-card-id="weather"] { --card-accent: #22d3ee; }
-.dash-card[data-card-id="date-countdown"] { --card-accent: #a78bfa; }
-.dash-card[data-card-id="widgets"] { --card-accent: #f59e0b; }
+.dash-card[data-card-id="banner"] {
+    --card-accent: #7c6df0;
+}
+
+.dash-card[data-card-id="todo"] {
+    --card-accent: #10b981;
+}
+
+.dash-card[data-card-id="schedule-mini"] {
+    --card-accent: #5b8def;
+}
+
+.dash-card[data-card-id="weather"] {
+    --card-accent: #22d3ee;
+}
+
+.dash-card[data-card-id="date-countdown"] {
+    --card-accent: #a78bfa;
+}
+
+.dash-card[data-card-id="widgets"] {
+    --card-accent: #f59e0b;
+}
 
 /* ---- Resize hotzones: cursor swaps when near an edge/corner,
    set inline by JS via getResizeDirection() — this just makes
    sure nothing else on the card overrides that cursor. ---- */
-.dash-card.canvas-card.resize-hover { cursor: inherit; }
+.dash-card.canvas-card.resize-hover {
+    cursor: inherit;
+}
 
 /* ---- Right-click context menu ---- */
 .card-context-menu {
@@ -558,7 +590,7 @@
     font-weight: bold;
 }
 
-.strike-item input[type="checkbox"]:checked + .task-text {
+.strike-item input[type="checkbox"]:checked+.task-text {
     text-decoration: line-through;
     color: var(--text-muted);
 }
@@ -620,10 +652,25 @@
 /* Color-coded stat cards — each sets --stat-color once and every
    rule below (icon tint, hover border, value readout) derives from
    it, instead of repeating the same hex three times per category. */
-.stat-card[data-view="todo-view"] { --stat-color: #10b981; --card-accent: #10b981; }
-.stat-card[data-view="schedule-view"] { --stat-color: #5b8def; --card-accent: #5b8def; }
-.stat-card[data-view="lessons-view"] { --stat-color: #f59e0b; --card-accent: #f59e0b; }
-.stat-card[data-view="analytics-view"] { --stat-color: #8b5cf6; --card-accent: #8b5cf6; }
+.stat-card[data-view="todo-view"] {
+    --stat-color: #10b981;
+    --card-accent: #10b981;
+}
+
+.stat-card[data-view="schedule-view"] {
+    --stat-color: #5b8def;
+    --card-accent: #5b8def;
+}
+
+.stat-card[data-view="lessons-view"] {
+    --stat-color: #f59e0b;
+    --card-accent: #f59e0b;
+}
+
+.stat-card[data-view="analytics-view"] {
+    --stat-color: #8b5cf6;
+    --card-accent: #8b5cf6;
+}
 
 .stat-card[data-view] .stat-icon {
     background: color-mix(in srgb, var(--stat-color) 16%, transparent);
@@ -683,9 +730,18 @@
 }
 
 @media (max-width: 520px) {
-    .stat-card-group { grid-column: span 1; }
-    .stat-group-inner { flex-direction: column; }
-    .stat-group-divider { flex-basis: 2px; height: 2px; }
+    .stat-card-group {
+        grid-column: span 1;
+    }
+
+    .stat-group-inner {
+        flex-direction: column;
+    }
+
+    .stat-group-divider {
+        flex-basis: 2px;
+        height: 2px;
+    }
 }
 
 /* ---- Day Streak sparkline: 7 small bars, one per day ---- */
@@ -821,7 +877,7 @@
 }
 
 /* Minimized card — collapse everything except the header */
-.dash-card.card-minimized .card-inner > *:not(.card-header-drag) {
+.dash-card.card-minimized .card-inner>*:not(.card-header-drag) {
     display: none !important;
 }
 
@@ -889,12 +945,12 @@
     color: var(--text-muted);
 }
 
-.session-history-empty > div:first-child {
+.session-history-empty>div:first-child {
     font-size: 1.5rem;
     margin-bottom: 6px;
 }
 
-.session-history-empty > div:nth-child(2) {
+.session-history-empty>div:nth-child(2) {
     color: var(--text-muted);
     font-size: 0.8rem;
 }
@@ -1290,6 +1346,48 @@ body {
     transform: translateX(2px) scale(0.99);
 }
 
+/* The live in-progress entry — not clickable (no saved timestamp to look
+   up yet), so no pointer cursor or hover-shift like the completed items
+   above. Red accent bar distinguishes it as "still running" rather than
+   an entry in the log. */
+.session-history-live {
+    cursor: default;
+}
+
+.session-history-live::before {
+    background: var(--status-danger);
+    opacity: 1;
+}
+
+.session-history-live:hover {
+    background: var(--bg-primary);
+    border-color: var(--border-color);
+    transform: none;
+}
+
+.session-history-live .session-history-time {
+    color: var(--status-danger);
+    animation: sessionLivePulse 2s ease-in-out infinite;
+}
+
+@keyframes sessionLivePulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .session-history-live .session-history-time {
+        animation: none;
+    }
+}
+
 .session-history-time {
     font-size: 0.8rem;
     font-weight: 700;
@@ -1520,6 +1618,7 @@ body {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1604,6 +1703,7 @@ body {
         opacity: 0;
         transform: translateX(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -1640,16 +1740,45 @@ body {
    ============================================================ */
 
 /* Stagger delays for each card */
-.dash-card:nth-child(1) { transition-delay: 0s; }
-.dash-card:nth-child(2) { transition-delay: 0.08s; }
-.dash-card:nth-child(3) { transition-delay: 0.16s; }
-.dash-card:nth-child(4) { transition-delay: 0.24s; }
-.dash-card:nth-child(5) { transition-delay: 0.32s; }
-.dash-card:nth-child(6) { transition-delay: 0.40s; }
-.dash-card:nth-child(7) { transition-delay: 0.48s; }
-.dash-card:nth-child(8) { transition-delay: 0.56s; }
-.dash-card:nth-child(9) { transition-delay: 0.64s; }
-.dash-card:nth-child(10) { transition-delay: 0.72s; }
+.dash-card:nth-child(1) {
+    transition-delay: 0s;
+}
+
+.dash-card:nth-child(2) {
+    transition-delay: 0.08s;
+}
+
+.dash-card:nth-child(3) {
+    transition-delay: 0.16s;
+}
+
+.dash-card:nth-child(4) {
+    transition-delay: 0.24s;
+}
+
+.dash-card:nth-child(5) {
+    transition-delay: 0.32s;
+}
+
+.dash-card:nth-child(6) {
+    transition-delay: 0.40s;
+}
+
+.dash-card:nth-child(7) {
+    transition-delay: 0.48s;
+}
+
+.dash-card:nth-child(8) {
+    transition-delay: 0.56s;
+}
+
+.dash-card:nth-child(9) {
+    transition-delay: 0.64s;
+}
+
+.dash-card:nth-child(10) {
+    transition-delay: 0.72s;
+}
 
 /* ============================================================
    FEATURE: SPARKLINES ON STAT CARDS
@@ -2021,6 +2150,7 @@ body {
         opacity: 0;
         transform: translateX(-50%) translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateX(-50%) translateY(0);

@@ -54,6 +54,10 @@
        so the dashboard accent language stays tied to the nav palette. */
     --status-live: var(--nav-schedule);
     --status-attention: var(--nav-journal);
+    /* Destructive actions (e.g. resetting a session). Same red the timer's
+       reset button already used — centralized here instead of repeated as
+       raw hex in three places (base, hover, hover shadow). */
+    --status-danger: #e74c3c;
     --bracket-color: rgba(255, 255, 255, 0.22);
     --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 

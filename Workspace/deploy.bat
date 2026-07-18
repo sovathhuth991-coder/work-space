@@ -21,6 +21,18 @@ xcopy /Y "web-app-manifest-192x192.png" "public\web-app-manifest-192x192.png"
 xcopy /Y "web-app-manifest-512x512.png" "public\web-app-manifest-512x512.png"
 
 echo.
+echo Removing executable/forbidden files from public/ (Firebase Spark blocks .bat/.exe/etc)...
+del /Q "public\*.bat" 2>nul
+del /Q "public\*.exe" 2>nul
+del /Q "public\*.cmd" 2>nul
+del /Q "public\*.com" 2>nul
+del /Q "public\*.msi" 2>nul
+del /Q "public\*.ps1" 2>nul
+del /Q "public\*.sh" 2>nul
+del /Q "public\*.vbs" 2>nul
+del /Q "public\*.jar" 2>nul
+del /Q "public\*.dll" 2>nul
+
 echo Deploying to Firebase...
 firebase deploy --only hosting
 echo.
