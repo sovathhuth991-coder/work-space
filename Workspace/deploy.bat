@@ -1,4 +1,10 @@
 @echo off
+echo Updating service worker cache version...
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMddHHmmss"') do set CACHE_VERSION=%%i
+powershell -NoProfile -Command "(Get-Content 'sw.js') -replace 'const CACHE_NAME = .*;', 'const CACHE_NAME = ''workspace-hub-v%CACHE_VERSION%'';' | Set-Content 'sw.js'"
+echo New cache version: workspace-hub-v%CACHE_VERSION%
+echo.
+
 echo Copying files to public/...
 xcopy /Y /S /I "WorkspaceCore" "public\WorkspaceCore"
 xcopy /Y /S /I "WorkspaceFeatures" "public\WorkspaceFeatures"
