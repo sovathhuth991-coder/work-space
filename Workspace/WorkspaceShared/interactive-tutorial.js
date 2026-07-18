@@ -21,14 +21,14 @@
             steps: [
                 {
                     target: '.dash-banner',
-                    title: 'Banner Card',
-                    content: 'This is your daily overview. It shows your completion progress, current streak, and a personalized greeting. Watch the progress bar fill up as you complete tasks!',
+                    title: 'Today\'s Focus',
+                    content: 'Your main focus card — drag it anywhere on the dashboard or resize it by its edge. Click "View Sessions" to see a log of today\'s focus sessions.',
                     position: 'bottom'
                 },
                 {
-                    target: '.current-session-box',
-                    title: 'Active Session',
-                    content: 'Shows what you\'re currently working on. It automatically updates based on your schedule and the lesson you\'re viewing. "Up next" shows your next upcoming task.',
+                    target: '#dailyFocusGoal',
+                    title: 'Daily Focus Goal',
+                    content: 'Set a daily focus-time target and this ring fills in as you log focus sessions throughout the day. Click "Set Goal" to change it.',
                     position: 'right'
                 },
                 {
@@ -122,13 +122,13 @@
             description: 'Master your task management',
             steps: [
                 {
-                    target: '.dash-add-todo-btn',
+                    target: '#todo-view .dash-add-todo-btn',
                     title: 'Add Tasks',
                     content: 'Click the "+ Add task" button to create a new task. Type your task and press Enter. It will appear in the list below.',
                     position: 'bottom'
                 },
                 {
-                    target: '.strike-item',
+                    target: '#todoStrikeList',
                     title: 'Task List',
                     content: 'All your tasks appear here. Click the checkbox to mark complete (gets strikethrough). Tasks sync with the dashboard automatically.',
                     position: 'left'
