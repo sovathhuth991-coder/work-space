@@ -236,6 +236,126 @@
                     position: 'top'
                 }
             ]
+        },
+        journal: {
+            title: 'Journal Tutorial',
+            description: 'Capture daily reflections',
+            steps: [
+                {
+                    target: '#journalQuickAddBtn',
+                    title: 'Write an Entry',
+                    content: 'This floating button is always available, on any page — click it any time to write a new journal entry, add a mood, and save.',
+                    position: 'left'
+                },
+                {
+                    target: '#journalStatsBar',
+                    title: 'Your Stats',
+                    content: 'Tracks your total entries, how many you\'ve written today and this week, and your current writing streak.',
+                    position: 'bottom'
+                },
+                {
+                    target: '#journalEntriesList',
+                    title: 'Your Entries',
+                    content: 'All your past entries appear here, newest first. Edit or delete any entry from its header.',
+                    position: 'top'
+                }
+            ]
+        },
+        reading: {
+            title: 'Reading List Tutorial',
+            description: 'Track books and articles',
+            steps: [
+                {
+                    target: '.reading-toolbar',
+                    title: 'Search, Filter & Add',
+                    content: 'Search your list, filter by To Read / Reading / Finished, or click "+ Add Item" to log a book, article, document, or video with its title, author, URL, and notes.',
+                    position: 'bottom'
+                },
+                {
+                    target: '.reading-stats-bar',
+                    title: 'Reading Stats',
+                    content: 'A quick summary of your reading activity at a glance.',
+                    position: 'bottom'
+                },
+                {
+                    target: '#readingItemsGrid',
+                    title: 'Your Library',
+                    content: 'Every saved item appears here as a card. Update its status as you make progress, and jump straight to the source via its link.',
+                    position: 'top'
+                }
+            ]
+        },
+        weather: {
+            title: 'Weather Tutorial',
+            description: 'Check the forecast',
+            steps: [
+                {
+                    target: '.weather-header',
+                    title: 'Change Location',
+                    content: 'Type a city name and click Update to switch locations, or hit Refresh to reload the current forecast.',
+                    position: 'bottom'
+                },
+                {
+                    target: '.weather-current',
+                    title: 'Current Conditions',
+                    content: 'Today\'s temperature and conditions at a glance.',
+                    position: 'bottom'
+                },
+                {
+                    target: '.weather-forecast-grid',
+                    title: 'Multi-Day Forecast',
+                    content: 'See what\'s coming over the next few days, each card color-coded by condition — sunny, rain, snow, and more.',
+                    position: 'top'
+                }
+            ]
+        },
+        ai: {
+            title: 'AI Assistant Tutorial',
+            description: 'Your workspace, in chat form',
+            steps: [
+                {
+                    target: '.ai-view-status-row',
+                    title: 'Connect Your Local AI',
+                    content: 'Click "⚙ Endpoint" to point this at a local AI you\'re running (Ollama, LM Studio, etc.) — the status pill shows whether it\'s currently connected.',
+                    position: 'bottom'
+                },
+                {
+                    target: '.ai-chat-inputrow',
+                    title: 'Ask or Command It',
+                    content: 'Ask questions about your workspace, or tell it to act — "add a task for tomorrow," "mark my reading habit done," and so on.',
+                    position: 'top'
+                },
+                {
+                    target: '#ai-actions-enabled',
+                    title: 'Action Permissions',
+                    content: 'Uncheck this if you only want it to answer questions — with it on, it\'s allowed to actually add, complete, or delete things on your behalf.',
+                    position: 'top'
+                },
+                {
+                    target: '.ai-context-panel',
+                    title: 'What It Can See & Do',
+                    content: 'A live snapshot of your workspace data it currently has access to, plus a list of everything it\'s able to do for you.',
+                    position: 'left'
+                }
+            ]
+        },
+        graph: {
+            title: 'Knowledge Graph Tutorial',
+            description: 'Visualize how it all connects',
+            steps: [
+                {
+                    target: '#graphContainer',
+                    title: 'Your Knowledge Graph',
+                    content: 'Each node is a lesson folder or page; each connecting line shows how they — and anything else that links to a lesson page — relate to each other. Drag nodes around, scroll to zoom.',
+                    position: 'top'
+                },
+                {
+                    target: '[data-action="renderKnowledgeGraph"]',
+                    title: 'Refresh',
+                    content: 'Click this after adding new lessons or links so the graph picks up your latest changes.',
+                    position: 'bottom'
+                }
+            ]
         }
     };
 

@@ -1050,7 +1050,12 @@ const tutorialData = [
     { icon: '📚', title: 'Lessons', tutorial: 'lessons', desc: 'Create and organize learning content. Explore the explorer panel, rich text editor, and slash commands.' },
     { icon: '📖', title: 'Library', tutorial: 'library', desc: 'Store and organize resources. Learn to add links, videos, documents, and code snippets.' },
     { icon: '✅', title: 'Habits', tutorial: 'habits', desc: 'Build consistency with daily tracking. Create habits, track streaks, and monitor completion rates.' },
-    { icon: '📈', title: 'Analytics', tutorial: 'analytics', desc: 'Insights into your productivity. Explore session history, category breakdown, and peak performance.' }
+    { icon: '📈', title: 'Analytics', tutorial: 'analytics', desc: 'Insights into your productivity. Explore session history, category breakdown, and peak performance.' },
+    { icon: '📔', title: 'Journal', tutorial: 'journal', desc: 'Capture daily reflections. Learn the quick-add button, your stats, and browsing past entries.' },
+    { icon: '📕', title: 'Reading List', tutorial: 'reading', desc: 'Track books and articles. Learn to search, filter, add items, and update reading status.' },
+    { icon: '🌤️', title: 'Weather', tutorial: 'weather', desc: 'Check the forecast. Learn to change location and read current conditions and the multi-day forecast.' },
+    { icon: '🤖', title: 'AI Assistant', tutorial: 'ai', desc: 'Your workspace, in chat form. Connect a local AI, learn action permissions, and see what it can do.' },
+    { icon: '🕸️', title: 'Knowledge Graph', tutorial: 'graph', desc: 'Visualize how your lessons and links connect to each other.' }
 ];
 
 function renderTutorialCards() {
@@ -1083,7 +1088,12 @@ const tutorialToViewMap = {
     'lessons': 'lessons-view',
     'library': 'library-view',
     'habits': 'habits-view',
-    'analytics': 'analytics-view'
+    'analytics': 'analytics-view',
+    'journal': 'journal-view',
+    'reading': 'reading-view',
+    'weather': 'weather-view',
+    'ai': 'ai-view',
+    'graph': 'graph-view'
 };
 
 document.addEventListener('click', function(e) {
