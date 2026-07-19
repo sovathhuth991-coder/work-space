@@ -829,6 +829,7 @@ function initDashboardEngine() {
     updateSidebarProgress();
     updateDailyStats();
     renderSessionHistory();
+    if (typeof renderMiniCalendar === 'function') renderMiniCalendar();
     if (typeof initWeather === 'function') initWeather();
     updateFocusGoalDisplay();
     renderQuickNotes();
