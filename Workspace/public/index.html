@@ -1692,9 +1692,12 @@
                 <p style="margin:0 0 4px 0; font-size:0.85rem; color:var(--text-muted);">Signed in as</p>
                 <p id="accountSignedInEmail"
                     style="margin:0 0 20px 0; font-size:1rem; font-weight:600; color:var(--text-primary);"></p>
-                <p style="margin:0 0 20px 0; font-size:0.8rem; color:var(--text-muted);">
-                    Cross-device sync isn't wired up yet \u2014 this only confirms your account works.
+                <p style="margin:0 0 16px 0; font-size:0.8rem; color:var(--text-muted);">
+                    Your tasks sync across devices. Changes appear within a few seconds.
                 </p>
+                <button class="matrix-btn" data-action="handleAccountSyncNow"
+                    style="width:100%; padding:12px; margin-bottom:10px;">↻ Sync now</button>
+                <p id="accountSyncStatus" style="margin:0 0 16px 0; font-size:0.78rem; color:var(--text-muted); text-align:center;"></p>
                 <button class="matrix-btn" data-action="handleAccountSignOut" style="width:100%; padding:12px;">Sign
                     out</button>
             </div>
