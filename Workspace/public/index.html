@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -761,6 +761,13 @@
                         <h1>Habit Tracker</h1>
                     </div>
                     <button class="matrix-btn" data-action="addHabit">+ Add Habit</button>
+                </div>
+                <div id="addHabitForm" style="display:none; gap:8px; margin-bottom:16px;">
+                    <input type="text" id="newHabitName" placeholder="Habit name..." maxlength="60"
+                        onkeydown="if(event.key==='Enter') submitNewHabit(); if(event.key==='Escape') toggleAddHabitForm();"
+                        style="flex:1; padding:8px 12px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.9rem;">
+                    <button class="matrix-btn" onclick="submitNewHabit()">Add</button>
+                    <button class="matrix-btn" onclick="toggleAddHabitForm()">Cancel</button>
                 </div>
                 <div id="habitsContainer" class="habits-grid"></div>
             </section>

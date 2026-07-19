@@ -58,6 +58,8 @@ function addLibraryItem() {
 }
 
 function deleteLibraryItem(id) {
+    const item = libraryItems.find(i => i.id === id);
+    if (!confirm(`Delete "${item ? item.title : 'this item'}" from your library?`)) return;
     libraryItems = libraryItems.filter(item => item.id !== id);
     saveLibraryItems();
     renderLibrary();

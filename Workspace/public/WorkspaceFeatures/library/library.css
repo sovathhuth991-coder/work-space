@@ -5,8 +5,8 @@
 }
 
 .library-item-card {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid #1e293b;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 16px;
     display: flex;
@@ -16,19 +16,19 @@
 }
 
 .library-item-card:hover {
-    border-color: rgba(168, 85, 247, 0.3);
+    border-color: var(--accent-1);
     transform: translateY(-2px);
 }
 
 .lib-title {
     font-size: 1rem;
-    color: #f8fafc;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
 .lib-url {
     font-size: 0.8rem;
-    color: #38bdf8;
+    color: var(--lib-link);
     word-break: break-all;
 }
 
@@ -36,26 +36,26 @@
     font-size: 0.7rem;
     padding: 2px 8px;
     border-radius: 4px;
-    background: rgba(148, 163, 184, 0.1);
-    color: #94a3b8;
+    background: var(--bg-secondary);
+    color: var(--text-muted);
 }
 
 .lib-cat.link {
-    background: rgba(56, 189, 248, 0.1);
-    color: #38bdf8;
+    background: color-mix(in srgb, var(--lib-link) 10%, transparent);
+    color: var(--lib-link);
 }
 
 .lib-cat.video {
-    background: rgba(244, 63, 94, 0.1);
-    color: #f43f5e;
+    background: color-mix(in srgb, var(--lib-video) 10%, transparent);
+    color: var(--lib-video);
 }
 
 .lib-cat.document {
-    background: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
+    background: color-mix(in srgb, var(--lib-document) 10%, transparent);
+    color: var(--lib-document);
 }
 
 .lib-cat.code {
-    background: rgba(16, 185, 129, 0.1);
-    color: #34d399;
+    background: color-mix(in srgb, var(--lib-code) 10%, transparent);
+    color: var(--lib-code);
 }

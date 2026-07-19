@@ -50,34 +50,28 @@
             description: 'Master your weekly planning',
             steps: [
                 {
-                    target: '.day',
-                    title: 'Day Cards',
-                    content: 'Each day of the week is shown as a card. It displays task count, a preview of your first 3 tasks, and a progress bar. Click any day to see details!',
+                    target: '#schedule-view .view-header',
+                    title: 'Quick Actions',
+                    content: '"Today" jumps to the current day. "+ Add Task" opens a form to add one right now. Export/Import iCal let you move events in and out of a calendar file.',
                     position: 'bottom'
                 },
                 {
-                    target: '.today-highlight',
-                    title: 'Today Highlight',
-                    content: 'Today\'s card is highlighted with a star ⭐ and special border. This helps you quickly identify the current day.',
-                    position: 'bottom'
-                },
-                {
-                    target: '.modal-form-zone',
-                    title: 'Task Creation Form',
-                    content: 'When you click a day, this form appears on the left. Enter task details here: title, category, time, and recurrence. Use preset buttons for quick task creation!',
-                    position: 'right'
-                },
-                {
-                    target: '.timeline-list',
-                    title: 'Timeline',
-                    content: 'All tasks for the selected day appear here on the right. Click any task to edit it. Use action buttons to start timer, mark complete, or delete.',
-                    position: 'left'
-                },
-                {
-                    target: '.day-nav-pill',
+                    target: '#scheduleQuickNav',
                     title: 'Day Navigation',
-                    content: 'Quickly switch between days using these pills. The active day is highlighted. The count badge shows how many tasks are scheduled.',
+                    content: 'Click a day pill to open its full task list and an add-task form. Today\'s pill is highlighted, and the number shows how many tasks are scheduled. Press 1–7 to jump straight to a day, or T for today.',
                     position: 'bottom'
+                },
+                {
+                    target: '#calendar',
+                    title: 'Week View',
+                    content: 'Your week at a glance — scroll through days here. Click any day to open the same task list and add-task view as the navigation pills above.',
+                    position: 'top'
+                },
+                {
+                    target: '.calendar-month-view',
+                    title: 'Month View',
+                    content: 'Browse a full month and click any date to see that day\'s events listed below — useful for planning further ahead than just this week.',
+                    position: 'top'
                 }
             ]
         },

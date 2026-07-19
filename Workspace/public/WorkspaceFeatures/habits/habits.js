@@ -49,7 +49,7 @@ function renderHabits() {
                         <div style="font-weight:600;color:var(--text-primary);">${escapeHtml(habit.name)}</div>
                         <div style="font-size:0.8rem;color:var(--text-muted);">🔥 ${streak} day${streak !== 1 ? 's' : ''}</div>
                     </div>
-                    <button class="matrix-btn" onclick="deleteHabit(${index})" style="color:#ef4444;border-color:#ef4444;">✕</button>
+                    <button class="matrix-btn" onclick="deleteHabit(${index})" style="color:var(--status-danger);border-color:var(--status-danger);">✕</button>
                 </div>
                 ${calHtml}
             </div>
@@ -95,12 +95,33 @@ function toggleHabit(index) {
 }
 
 function addHabit() {
-    const name = prompt('Enter habit name:');
-    if (name && name.trim()) {
-        habits.push({ name: name.trim(), history: {} });
-        saveHabits();
-        renderHabits();
+    toggleAddHabitForm();
+}
+
+function toggleAddHabitForm() {
+    const form = document.getElementById('addHabitForm');
+    if (!form) return;
+    const showing = form.style.display !== 'none';
+    form.style.display = showing ? 'none' : 'flex';
+    if (!showing) {
+        const input = document.getElementById('newHabitName');
+        if (input) { input.value = ''; input.focus(); }
     }
+}
+
+function submitNewHabit() {
+    const input = document.getElementById('newHabitName');
+    if (!input) return;
+    const name = input.value.trim();
+    if (!name) {
+        if (typeof showToast === 'function') showToast('Enter a habit name first.', 'warning');
+        return;
+    }
+    habits.push({ name, history: {} });
+    saveHabits();
+    renderHabits();
+    toggleAddHabitForm();
+    if (typeof showToast === 'function') showToast(`Added habit "${name}".`, 'success');
 }
 
 function deleteHabit(index) {
@@ -121,3 +142,5 @@ window.renderHabits = renderHabits;
 window.addHabit = addHabit;
 window.toggleHabit = toggleHabit;
 window.deleteHabit = deleteHabit;
+window.toggleAddHabitForm = toggleAddHabitForm;
+window.submitNewHabit = submitNewHabit;
