@@ -125,7 +125,8 @@
         const diff = targetDate - now;
 
         if (diff <= 0) {
-            // Countdown complete
+            // Countdown complete — this only happens once, so a full
+            // rebuild here is fine (unlike the ticking case below).
             panel.innerHTML = `
                 <div class="countdown-complete">
                     <div class="countdown-icon">🎉</div>
@@ -145,7 +146,6 @@
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        // Format with leading zeros
         const dd = String(days).padStart(2, '0');
         const hh = String(hours).padStart(2, '0');
         const mm = String(minutes).padStart(2, '0');
@@ -158,89 +158,123 @@
             year: 'numeric'
         });
 
-        panel.innerHTML = `
-            <div class="countdown-card">
-                <div class="countdown-header">
-                    <div class="countdown-title">⏳ Countdown to Event</div>
-                    <button class="countdown-close" onclick="clearCountdown()" title="Clear countdown">✕</button>
+        // Build the static card structure only once (first render, or if
+        // the panel currently holds something else, e.g. it just switched
+        // out of the "complete" state). Every subsequent tick — every
+        // second — just updates the four digit values directly. This used
+        // to do `panel.innerHTML = ...` unconditionally on every tick,
+        // which destroyed and recreated the whole card every second,
+        // retriggering its CSS fade-in animation every second. That
+        // constant re-fade-in was the "blinking."
+        if (!panel.querySelector('.countdown-card')) {
+            panel.innerHTML = `
+                <div class="countdown-card">
+                    <div class="countdown-header">
+                        <div class="countdown-title">⏳ Countdown to Event</div>
+                        <button class="countdown-close" onclick="clearCountdown()" title="Clear countdown">✕</button>
+                    </div>
+                    <div class="countdown-target-date" id="countdownTargetDateLabel"></div>
+                    <div class="countdown-display">
+                        <div class="countdown-unit">
+                            <div class="countdown-value" id="countdownDaysVal">00</div>
+                            <div class="countdown-label">Days</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-unit">
+                            <div class="countdown-value" id="countdownHoursVal">00</div>
+                            <div class="countdown-label">Hours</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-unit">
+                            <div class="countdown-value" id="countdownMinutesVal">00</div>
+                            <div class="countdown-label">Minutes</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-unit">
+                            <div class="countdown-value" id="countdownSecondsVal">00</div>
+                            <div class="countdown-label">Seconds</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="countdown-target-date">${targetDateStr}</div>
-                <div class="countdown-display">
-                    <div class="countdown-unit">
-                        <div class="countdown-value">${dd}</div>
-                        <div class="countdown-label">Days</div>
-                    </div>
-                    <div class="countdown-separator">:</div>
-                    <div class="countdown-unit">
-                        <div class="countdown-value">${hh}</div>
-                        <div class="countdown-label">Hours</div>
-                    </div>
-                    <div class="countdown-separator">:</div>
-                    <div class="countdown-unit">
-                        <div class="countdown-value">${mm}</div>
-                        <div class="countdown-label">Minutes</div>
-                    </div>
-                    <div class="countdown-separator">:</div>
-                    <div class="countdown-unit">
-                        <div class="countdown-value">${ss}</div>
-                        <div class="countdown-label">Seconds</div>
-                    </div>
-                </div>
-            </div>
-        `;
+            `;
+        }
+
+        const dateLabel = document.getElementById('countdownTargetDateLabel');
+        if (dateLabel) dateLabel.textContent = targetDateStr;
+        const daysEl = document.getElementById('countdownDaysVal');
+        if (daysEl) daysEl.textContent = dd;
+        const hoursEl = document.getElementById('countdownHoursVal');
+        if (hoursEl) hoursEl.textContent = hh;
+        const minutesEl = document.getElementById('countdownMinutesVal');
+        if (minutesEl) minutesEl.textContent = mm;
+        const secondsEl = document.getElementById('countdownSecondsVal');
+        if (secondsEl) secondsEl.textContent = ss;
     }
 
     // ----- UPDATE DASHBOARD COUNTDOWN -----
     function updateDashboardCountdown() {
         const panel = document.getElementById('dashDateCountdown');
+        if (!panel) return;
 
-        const buildCountdownHTML = () => {
-            if (!targetDate) return '';
+        if (!targetDate) {
+            panel.innerHTML = buildEmptyCountdownState();
+            panel.style.display = 'block';
+            return;
+        }
 
-            const now = new Date();
-            const diff = targetDate - now;
+        const now = new Date();
+        const diff = targetDate - now;
 
-            if (diff <= 0) {
-                return `
-                    <div class="dash-countdown-card countdown-complete">
-                        <div class="countdown-icon">🎉</div>
-                        <div class="countdown-title">Countdown Complete!</div>
-                        <button class="matrix-btn" onclick="clearCountdown()" style="margin-top: 8px; font-size: 0.75rem; padding: 4px 12px;">Clear</button>
-                    </div>
-                `;
-            }
+        if (diff <= 0) {
+            // Only happens once, so a full rebuild here is fine.
+            panel.innerHTML = `
+                <div class="dash-countdown-card countdown-complete">
+                    <div class="countdown-icon">🎉</div>
+                    <div class="countdown-title">Countdown Complete!</div>
+                    <button class="matrix-btn" onclick="clearCountdown()" style="margin-top: 8px; font-size: 0.75rem; padding: 4px 12px;">Clear</button>
+                </div>
+            `;
+            panel.style.display = 'block';
+            return;
+        }
 
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-            const dd = String(days).padStart(2, '0');
-            const hh = String(hours).padStart(2, '0');
-            const mm = String(minutes).padStart(2, '0');
+        const dd = String(days).padStart(2, '0');
+        const hh = String(hours).padStart(2, '0');
+        const mm = String(minutes).padStart(2, '0');
 
-            const targetDateStr = targetDate.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
+        const targetDateStr = targetDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
 
-            return `
+        // Same fix as updateCountdownDisplay: build the card once, then
+        // update its text on later ticks instead of rebuilding (and
+        // re-triggering the fadeIn animation on) the whole card every
+        // second — that constant re-fade was the "blinking" on the
+        // Dashboard's countdown card too.
+        if (!panel.querySelector('.dash-countdown-card:not(.countdown-complete)')) {
+            panel.innerHTML = `
                 <div class="dash-countdown-card">
-                    <div class="dash-countdown-date">${targetDateStr}</div>
+                    <div class="dash-countdown-date" id="dashCountdownDateLabel"></div>
                     <div class="dash-countdown-display">
-                        <span class="dash-countdown-value">${dd}d ${hh}h ${mm}m</span>
+                        <span class="dash-countdown-value" id="dashCountdownValueText"></span>
                     </div>
                     <button class="matrix-btn" onclick="clearCountdown()" style="margin-top: 8px; font-size: 0.75rem; padding: 4px 12px;">Clear</button>
                 </div>
             `;
-        };
-
-        const html = buildCountdownHTML() || buildEmptyCountdownState();
-
-        if (panel) {
-            panel.innerHTML = html;
-            panel.style.display = 'block';
         }
+
+        const dateLabel = document.getElementById('dashCountdownDateLabel');
+        if (dateLabel) dateLabel.textContent = targetDateStr;
+        const valueEl = document.getElementById('dashCountdownValueText');
+        if (valueEl) valueEl.textContent = `${dd}d ${hh}h ${mm}m`;
+
+        panel.style.display = 'block';
     }
 
     // ----- EMPTY STATE: pick a date directly from the dashboard card -----
