@@ -302,7 +302,7 @@
    max-width:850px, and it's rendered into markup by dashboard.js,
    live-widgets.js and app.js alike. Deleting it outright would have
    silently broken the tutorial view, so it stays here (its original
-   home) �� dash-card just opts out below instead. */
+   home) ��� dash-card just opts out below instead. */
 @property --border-angle {
     syntax: '<angle>';
     initial-value: 0deg;
@@ -603,16 +603,15 @@
 /* ---- Stats container ---- */
 .dash-stats-container {
     grid-column: 1 / -1;
-    /* Fluid split-pane row: every stat card is an equal 1fr track, so
-       adjacent cards grow/shrink together as the container resizes — widen
-       the row and all cards expand in step; narrow it and they compress in
-       step. auto-fit only reduces the column count (4-up → balanced 2-up →
-       1-up) once the cards hit their readable ~190px floor, so nothing wraps
-       prematurely and no lone card is ever left stretched full width. The
-       min(100%, …) guard keeps a single column from overflowing when the
-       container is narrower than that floor. */
+    /* Fluid split-pane row of equal 1fr tracks: adjacent stat cards
+       grow/shrink together as the container resizes — widen it and all cards
+       expand in step, narrow it and they compress in step, none overflowing
+       (minmax floor of 0 lets a track shrink below its content). A fixed
+       4-up count here (dropped to a balanced 2-up, then 1-up, at the
+       breakpoints below) keeps the rows balanced so no card is left wrapping
+       alone onto a half-empty row. */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: clamp(12px, 1.5vw, 20px);
     width: 100%;
     position: relative;
@@ -2202,7 +2201,9 @@ body {
     }
 
     .dash-stats-container {
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+        /* Balanced 2-up (a clean 2x2 for the four stat cards) so the row
+           never lands on a lopsided 3 + 1 split as it narrows. */
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px;
     }
 
