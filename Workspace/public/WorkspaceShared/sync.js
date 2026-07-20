@@ -64,8 +64,22 @@ async function getCurrentUser() {
 // whenever the user signs in. Deletions delete the cloud row and keep a
 // small tombstone list so a later pull can't resurrect a deleted item.
 
-const DELETED_TASKS_KEY = 'deletedTaskIds';
+// Per-table tombstone key, e.g. tombstoneKey('tasks') -> 'deleted_tasks_ids'.
+// Keeping this per-table (rather than one shared key) means a deletion in
+// one synced feature table can never mask an item in another.
+function tombstoneKey(table) { return `deleted_${table}_ids`; }
 let lastSyncErrorAt = 0;
+
+// One-time migration: earlier versions stored task tombstones under a single
+// shared 'deletedTaskIds' key. Move any existing entries to the new
+// per-table key so already-deleted tasks don't resurface on the next pull.
+(function migrateLegacyTaskTombstones() {
+    const legacy = localStorage.getItem('deletedTaskIds');
+    if (!legacy) return;
+    const newKey = tombstoneKey('tasks');
+    if (!localStorage.getItem(newKey)) localStorage.setItem(newKey, legacy);
+    localStorage.removeItem('deletedTaskIds');
+})();
 
 function toastSyncError(message) {
     console.warn('[sync] ' + message);
@@ -125,7 +139,7 @@ async function pullFromCloud(table, localKey, afterMerge) {
 
     const local = safeParseArray(localStorage.getItem(localKey));
     const byId = new Map(local.map(t => [String(t.id), t]));
-    const tombstones = safeParseArray(localStorage.getItem(DELETED_TASKS_KEY));
+    const tombstones = safeParseArray(localStorage.getItem(tombstoneKey(table)));
     let changed = false;
 
     for (const row of data) {
@@ -167,13 +181,18 @@ async function pullMyTasks() {
 
 async function deleteTaskInCloud(id) { return await deleteItemInCloud('tasks', id); }
 
-function markTaskDeleted(id) {
-    const tombstones = safeParseArray(localStorage.getItem(DELETED_TASKS_KEY));
+// Generic: record a tombstone for `id` in `table` so a later pull can't
+// resurrect it.
+function markItemDeleted(table, id) {
+    const key = tombstoneKey(table);
+    const tombstones = safeParseArray(localStorage.getItem(key));
     if (!tombstones.includes(id)) {
         tombstones.push(id);
-        localStorage.setItem(DELETED_TASKS_KEY, JSON.stringify(tombstones));
+        localStorage.setItem(key, JSON.stringify(tombstones));
     }
 }
+
+function markTaskDeleted(id) { markItemDeleted('tasks', id); }
 
 // Manual sync: pull remote changes, then push local ones. Driven by the
 // "Sync now" button; reports the result in the account modal + a toast.
@@ -207,14 +226,6 @@ function startBackgroundSync() {
     }, 15000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) pullMyTasks(); });
     window.addEventListener('focus', () => pullMyTasks());
-}
-
-function markTaskDeleted(id) {
-    const tombstones = safeParseArray(localStorage.getItem(DELETED_TASKS_KEY));
-    if (!tombstones.includes(id)) {
-        tombstones.push(id);
-        localStorage.setItem(DELETED_TASKS_KEY, JSON.stringify(tombstones));
-    }
 }
 
 // ============================================================

@@ -126,10 +126,22 @@ function submitNewHabit() {
 
 function deleteHabit(index) {
     if (confirm('Delete this habit?')) {
+        if (typeof saveStateForUndo === 'function') saveStateForUndo('habits');
         habits.splice(index, 1);
         saveHabits();
         renderHabits();
     }
+}
+
+if (typeof registerUndoStore === 'function') {
+    registerUndoStore('habits', {
+        get: () => habits,
+        set: (value) => {
+            habits = Array.isArray(value) ? value : [];
+            saveHabits();
+            renderHabits();
+        }
+    });
 }
 
 // Initial render

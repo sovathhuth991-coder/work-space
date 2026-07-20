@@ -54,10 +54,22 @@ function toggleDashTodo(id) {
 
 function deleteDashTodo(id) {
     if (!confirm('Delete this task?')) return;
+    if (typeof saveStateForUndo === 'function') saveStateForUndo('dashboard-todos');
     dashTodos = dashTodos.filter(t => t.id !== id);
     saveDashTodos();
     renderDashTodos();
     updateDashProgress();
+}
+
+if (typeof registerUndoStore === 'function') {
+    registerUndoStore('dashboard-todos', {
+        get: () => dashTodos,
+        set: (value) => {
+            dashTodos = Array.isArray(value) ? value : [];
+            saveDashTodos();
+            renderDashTodos();
+        }
+    });
 }
 
 function addDashTodo() {

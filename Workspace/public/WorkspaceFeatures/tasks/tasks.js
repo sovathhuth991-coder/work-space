@@ -69,9 +69,21 @@ function toggleMyTask(id) {
 }
 
 function deleteMyTask(id) {
+    if (typeof saveStateForUndo === 'function') saveStateForUndo('tasks');
     myTasks = myTasks.filter(t => t.id !== id);
     if (window.markTaskDeleted) window.markTaskDeleted(id);
     if (window.deleteTaskInCloud) window.deleteTaskInCloud(id);
     saveMyTasks();
     renderMyTasks();
+}
+
+if (typeof registerUndoStore === 'function') {
+    registerUndoStore('tasks', {
+        get: () => myTasks,
+        set: (value) => {
+            myTasks = Array.isArray(value) ? value : [];
+            saveMyTasks();
+            renderMyTasks();
+        }
+    });
 }

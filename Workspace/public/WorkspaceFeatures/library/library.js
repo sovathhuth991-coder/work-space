@@ -60,7 +60,19 @@ function addLibraryItem() {
 function deleteLibraryItem(id) {
     const item = libraryItems.find(i => i.id === id);
     if (!confirm(`Delete "${item ? item.title : 'this item'}" from your library?`)) return;
+    if (typeof saveStateForUndo === 'function') saveStateForUndo('library');
     libraryItems = libraryItems.filter(item => item.id !== id);
     saveLibraryItems();
     renderLibrary();
+}
+
+if (typeof registerUndoStore === 'function') {
+    registerUndoStore('library', {
+        get: () => libraryItems,
+        set: (value) => {
+            libraryItems = Array.isArray(value) ? value : [];
+            saveLibraryItems();
+            renderLibrary();
+        }
+    });
 }

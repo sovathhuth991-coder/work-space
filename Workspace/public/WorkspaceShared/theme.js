@@ -187,5 +187,17 @@ function updateThemeSelector() {
 }
 
 // ─── EXPOSE ─────────────────────────────────────────────────────
-window.currentTheme = currentTheme;
+// currentTheme is exposed as a live getter, not a one-time value copy.
+// A plain `window.currentTheme = currentTheme` assignment here would
+// freeze window.currentTheme at whatever the theme was on page load —
+// applyTheme() updates the local `currentTheme` variable, not the window
+// property, so any reader using window.currentTheme would silently get a
+// stale value after the first theme change.
+Object.defineProperty(window, 'currentTheme', {
+    get() { return currentTheme; },
+    configurable: true
+});
 window.applyTheme = applyTheme;
+// Canonical list of valid theme names, derived from THEME_MAP so nothing
+// else has to keep its own hardcoded copy in sync.
+window.THEME_NAMES = Object.keys(THEME_MAP);

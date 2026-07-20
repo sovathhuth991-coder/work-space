@@ -1,4 +1,4 @@
-﻿/* This file previously used its own hardcoded slate/sky palette
+/* This file previously used its own hardcoded slate/sky palette
    (#1e293b, #38bdf8, #f8fafc...) instead of the shared tokens in
    variables.css — a leftover from before that token system existed.
    It rendered a visibly different blue than the rest of the
@@ -19,6 +19,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 6px;
 }
 
 .widget-title {
@@ -412,9 +413,6 @@
 }
 
 /* ---- Drag-to-reorder blocks ---- */
-.widget-header {
-    gap: 6px;
-}
 
 .widget-drag-handle {
     cursor: grab;

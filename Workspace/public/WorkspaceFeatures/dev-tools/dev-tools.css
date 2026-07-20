@@ -68,7 +68,7 @@
 }
 
 .dev-tools-close:hover {
-    color: #ef4444;
+    color: var(--status-danger);
 }
 
 .dev-tools-tabs {

@@ -158,6 +158,19 @@ function refreshWorkspace() {
     renderCurriculumLedger();
 }
 
+// refreshWorkspace() re-renders both the tree sidebar and the open page's
+// content pane, so it's the correct set() for undo/redo — restoring
+// hubState and re-rendering whatever's currently open in one call.
+if (typeof registerUndoStore === 'function') {
+    registerUndoStore('lessons', {
+        get: () => hubState,
+        set: (value) => {
+            hubState = value;
+            refreshWorkspace();
+        }
+    });
+}
+
 // ============================================================
 // SEARCH (uses escapeHtml)
 // ============================================================
@@ -583,6 +596,7 @@ async function showLessonContextMenu(e, context) {
                 case 'deleteFolder': {
                     const confirmed = await showCustomConfirm(`Delete folder "${currentName}" and all its contents?`);
                     if (confirmed) {
+                        if (typeof saveStateForUndo === 'function') saveStateForUndo('lessons');
                         function deleteFolderRecursive(fid) {
                             const folder = hubState.folders[fid];
                             if (!folder) return;
@@ -648,6 +662,7 @@ async function showLessonContextMenu(e, context) {
                     if (confirmed) {
                         const folder = hubState.folders[folderId];
                         if (folder) {
+                            if (typeof saveStateForUndo === 'function') saveStateForUndo('lessons');
                             folder.children = folder.children.filter(c => c !== 'page_' + pageId);
                             delete hubState.pages[pageId];
                             if (hubState.activePageId === pageId) hubState.activePageId = null;

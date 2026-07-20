@@ -554,15 +554,36 @@ function initGlobalSearch() {
         }
 
         resultsLabel.textContent = `${matches.length} result${matches.length > 1 ? 's' : ''}`;
-        dropdown.innerHTML = matches.map(m => `
-            <div style="padding:8px 12px; border-bottom:1px solid var(--border-color); cursor:pointer; transition:0.15s;"
-                onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'"
-                onclick="handleGlobalSearchClick('${encodeURIComponent(JSON.stringify(m))}')">
-                <span style="font-weight:600;color:var(--accent-1);">${m.type}</span>
-                <span style="color:var(--text-secondary);">${m.name}</span>
-                ${m.page ? `<span style="color:var(--text-muted);font-size:0.75rem;"> in ${m.page}</span>` : ''}
-            </div>
-        `).join('');
+        dropdown.innerHTML = '';
+        matches.forEach(m => {
+            const row = document.createElement('div');
+            row.style.padding = '8px 12px';
+            row.style.borderBottom = '1px solid var(--border-color)';
+            row.style.cursor = 'pointer';
+            // Hover styling is handled by the #globalSearchDropdown>div:hover CSS rule
+
+            const typeSpan = document.createElement('span');
+            typeSpan.style.fontWeight = '600';
+            typeSpan.style.color = 'var(--accent-1)';
+            typeSpan.textContent = m.type;
+            row.appendChild(typeSpan);
+
+            const nameSpan = document.createElement('span');
+            nameSpan.style.color = 'var(--text-secondary)';
+            nameSpan.textContent = ` ${m.name}`;
+            row.appendChild(nameSpan);
+
+            if (m.page) {
+                const pageSpan = document.createElement('span');
+                pageSpan.style.color = 'var(--text-muted)';
+                pageSpan.style.fontSize = '0.75rem';
+                pageSpan.textContent = ` in ${m.page}`;
+                row.appendChild(pageSpan);
+            }
+
+            row.addEventListener('click', () => handleGlobalSearchClick(m));
+            dropdown.appendChild(row);
+        });
         dropdown.style.display = 'block';
     }, 300));
 
@@ -577,10 +598,9 @@ function initGlobalSearch() {
 /**
  * Handles clicking on a search result item.
  * Navigates to the appropriate view based on result type.
- * @param {string} encoded - URI-encoded JSON of the search result item
+ * @param {Object} item - The search result item
  */
-function handleGlobalSearchClick(encoded) {
-    const item = JSON.parse(decodeURIComponent(encoded));
+function handleGlobalSearchClick(item) {
     const dropdown = document.getElementById('globalSearchDropdown');
     const input = document.getElementById('globalSearchInput');
     dropdown.style.display = 'none';
@@ -599,7 +619,7 @@ function handleGlobalSearchClick(encoded) {
     showToast(`Found: ${item.name}`, 'info');
 }
 
-// Expose globally for inline onclick handlers
+// Expose globally
 window.initGlobalSearch = initGlobalSearch;
 window.handleGlobalSearchClick = handleGlobalSearchClick;
 
@@ -838,7 +858,7 @@ function initHeaderToggles() {
     // Theme toggle (cycle through themes)
     if (toggleThemeBtn) {
         toggleThemeBtn.addEventListener('click', () => {
-            const themes = ['cyberpunk', 'minimal', 'ocean', 'sunset', 'forest', 'midnight'];
+            const themes = window.THEME_NAMES || ['cyberpunk', 'minimal', 'ocean', 'sunset', 'forest', 'midnight'];
             const currentThemeIndex = themes.indexOf(currentTheme);
             const nextThemeIndex = (currentThemeIndex + 1) % themes.length;
             const nextTheme = themes[nextThemeIndex];
