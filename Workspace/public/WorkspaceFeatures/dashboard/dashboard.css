@@ -91,8 +91,11 @@
 .group-child {
     position: relative;
     min-width: 0;
+    min-height: 0;
     height: 100%;
+    overflow: hidden;
     container-type: inline-size;
+    box-sizing: border-box;
 }
 
 .group-child .dash-card {
@@ -106,10 +109,20 @@
 }
 
 .group-divider {
-    flex: 0 0 6px;
+    flex: 0 0 8px;
     cursor: ew-resize;
     background: var(--border-color);
     position: relative;
+}
+
+.group-divider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -6px;
+    right: -6px;
+    z-index: 5;
 }
 
 .group-divider:hover,

@@ -1071,13 +1071,16 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 
     function buildGroupWrapper(cardA, cardB, ratio, existingGroupId) {
         const groupId = existingGroupId || ('group-' + Date.now());
+        const safeRatio = (typeof ratio === 'number' && ratio > 0 && ratio < 1) ? ratio : 0.5;
         const wrapper = document.createElement('div');
         wrapper.className = 'dash-card-group canvas-positioned-item canvas-card';
         wrapper.dataset.groupId = groupId;
 
         const childA = document.createElement('div');
         childA.className = 'group-child';
-        childA.style.flexBasis = (ratio * 100) + '%';
+        childA.style.flexGrow = String(safeRatio);
+        childA.style.flexShrink = '1';
+        childA.style.flexBasis = '0px';
 
         const divider = document.createElement('div');
         divider.className = 'group-divider';
@@ -1086,7 +1089,9 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 
         const childB = document.createElement('div');
         childB.className = 'group-child';
-        childB.style.flexBasis = ((1 - ratio) * 100) + '%';
+        childB.style.flexGrow = String(1 - safeRatio);
+        childB.style.flexShrink = '1';
+        childB.style.flexBasis = '0px';
 
         [cardA, cardB].forEach(c => {
             c.classList.remove('canvas-positioned-item');
@@ -1118,10 +1123,10 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         const draggedRect = draggedCard.getBoundingClientRect();
 
         const groupRect = {
-            x: targetRect.left - canvasRect.left,
-            y: targetRect.top - canvasRect.top,
-            w: targetRect.width + draggedRect.width,
-            h: Math.max(targetRect.height, draggedRect.height)
+            x: Math.min(targetRect.left, draggedRect.left) - canvasRect.left,
+            y: Math.min(targetRect.top, draggedRect.top) - canvasRect.top,
+            w: Math.max(targetRect.right, draggedRect.right) - Math.min(targetRect.left, draggedRect.left),
+            h: Math.max(targetRect.bottom, draggedRect.bottom) - Math.min(targetRect.top, draggedRect.top)
         };
 
         const cardA = side === 'left' ? draggedCard : targetCard;
@@ -1320,13 +1325,20 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 
     function wireDivider(divider) {
         divider.addEventListener('mousedown', (e) => {
+            if (!isCanvasMode()) return;
             e.preventDefault();
             e.stopPropagation();
             const wrapper = divider.closest('.dash-card-group');
             const childA = wrapper.querySelector('.group-child');
             activeDivider = divider;
             dividerStartX = e.clientX;
-            dividerStartRatio = parseFloat(childA.style.flexBasis) / 100 || 0.5;
+            let startRatio = parseFloat(childA.style.flexGrow);
+            if (isNaN(startRatio)) {
+                const groups = loadGroups();
+                const groupData = groups[wrapper.dataset.groupId];
+                startRatio = groupData ? (groupData.ratio || 0.5) : 0.5;
+            }
+            dividerStartRatio = startRatio;
             dividerGroupWidth = wrapper.getBoundingClientRect().width;
             document.body.style.cursor = 'ew-resize';
             document.body.style.userSelect = 'none';
@@ -1365,8 +1377,10 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             const wrapper = activeDivider.closest('.dash-card-group');
             const childA = wrapper.querySelector('.group-child');
             const childB = wrapper.querySelectorAll('.group-child')[1];
-            childA.style.flexBasis = (newRatio * 100) + '%';
-            childB.style.flexBasis = ((1 - newRatio) * 100) + '%';
+            childA.style.flexGrow = String(newRatio);
+            childA.style.flexBasis = '0px';
+            childB.style.flexGrow = String(1 - newRatio);
+            childB.style.flexBasis = '0px';
             return;
         }
 
@@ -1420,7 +1434,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             const groups = loadGroups();
             if (wrapper && groups[wrapper.dataset.groupId]) {
                 const childA = wrapper.querySelector('.group-child');
-                groups[wrapper.dataset.groupId].ratio = parseFloat(childA.style.flexBasis) / 100 || 0.5;
+                groups[wrapper.dataset.groupId].ratio = parseFloat(childA.style.flexGrow) || 0.5;
                 saveGroups(groups);
             }
             activeDivider = null;
