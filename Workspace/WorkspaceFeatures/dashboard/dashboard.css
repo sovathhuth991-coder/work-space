@@ -603,8 +603,15 @@
 /* ---- Stats container ---- */
 .dash-stats-container {
     grid-column: 1 / -1;
+    /* Fluid split-pane row of equal 1fr tracks: adjacent stat cards
+       grow/shrink together as the container resizes — widen it and all cards
+       expand in step, narrow it and they compress in step, none overflowing
+       (minmax floor of 0 lets a track shrink below its content). A fixed
+       4-up count here (dropped to a balanced 2-up, then 1-up, at the
+       breakpoints below) keeps the rows balanced so no card is left wrapping
+       alone onto a half-empty row. */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: clamp(12px, 1.5vw, 20px);
     width: 100%;
     position: relative;

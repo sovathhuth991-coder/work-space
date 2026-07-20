@@ -350,7 +350,10 @@
    ============================================================ */
 .dash-widgets-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    /* auto-fit + clamped min lets the widget blocks grow to fill the row
+       and shrink relative to one another, only wrapping once they hit their
+       floor — so a wide row stays full instead of leaving trailing gaps. */
+    grid-template-columns: repeat(auto-fit, minmax(clamp(180px, 22vw, 240px), 1fr));
     gap: 16px;
     align-items: start;
 }
