@@ -494,7 +494,7 @@
                                     </div>
                                 </div>
                                 <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task"
-                                    style="padding:4px 12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
+                                    style="width:100%;padding:12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
                                     Add Task</button>
                                 <ul class="strike-list" id="dashStrikeList"></ul>
                             </div>
@@ -1734,25 +1734,31 @@
     ============================================================ -->
     <div class="lofi-widget" id="lofiWidget">
         <div class="lofi-header">
-            <div class="lofi-title">Ambient Mix Station</div>
-            <button class="lofi-toggle-btn" data-action="toggleLofiConsole" id="lofiToggleBtn">−</button>
+            <div class="lofi-title">🎵 Study Beats</div>
+            <button class="lofi-toggle-btn" data-action="toggleLofiConsole" id="lofiToggleBtn" title="Minimize">−</button>
         </div>
         <div class="lofi-body" id="lofiBody">
-            <!-- Local Audio Player with cache-busting -->
-            <audio id="rainAudioEngine" controls loop style="width:100%; border-radius:8px; margin-bottom:12px;">
+            <div class="lofi-track-row">
+                <div class="lofi-track-avatar">🎧</div>
+                <div class="lofi-track-info">
+                    <div class="lofi-track-title">Continuous Rain Layer</div>
+                    <div class="lofi-track-subtitle">Looping ambient rain for focus</div>
+                </div>
+            </div>
+            <div class="lofi-transport">
+                <button class="lofi-transport-btn" data-action="rainVolumeStep" data-step="-1"
+                    title="Volume down">⏮</button>
+                <button class="lofi-transport-btn lofi-play-btn" id="rainPlayBtn"
+                    data-action="toggleRainSound" title="Play/Pause">▶</button>
+                <button class="lofi-transport-btn" data-action="rainVolumeStep" data-step="1"
+                    title="Volume up">⏭</button>
+            </div>
+            <input type="range" id="rainVolume" class="lofi-volume-slider" min="0" max="1" step="0.1" value="0.5"
+                data-action="changeRainVolume" title="Volume">
+            <audio id="rainAudioEngine" loop style="display:none;">
                 <source src="Assets/Rain-Music.mp3?v=2" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
-
-            <!-- Rain Deck -->
-            <div class="rain-deck">
-                <div class="rain-info">
-                    <span>Continuous Rain Layer</span>
-                    <button id="rainPlayBtn" data-action="toggleRainSound">Play Rain</button>
-                </div>
-                <input type="range" id="rainVolume" min="0" max="1" step="0.1" value="0.5"
-                    data-action="changeRainVolume">
-            </div>
         </div>
     </div>
 

@@ -888,14 +888,6 @@ function initDashboardEngine() {
     window.__focusGoalInterval = setInterval(() => {
         if (document.getElementById('dashboard-view')?.classList.contains('active')) updateFocusGoalDisplay();
     }, 30000);
-
-    const savedMode = window.__getLayoutMode?.();
-    if (savedMode && savedMode !== 'canvas') {
-        window.__setLayoutMode(savedMode);
-    }
-    ensureResizeHandles();
-    initResizeHandlers();
-    initFlowDragReorder();
 }
 
 function calculateStreak() {
@@ -1257,7 +1249,7 @@ function initDateCountdownCard() {
     `;
     const slot = document.getElementById('liveWidgetsSlot');
     if (slot) {
-        slot.appendChild(countdownCard);
+        slot.parentElement.insertBefore(countdownCard, slot);
     } else {
         const statsContainer = grid.querySelector('.dash-stats-container');
         if (statsContainer) grid.insertBefore(countdownCard, statsContainer);
@@ -1266,6 +1258,275 @@ function initDateCountdownCard() {
     if (typeof updateDashboardCountdown === 'function') updateDashboardCountdown();
     if (typeof initDashboardCards === 'function') initDashboardCards();
 }
+// ============================================================
+// DASHBOARD LAYOUT MODES — Canvas (existing freeform absolute
+// layout, untouched) / Grid (12-col) / Flex Row (wrap) / Stack
+// (single column). Only .dashboard-canvas is affected; the stats
+// row, widgets card, and calendar stay in normal flow outside it.
+//
+// isCanvasMode() in drag-drop.js reads window.__getLayoutMode()
+// (defined below) to decide whether the freeform drag/resize
+// system is active; when it isn't, this module takes over via
+// applyFlowLayout(). Card resize/reorder each persist per-mode to
+// their own localStorage key so every mode remembers its own
+// arrangement independently.
+// ============================================================
+const DASH_LAYOUT_MODE_KEY = 'dashboardLayoutMode';
+const DASH_LAYOUT_MODES = ['canvas', 'grid', 'flex', 'stack'];
+
+window.__getLayoutMode = function() {
+    const stored = localStorage.getItem(DASH_LAYOUT_MODE_KEY);
+    return DASH_LAYOUT_MODES.includes(stored) ? stored : 'canvas';
+};
+
+function dashFlowStoreKey(mode) {
+    return mode === 'grid' ? 'dashboardGridLayout' : mode === 'flex' ? 'dashboardFlexLayout' : 'dashboardStackLayout';
+}
+function dashLoadFlowStore(mode) {
+    try { return JSON.parse(localStorage.getItem(dashFlowStoreKey(mode)) || '{}'); }
+    catch (e) { return {}; }
+}
+function dashSaveFlowStore(mode, store) {
+    try { localStorage.setItem(dashFlowStoreKey(mode), JSON.stringify(store)); } catch (e) {}
+}
+
+// Unwraps any merged .dash-card-group wrappers back into standalone cards
+// so flow layouts (grid/flex/stack only lay out DIRECT children of
+// .dashboard-canvas) can position every card individually. The group
+// definitions themselves are left in localStorage (dashboardCanvasGroups)
+// untouched, so returning to Canvas mode rebuilds the same groups via
+// drag-drop.js's rebuildGroupsFromStorage() — nothing is lost, it's just
+// unwrapped for the duration of the flow mode.
+function resetCanvasGroups() {
+    const canvasEl = document.getElementById('dashboardCanvas');
+    if (!canvasEl) return;
+    document.querySelectorAll('.dash-card-group').forEach(wrapper => {
+        Array.from(wrapper.querySelectorAll('.dash-card[data-card-id]')).forEach(card => {
+            card.classList.remove('grouped-card');
+            card.classList.add('canvas-positioned-item');
+            const minBtn = card.querySelector('.card-minimize-btn');
+            if (minBtn) minBtn.style.display = '';
+            delete card.dataset.restoreHeight;
+            canvasEl.appendChild(card);
+        });
+        wrapper.remove();
+    });
+}
+
+// Applies mode-specific inline styles to every direct card child of the
+// canvas. Position/size from Canvas mode is always cleared first so no
+// leftover absolute-positioning inline styles fight the flow CSS.
+function applyFlowLayout(mode) {
+    const canvasEl = document.getElementById('dashboardCanvas');
+    if (!canvasEl) return;
+    const store = dashLoadFlowStore(mode);
+    const cards = Array.from(canvasEl.querySelectorAll(':scope > .dash-card[data-card-id]'));
+    cards.forEach((card, i) => {
+        const saved = store[card.dataset.cardId] || {};
+        card.classList.remove('canvas-card', 'card-minimized');
+        card.style.left = ''; card.style.top = ''; card.style.width = ''; card.style.height = '';
+        card.style.order = saved.order !== undefined ? saved.order : i;
+        if (mode === 'grid') {
+            card.style.gridColumn = 'span ' + (saved.span || 4);
+            card.style.flex = ''; card.style.minWidth = '';
+        } else if (mode === 'flex') {
+            card.style.gridColumn = '';
+            card.style.flex = '1 1 ' + (saved.baseWidth || 300) + 'px';
+            card.style.minWidth = '220px';
+        } else { // stack
+            card.style.gridColumn = ''; card.style.flex = ''; card.style.minWidth = '';
+            card.style.height = (saved.height || 260) + 'px';
+        }
+    });
+}
+
+function updateLayoutToolbar(mode) {
+    document.querySelectorAll('.layout-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.layoutMode === mode);
+    });
+}
+
+function updateResizeHandlesVisibility() {
+    const mode = window.__getLayoutMode();
+    const resizeEnabled = localStorage.getItem('dashboardResizeHandles') !== 'false';
+    document.querySelectorAll('#dashboardCanvas .resize-handle').forEach(handle => {
+        handle.style.display = (mode !== 'canvas' && resizeEnabled) ? '' : 'none';
+    });
+}
+
+function ensureResizeHandles() {
+    const canvasEl = document.getElementById('dashboardCanvas');
+    if (!canvasEl) return;
+    canvasEl.querySelectorAll(':scope > .dash-card[data-card-id]').forEach(card => {
+        if (card.querySelector(':scope > .resize-handle')) return;
+        const handle = document.createElement('div');
+        handle.className = 'resize-handle';
+        handle.dataset.cardId = card.dataset.cardId;
+        handle.addEventListener('mousedown', onDashResizeStart);
+        handle.addEventListener('touchstart', onDashResizeStart, { passive: false });
+        card.appendChild(handle);
+    });
+}
+
+function onDashResizeStart(e) {
+    const mode = window.__getLayoutMode();
+    if (mode === 'canvas') return;
+    e.preventDefault();
+    e.stopPropagation();
+    const card = e.target.closest('.dash-card');
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const startClientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const startClientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const startW = rect.width, startH = rect.height;
+
+    function onMove(ev) {
+        const dx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - startClientX;
+        const dy = (ev.touches ? ev.touches[0].clientY : ev.clientY) - startClientY;
+        const key = card.dataset.cardId;
+        const store = dashLoadFlowStore(mode);
+        if (mode === 'grid') {
+            const canvasEl = document.getElementById('dashboardCanvas');
+            const colWidth = (canvasEl ? canvasEl.getBoundingClientRect().width : 1200) / 12;
+            const newSpan = Math.max(2, Math.min(12, (store[key]?.span || 4) + Math.round(dx / colWidth)));
+            store[key] = { ...store[key], order: store[key]?.order ?? 0, span: newSpan };
+            card.style.gridColumn = 'span ' + newSpan;
+        } else if (mode === 'flex') {
+            const newW = Math.max(220, Math.round(startW + dx));
+            store[key] = { ...store[key], order: store[key]?.order ?? 0, baseWidth: newW };
+            card.style.flex = '1 1 ' + newW + 'px';
+        } else if (mode === 'stack') {
+            const newH = Math.max(140, Math.round(startH + dy));
+            store[key] = { ...store[key], order: store[key]?.order ?? 0, height: newH };
+            card.style.height = newH + 'px';
+        }
+        dashSaveFlowStore(mode, store);
+    }
+    function onEnd() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+    }
+    document.addEventListener('mousemove', onMove, { passive: true });
+    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+}
+
+function dashGetDragAfterElement(cards, cursorPos, mode) {
+    return cards.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const pos = mode === 'grid' ? (box.left + box.width / 2) : (box.top + box.height / 2);
+        const offset = cursorPos - pos;
+        if (offset < 0 && offset > closest.offset) return { offset, element: child };
+        return closest;
+    }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+}
+
+function dashPersistFlowOrder(mode) {
+    const canvasEl = document.getElementById('dashboardCanvas');
+    if (!canvasEl) return;
+    const store = dashLoadFlowStore(mode);
+    Array.from(canvasEl.querySelectorAll(':scope > .dash-card[data-card-id]')).forEach((card, i) => {
+        const key = card.dataset.cardId;
+        if (!key) return;
+        store[key] = { ...store[key], order: i };
+        card.style.order = i;
+    });
+    dashSaveFlowStore(mode, store);
+}
+
+function onFlowDragStart(e) {
+    const mode = window.__getLayoutMode();
+    if (mode === 'canvas') return;
+    e.preventDefault();
+    e.stopPropagation();
+    const handle = e.target.closest('.card-drag-handle');
+    const card = handle && handle.closest('.dash-card');
+    const canvasEl = document.getElementById('dashboardCanvas');
+    if (!card || !canvasEl) return;
+
+    card.style.opacity = '0.4';
+    card.style.zIndex = '100';
+
+    function onMove(ev) {
+        const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+        const x = ev.touches ? ev.touches[0].clientX : ev.clientX;
+        const others = Array.from(canvasEl.querySelectorAll(':scope > .dash-card[data-card-id]')).filter(c => c !== card);
+        const afterEl = dashGetDragAfterElement(others, mode === 'grid' ? x : y, mode);
+        if (afterEl == null) canvasEl.appendChild(card);
+        else canvasEl.insertBefore(card, afterEl);
+    }
+    function onEnd() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+        card.style.opacity = '';
+        card.style.zIndex = '';
+        dashPersistFlowOrder(mode);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+}
+
+function initFlowDragReorder() {
+    const canvasEl = document.getElementById('dashboardCanvas');
+    if (!canvasEl) return;
+    canvasEl.querySelectorAll(':scope > .dash-card[data-card-id] .card-drag-handle').forEach(handle => {
+        if (handle.dataset.flowWired === '1') return;
+        handle.dataset.flowWired = '1';
+        handle.addEventListener('mousedown', onFlowDragStart);
+        handle.addEventListener('touchstart', onFlowDragStart, { passive: false });
+    });
+}
+
+// Re-applies whichever layout mode is currently active. Called on every
+// initDashboardCards() pass (drag-drop.js) — i.e. on initial load and every
+// time a card is added dynamically (live widgets, date countdown) — so new
+// cards always pick up resize handles, reorder wiring, and flow styling.
+window.__refreshFlowLayout = function() {
+    const mode = window.__getLayoutMode();
+    const canvasEl = document.getElementById('dashboardCanvas');
+    if (canvasEl) {
+        DASH_LAYOUT_MODES.forEach(m => canvasEl.classList.remove('mode-' + m));
+        canvasEl.classList.add('mode-' + mode);
+    }
+    if (mode !== 'canvas') {
+        resetCanvasGroups();
+        applyFlowLayout(mode);
+    }
+    ensureResizeHandles();
+    initFlowDragReorder();
+    updateResizeHandlesVisibility();
+    updateLayoutToolbar(mode);
+};
+
+window.__setLayoutMode = function(mode) {
+    if (!DASH_LAYOUT_MODES.includes(mode)) return;
+    const canvasEl = document.getElementById('dashboardCanvas');
+    if (!canvasEl) return;
+    const prev = window.__getLayoutMode();
+    if (prev === 'canvas' && mode !== 'canvas' && typeof window.__dashCanvasSave === 'function') {
+        window.__dashCanvasSave();
+    }
+    localStorage.setItem(DASH_LAYOUT_MODE_KEY, mode);
+    if (mode === 'canvas' && typeof window.__dashCanvasInit === 'function') {
+        window.__dashCanvasInit();
+    }
+    window.__refreshFlowLayout();
+    if (typeof window.updateCardSizeClasses === 'function') window.updateCardSizeClasses();
+};
+
+window.__toggleResizeHandles = function() {
+    const current = localStorage.getItem('dashboardResizeHandles') !== 'false';
+    localStorage.setItem('dashboardResizeHandles', String(!current));
+    updateResizeHandlesVisibility();
+};
+
 function toggleDashboardFocusMode() {
     const grid = document.querySelector('.dashboard-grid');
     const badge = document.getElementById('focusModeBadge');
@@ -1284,266 +1545,6 @@ function toggleDashboardFocusMode() {
         });
     }
 }
-const LAYOUT_MODE_KEY = 'dashboardLayoutMode';
-const MODES = ['canvas', 'grid', 'flex', 'stack'];
-
-window.__getLayoutMode = function() {
-    return localStorage.getItem(LAYOUT_MODE_KEY) || 'canvas';
-};
-
-window.__setLayoutMode = function(mode) {
-    if (!MODES.includes(mode)) return;
-    const canvas = document.getElementById('dashboardCanvas');
-    if (!canvas) return;
-
-    const prev = window.__getLayoutMode();
-
-    if (prev === 'canvas' && mode !== 'canvas') {
-        if (typeof window.__dashCanvasSave === 'function') window.__dashCanvasSave();
-        resetCanvasGroups();
-    }
-
-    localStorage.setItem(LAYOUT_MODE_KEY, mode);
-
-    MODES.forEach(m => canvas.classList.remove(`mode-${m}`));
-    canvas.classList.add(`mode-${mode}`);
-
-    if (mode === 'canvas') {
-        if (typeof window.__dashCanvasInit === 'function') window.__dashCanvasInit();
-    } else {
-        applyFlowLayout(mode);
-    }
-
-    updateLayoutToolbar(mode);
-    updateResizeHandlesVisibility();
-    if (typeof updateCardSizeClasses === 'function') updateCardSizeClasses();
-};
-
-function resetCanvasGroups() {
-    const canvasEl = document.getElementById('dashboardCanvas');
-    document.querySelectorAll('.dash-card-group').forEach(wrapper => {
-        const cards = Array.from(wrapper.querySelectorAll('.dash-card[data-card-id]'));
-        cards.forEach(card => {
-            card.classList.remove('grouped-card');
-            card.classList.add('canvas-positioned-item');
-            const minBtn = card.querySelector('.card-minimize-btn');
-            if (minBtn) minBtn.style.display = '';
-            delete card.dataset.restoreHeight;
-            canvasEl.appendChild(card);
-        });
-        wrapper.remove();
-    });
-}
-
-function updateLayoutToolbar(mode) {
-    document.querySelectorAll('.layout-mode-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.layoutMode === mode);
-    });
-}
-
-function applyFlowLayout(mode) {
-    const cards = document.querySelectorAll('.dashboard-canvas .dash-card.canvas-card');
-    const storeKey = mode === 'grid' ? 'dashboardGridLayout' : mode === 'flex' ? 'dashboardFlexLayout' : 'dashboardStackLayout';
-    const store = JSON.parse(localStorage.getItem(storeKey) || '{}');
-
-    cards.forEach((card, i) => {
-        card.style.gridColumn = '';
-        card.style.flex = '';
-        card.style.minWidth = '';
-        card.style.width = '';
-        card.style.height = '';
-        card.style.order = '';
-
-        const key = card.dataset.cardId;
-        if (!key) return;
-        const layout = store[key];
-
-        if (mode === 'grid') {
-            card.style.gridColumn = 'span ' + (layout?.span || 4);
-        } else if (mode === 'flex') {
-            card.style.flex = '1 1 ' + (layout?.baseWidth || 300) + 'px';
-            card.style.minWidth = '220px';
-        } else if (mode === 'stack') {
-            card.style.width = '100%';
-            card.style.height = (layout?.height || 260) + 'px';
-        }
-
-        card.style.order = layout?.order ?? i;
-    });
-}
-
-function updateResizeHandlesVisibility() {
-    const mode = window.__getLayoutMode();
-    const resizeEnabled = localStorage.getItem('dashboardResizeHandles') !== 'false';
-    document.querySelectorAll('.resize-handle').forEach(handle => {
-        handle.style.display = (mode !== 'canvas' && resizeEnabled) ? '' : 'none';
-    });
-}
-
-function ensureResizeHandles() {
-    document.querySelectorAll('.dashboard-canvas .dash-card.canvas-card').forEach(card => {
-        if (card.querySelector('.resize-handle')) return;
-        const handle = document.createElement('div');
-        handle.className = 'resize-handle';
-        handle.dataset.cardId = card.dataset.cardId;
-        card.appendChild(handle);
-    });
-}
-
-let activeFlowResize = null;
-
-function initResizeHandlers() {
-    document.querySelectorAll('.resize-handle').forEach(handle => {
-        if (handle.dataset.resizeWired === '1') return;
-        handle.dataset.resizeWired = '1';
-        handle.addEventListener('mousedown', onResizeStart);
-        handle.addEventListener('touchstart', onResizeStart, { passive: false });
-    });
-}
-
-function onResizeStart(e) {
-    if (window.__getLayoutMode?.() === 'canvas') return;
-    if (activeFlowResize) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const card = e.target.closest('.dash-card');
-    if (!card) return;
-    const mode = window.__getLayoutMode?.();
-    const rect = card.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    const startW = rect.width;
-    const startH = rect.height;
-
-    const storeKey = mode === 'grid' ? 'dashboardGridLayout' : mode === 'flex' ? 'dashboardFlexLayout' : 'dashboardStackLayout';
-    const store = JSON.parse(localStorage.getItem(storeKey) || '{}');
-    const key = card.dataset.cardId;
-    const initial = store[key] || {};
-
-    activeFlowResize = { card, mode, store, storeKey };
-
-    function onMove(ev) {
-        const dx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - clientX;
-        const dy = (ev.touches ? ev.touches[0].clientY : ev.clientY) - clientY;
-
-        if (mode === 'grid') {
-            const colWidth = card.parentElement.getBoundingClientRect().width / 12;
-            const spanDelta = Math.round(dx / colWidth);
-            const newSpan = Math.max(2, Math.min(12, (initial.span || 4) + spanDelta));
-            initial.span = newSpan;
-            card.style.gridColumn = 'span ' + newSpan;
-        } else if (mode === 'flex') {
-            const newW = Math.max(220, startW + dx);
-            initial.baseWidth = Math.round(newW);
-            card.style.flex = '1 1 ' + Math.round(newW) + 'px';
-        } else if (mode === 'stack') {
-            const newH = Math.max(140, startH + dy);
-            initial.height = Math.round(newH);
-            card.style.height = Math.round(newH) + 'px';
-        }
-    }
-
-    function onEnd() {
-        store[key] = { ...initial };
-        localStorage.setItem(storeKey, JSON.stringify(store));
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onEnd);
-        document.removeEventListener('touchmove', onMove);
-        document.removeEventListener('touchend', onEnd);
-        activeFlowResize = null;
-    }
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onEnd);
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', onEnd);
-}
-
-let activeFlowDrag = null;
-
-function initFlowDragReorder() {
-    document.querySelectorAll('.dashboard-canvas .card-drag-handle').forEach(handle => {
-        if (handle.dataset.flowWired === '1') return;
-        handle.dataset.flowWired = '1';
-        handle.addEventListener('mousedown', onFlowDragStart);
-        handle.addEventListener('touchstart', onFlowDragStart, { passive: false });
-    });
-}
-
-function onFlowDragStart(e) {
-    if (window.__getLayoutMode?.() === 'canvas' || activeFlowDrag) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const handle = e.target.closest('.card-drag-handle');
-    const card = handle.closest('.dash-card');
-    const mode = window.__getLayoutMode?.();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    card.style.opacity = '0.4';
-    card.style.zIndex = '100';
-
-    activeFlowDrag = { card, mode };
-
-    function onMove(ev) {
-        const x = ev.touches ? ev.touches[0].clientX : ev.clientX;
-        const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
-        const currentCards = Array.from(document.querySelectorAll('.dashboard-canvas .dash-card.canvas-card'));
-        const target = findNearestCard(currentCards, x, y, card);
-        if (target && target !== card) {
-            const cardOrder = parseFloat(card.style.order) || 0;
-            const targetOrder = parseFloat(target.style.order) || 0;
-            card.style.order = targetOrder;
-            target.style.order = cardOrder;
-        }
-    }
-
-    function onEnd() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onEnd);
-        document.removeEventListener('touchmove', onMove);
-        document.removeEventListener('touchend', onEnd);
-        card.style.opacity = '';
-        card.style.zIndex = '';
-        persistFlowOrder(mode);
-        activeFlowDrag = null;
-    }
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onEnd);
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', onEnd);
-}
-
-function findNearestCard(cards, clientX, clientY, excludeCard) {
-    let nearest = null;
-    let minDist = Infinity;
-    cards.forEach(c => {
-        if (c === excludeCard) return;
-        const box = c.getBoundingClientRect();
-        const cx = box.left + box.width / 2;
-        const cy = box.top + box.height / 2;
-        const dist = Math.hypot(clientX - cx, clientY - cy);
-        if (dist < minDist) {
-            minDist = dist;
-            nearest = c;
-        }
-    });
-    return nearest;
-}
-
-function persistFlowOrder(mode) {
-    const cards = Array.from(document.querySelectorAll('.dashboard-canvas .dash-card.canvas-card'));
-    const storeKey = mode === 'grid' ? 'dashboardGridLayout' : mode === 'flex' ? 'dashboardFlexLayout' : 'dashboardStackLayout';
-    const store = JSON.parse(localStorage.getItem(storeKey) || '{}');
-    cards.forEach(card => {
-        const key = card.dataset.cardId;
-        if (!key) return;
-        store[key] = { ...store[key], order: parseFloat(card.style.order) || 0 };
-    });
-    localStorage.setItem(storeKey, JSON.stringify(store));
-}
-
 function initDashboardEnhancements() {
     setTimeout(animateCardsIn, 50);
     initLastUpdatedTimestamps();

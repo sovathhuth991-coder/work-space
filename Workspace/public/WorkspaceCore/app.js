@@ -152,6 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'closeSessionDetailsModal': () => closeSessionDetailsModal?.(),
             'showSessionDetailsModal': () => showSessionDetailsModal?.(),
             'resetDashboardLayout': () => resetDashboardLayout?.(),
+            'setLayoutMode': () => window.__setLayoutMode?.(actionBtn.dataset.layoutMode),
+            'toggleResizeHandles': () => window.__toggleResizeHandles?.(),
             'closeFocusGoalModal': () => closeFocusGoalModal?.(),
             'saveFocusGoalModal': () => saveFocusGoalModal?.(),
             'closeGenericDetailModal': () => closeGenericDetailModal?.(),
@@ -198,13 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'handleAccountSignUp': () => window.handleAccountSignUp?.(),
             'handleAccountMagicLink': () => window.handleAccountMagicLink?.(),
             'handleAccountSignOut': () => window.handleAccountSignOut?.(),
-            'handleAccountSyncNow': () => window.handleAccountSyncNow?.(),
-            'setLayoutMode': (btn) => window.__setLayoutMode?.(btn.dataset.layoutMode),
-            'toggleResizeHandles': () => {
-                const current = localStorage.getItem('dashboardResizeHandles') !== 'false';
-                localStorage.setItem('dashboardResizeHandles', String(!current));
-                if (typeof updateResizeHandlesVisibility === 'function') updateResizeHandlesVisibility();
-            }
+            'handleAccountSyncNow': () => window.handleAccountSyncNow?.()
         };
 
         const handler = actionHandlers[action];

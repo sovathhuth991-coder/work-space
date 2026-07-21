@@ -277,7 +277,9 @@
     transform: translateY(0);
 }
 
-/* ---- Corner brackets (HUD-style card signature) ---- */
+/* ---- Corner brackets (legacy HUD-style signature) — superseded by the
+   card-inner border + corner-fold below, kept displayed:none rather than
+   deleted in case any other view still opts back into them. ---- */
 .dash-card::before,
 .dash-card::after {
     content: '';
@@ -288,6 +290,7 @@
     z-index: 3;
     pointer-events: none;
     transition: border-color var(--transition-fast);
+    display: none;
 }
 
 .dash-card::before {
@@ -362,7 +365,7 @@
     font-family: var(--font-mono);
     font-size: 0.7rem;
     letter-spacing: 0.1em;
-    color: var(--status-live);
+    color: var(--text-secondary);
     margin: 0 0 10px;
     text-transform: uppercase;
 }
@@ -373,18 +376,34 @@
     background: var(--bg-card);
     border-radius: var(--radius-lg);
     padding: clamp(18px, 2.5vw, 32px);
-    border: 1px solid var(--border-color);
-    border-left: 2px solid var(--status-live);
+    border: 1px solid rgba(124, 109, 240, 0.28);
     height: 100%;
     min-height: 180px;
     box-shadow: var(--shadow-card);
+    overflow: hidden;
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* ---- Folded-corner accent (new card signature, replaces the old
+   left-edge accent stripe). A small diagonal wedge in the per-card
+   accent color, seated inside the rounded corner via overflow:hidden
+   on .card-inner above. ---- */
+.card-inner::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, transparent 50%, var(--card-accent, var(--accent-1)) 50%);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .dash-card:hover .card-inner {
     transform: translateY(-3px);
-    border-color: var(--border-color-hover);
-    border-left-color: var(--card-accent, var(--status-live));
+    border-color: rgba(124, 109, 240, 0.5);
     background: var(--bg-card-hover);
     box-shadow: var(--shadow-elevated);
 }
@@ -552,18 +571,18 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     font-size: clamp(0.85rem, 1vw, 0.95rem);
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
-    border-radius: 6px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .strike-item:hover {
     color: var(--text-primary);
-    background: rgba(124, 109, 240, 0.08);
-    padding-left: 16px;
+    background: rgba(124, 109, 240, 0.1);
 }
 
 .strike-item input[type="checkbox"] {
@@ -625,17 +644,21 @@
 
 .stat-card .card-inner {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: clamp(14px, 2vw, 18px);
-    padding: clamp(18px, 2vw, 28px);
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    padding: clamp(18px, 2vw, 26px) clamp(12px, 1.5vw, 20px);
     cursor: pointer;
     border-radius: var(--radius-md);
-    background: var(--bg-card);
-    border: 2px solid transparent;
+    background: color-mix(in srgb, var(--stat-color, var(--accent-1)) 10%, var(--bg-card));
+    border: 1px solid color-mix(in srgb, var(--stat-color, var(--accent-1)) 30%, transparent);
     background-clip: padding-box;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
+    min-height: 0;
 }
 
 .stat-card:active .card-inner {
@@ -647,19 +670,22 @@
     border-color: var(--stat-color, var(--border-color-hover));
 }
 
-.stat-card:hover .stat-icon {
-    transform: scale(1.1);
+.stat-card .card-header-drag {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    margin: 0 !important;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
 }
 
-.stat-icon {
-    font-size: clamp(1.6rem, 2.5vw, 2rem);
-    background: var(--bg-secondary);
-    padding: clamp(10px, 1.5vw, 12px);
-    border-radius: var(--radius-sm);
-    transition: transform var(--transition-fast);
-    position: relative;
-    z-index: 1;
-    flex-shrink: 0;
+.stat-card:hover .card-header-drag {
+    opacity: 1;
+}
+
+.stat-card .stat-icon {
+    display: none;
 }
 
 /* Color-coded stat cards — each sets --stat-color once and every
@@ -692,9 +718,9 @@
 
 .stat-value {
     font-family: var(--font-mono);
-    font-size: clamp(1.1rem, 1.7vw, 1.8rem);
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    font-weight: 800;
+    color: var(--accent-1);
     display: block;
     white-space: nowrap;
     overflow: hidden;

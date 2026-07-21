@@ -15,6 +15,7 @@
 
     // ----- CONSTANTS -----
     const STORAGE_KEY = 'activeCountdownDate';
+    const START_KEY = 'activeCountdownStart';
 
     // ----- INITIALIZATION -----
     function init() {
@@ -45,6 +46,7 @@
         // Save to localStorage for persistence
         try {
             localStorage.setItem(STORAGE_KEY, targetDate.toISOString());
+            localStorage.setItem(START_KEY, new Date().toISOString());
         } catch (e) {
             console.error('Error saving countdown:', e);
         }
@@ -79,6 +81,7 @@
         // Remove from localStorage
         try {
             localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(START_KEY);
         } catch (e) {
             console.error('Error clearing countdown:', e);
         }
@@ -98,6 +101,11 @@
                 // Only restore if the date is still in the future
                 if (savedDate > now) {
                     targetDate = savedDate;
+                    if (!localStorage.getItem(START_KEY)) {
+                        // Pre-existing countdown from before progress tracking was
+                        // added — treat "now" as the start so the bar still works.
+                        localStorage.setItem(START_KEY, now.toISOString());
+                    }
                     updateCountdownDisplay();
                     updateDashboardCountdown();
                     showCountdownPanels();
@@ -242,15 +250,21 @@
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-        const dd = String(days).padStart(2, '0');
-        const hh = String(hours).padStart(2, '0');
-        const mm = String(minutes).padStart(2, '0');
-
         const targetDateStr = targetDate.toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric'
         });
+
+        let startDate;
+        try {
+            startDate = new Date(localStorage.getItem(START_KEY) || now.toISOString());
+        } catch (e) {
+            startDate = now;
+        }
+        const totalMs = targetDate - startDate;
+        const elapsedMs = now - startDate;
+        const progressPct = totalMs > 0 ? Math.min(100, Math.max(0, (elapsedMs / totalMs) * 100)) : 0;
 
         // Same fix as updateCountdownDisplay: build the card once, then
         // update its text on later ticks instead of rebuilding (and
@@ -260,11 +274,13 @@
         if (!panel.querySelector('.dash-countdown-card:not(.countdown-complete)')) {
             panel.innerHTML = `
                 <div class="dash-countdown-card">
-                    <div class="dash-countdown-date" id="dashCountdownDateLabel"></div>
-                    <div class="dash-countdown-display">
-                        <span class="dash-countdown-value" id="dashCountdownValueText"></span>
+                    <div class="dash-countdown-value" id="dashCountdownValueText"></div>
+                    <div class="dash-countdown-caption">Days until <span id="dashCountdownDateLabel"></span></div>
+                    <div class="dash-countdown-progress-track">
+                        <div class="dash-countdown-progress-fill" id="dashCountdownProgressFill"></div>
                     </div>
-                    <button class="matrix-btn" onclick="clearCountdown()" style="margin-top: 8px; font-size: 0.75rem; padding: 4px 12px;">Clear</button>
+                    <div class="dash-countdown-fine-print" id="dashCountdownFinePrint"></div>
+                    <button class="matrix-btn" onclick="clearCountdown()" style="margin-top: 12px; font-size: 0.75rem; padding: 4px 12px;">Clear</button>
                 </div>
             `;
         }
@@ -272,7 +288,11 @@
         const dateLabel = document.getElementById('dashCountdownDateLabel');
         if (dateLabel) dateLabel.textContent = targetDateStr;
         const valueEl = document.getElementById('dashCountdownValueText');
-        if (valueEl) valueEl.textContent = `${dd}d ${hh}h ${mm}m`;
+        if (valueEl) valueEl.textContent = String(days);
+        const fillEl = document.getElementById('dashCountdownProgressFill');
+        if (fillEl) fillEl.style.width = progressPct + '%';
+        const fineEl = document.getElementById('dashCountdownFinePrint');
+        if (fineEl) fineEl.textContent = `${hours}h ${minutes}m remaining today`;
 
         panel.style.display = 'block';
     }

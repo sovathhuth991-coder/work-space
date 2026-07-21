@@ -967,7 +967,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 
     function canvas() { return document.getElementById('dashboardCanvas'); }
     function isCanvasMode() {
-        return window.innerWidth > BREAKPOINT && window.__getLayoutMode ? window.__getLayoutMode() === 'canvas' : true;
+        if (window.innerWidth <= BREAKPOINT) return false;
+        return typeof window.__getLayoutMode === 'function' ? window.__getLayoutMode() === 'canvas' : true;
     }
     window.__isCanvasMode = isCanvasMode;
 
@@ -1474,9 +1475,6 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     function layoutCards() {
         const el = canvas();
         if (!el) return;
-        if (!isCanvasMode()) {
-            return;
-        }
         rebuildGroupsFromStorage();
 
         const canvasMode = isCanvasMode();
@@ -1563,13 +1561,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     let resizeTimer = null;
     window.addEventListener('resize', () => {
         if (resizeTimer) clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            if (isCanvasMode()) {
-                layoutCards();
-            } else if (typeof applyFlowLayout === 'function') {
-                applyFlowLayout(window.__getLayoutMode?.() || 'grid');
-            }
-        }, 150);
+        resizeTimer = setTimeout(layoutCards, 150);
     });
 
     window.__dashCanvasInit = initCanvasCards;
@@ -1588,6 +1580,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 function initDashboardCards() {
     if (typeof window.__dashStatsInit === 'function') window.__dashStatsInit();
     if (typeof window.__dashCanvasInit === 'function') window.__dashCanvasInit();
+    if (typeof window.__refreshFlowLayout === 'function') window.__refreshFlowLayout();
     const widgetsCard = document.querySelector('.dash-card[data-card-id="widgets"]');
     if (widgetsCard) ensureMinimizeButton(widgetsCard);
     updateCardSizeClasses();
@@ -1612,14 +1605,10 @@ function updateCardSizeClasses() {
 function resetDashboardLayout() {
     if (typeof window.__dashStatsReset === 'function') window.__dashStatsReset();
     if (typeof window.__dashCanvasReset === 'function') window.__dashCanvasReset();
-    try { localStorage.removeItem('dashboardGridLayout'); } catch(e) {}
-    try { localStorage.removeItem('dashboardFlexLayout'); } catch(e) {}
-    try { localStorage.removeItem('dashboardStackLayout'); } catch(e) {}
-    try { localStorage.removeItem('dashboardResizeHandles'); } catch(e) {}
-    window.__setLayoutMode?.('canvas');
     document.querySelectorAll('.dash-card[data-card-id]').forEach(card => {
         card.style.display = '';
     });
+    if (typeof window.__refreshFlowLayout === 'function') window.__refreshFlowLayout();
     showToast('🔄 Layout reset to default', 'info');
     updateCardSizeClasses();
 }
