@@ -966,7 +966,10 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     let dividerStartX = 0, dividerStartRatio = 0.5, dividerGroupWidth = 0;
 
     function canvas() { return document.getElementById('dashboardCanvas'); }
-    function isCanvasMode() { return window.innerWidth > BREAKPOINT; }
+    function isCanvasMode() {
+        return window.innerWidth > BREAKPOINT && window.__getLayoutMode ? window.__getLayoutMode() === 'canvas' : true;
+    }
+    window.__isCanvasMode = isCanvasMode;
 
     // Top-level positionable items — standalone cards and group wrappers.
     // Cards living inside a group are NOT in this list (their position comes
@@ -1271,10 +1274,12 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         const handle = card.querySelector('.card-drag-handle');
         if (handle) {
             handle.addEventListener('mousedown', (e) => {
+                if (!isCanvasMode()) return;
                 const group = card.closest('.dash-card-group');
                 startInteraction(e, group || card, 'move', group ? null : card);
             });
             handle.addEventListener('touchstart', (e) => {
+                if (!isCanvasMode()) return;
                 const group = card.closest('.dash-card-group');
                 startInteraction(e, group || card, 'move', group ? null : card);
             }, { passive: false });
@@ -1469,6 +1474,9 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     function layoutCards() {
         const el = canvas();
         if (!el) return;
+        if (!isCanvasMode()) {
+            return;
+        }
         rebuildGroupsFromStorage();
 
         const canvasMode = isCanvasMode();
@@ -1555,7 +1563,13 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     let resizeTimer = null;
     window.addEventListener('resize', () => {
         if (resizeTimer) clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(layoutCards, 150);
+        resizeTimer = setTimeout(() => {
+            if (isCanvasMode()) {
+                layoutCards();
+            } else if (typeof applyFlowLayout === 'function') {
+                applyFlowLayout(window.__getLayoutMode?.() || 'grid');
+            }
+        }, 150);
     });
 
     window.__dashCanvasInit = initCanvasCards;
@@ -1598,6 +1612,11 @@ function updateCardSizeClasses() {
 function resetDashboardLayout() {
     if (typeof window.__dashStatsReset === 'function') window.__dashStatsReset();
     if (typeof window.__dashCanvasReset === 'function') window.__dashCanvasReset();
+    try { localStorage.removeItem('dashboardGridLayout'); } catch(e) {}
+    try { localStorage.removeItem('dashboardFlexLayout'); } catch(e) {}
+    try { localStorage.removeItem('dashboardStackLayout'); } catch(e) {}
+    try { localStorage.removeItem('dashboardResizeHandles'); } catch(e) {}
+    window.__setLayoutMode?.('canvas');
     document.querySelectorAll('.dash-card[data-card-id]').forEach(card => {
         card.style.display = '';
     });

@@ -966,7 +966,11 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     let dividerStartX = 0, dividerStartRatio = 0.5, dividerGroupWidth = 0;
 
     function canvas() { return document.getElementById('dashboardCanvas'); }
-    function isCanvasMode() { return window.innerWidth > BREAKPOINT; }
+    function isCanvasMode() {
+        if (window.innerWidth <= BREAKPOINT) return false;
+        return typeof window.__getLayoutMode === 'function' ? window.__getLayoutMode() === 'canvas' : true;
+    }
+    window.__isCanvasMode = isCanvasMode;
 
     // Top-level positionable items — standalone cards and group wrappers.
     // Cards living inside a group are NOT in this list (their position comes
@@ -1271,10 +1275,12 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         const handle = card.querySelector('.card-drag-handle');
         if (handle) {
             handle.addEventListener('mousedown', (e) => {
+                if (!isCanvasMode()) return;
                 const group = card.closest('.dash-card-group');
                 startInteraction(e, group || card, 'move', group ? null : card);
             });
             handle.addEventListener('touchstart', (e) => {
+                if (!isCanvasMode()) return;
                 const group = card.closest('.dash-card-group');
                 startInteraction(e, group || card, 'move', group ? null : card);
             }, { passive: false });
@@ -1574,6 +1580,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 function initDashboardCards() {
     if (typeof window.__dashStatsInit === 'function') window.__dashStatsInit();
     if (typeof window.__dashCanvasInit === 'function') window.__dashCanvasInit();
+    if (typeof window.__refreshFlowLayout === 'function') window.__refreshFlowLayout();
     const widgetsCard = document.querySelector('.dash-card[data-card-id="widgets"]');
     if (widgetsCard) ensureMinimizeButton(widgetsCard);
     updateCardSizeClasses();
@@ -1601,6 +1608,7 @@ function resetDashboardLayout() {
     document.querySelectorAll('.dash-card[data-card-id]').forEach(card => {
         card.style.display = '';
     });
+    if (typeof window.__refreshFlowLayout === 'function') window.__refreshFlowLayout();
     showToast('🔄 Layout reset to default', 'info');
     updateCardSizeClasses();
 }

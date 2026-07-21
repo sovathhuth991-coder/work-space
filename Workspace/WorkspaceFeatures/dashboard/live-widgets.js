@@ -37,7 +37,12 @@ function insertLiveWidgetCard(card) {
     if (grid.querySelector(`.dash-card[data-card-id="${card.dataset.cardId}"]`)) return false;
     const slot = document.getElementById('liveWidgetsSlot');
     if (slot) {
-        slot.appendChild(card);
+        // Inserted as a sibling (not a child) of the slot marker so the card
+        // is a direct child of .dashboard-canvas — required for CSS Grid/Flex
+        // layout modes, which only lay out direct children. Canvas (freeform)
+        // absolute positioning works either way since it's relative to the
+        // nearest positioned ancestor, not the immediate parent.
+        slot.parentElement.insertBefore(card, slot);
     } else {
         const statsContainer = grid.querySelector('.dash-stats-container');
         if (statsContainer) grid.insertBefore(card, statsContainer);

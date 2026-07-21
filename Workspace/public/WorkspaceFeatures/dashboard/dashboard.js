@@ -888,6 +888,14 @@ function initDashboardEngine() {
     window.__focusGoalInterval = setInterval(() => {
         if (document.getElementById('dashboard-view')?.classList.contains('active')) updateFocusGoalDisplay();
     }, 30000);
+
+    const savedMode = window.__getLayoutMode?.();
+    if (savedMode && savedMode !== 'canvas') {
+        window.__setLayoutMode(savedMode);
+    }
+    ensureResizeHandles();
+    initResizeHandlers();
+    initFlowDragReorder();
 }
 
 function calculateStreak() {
@@ -1276,6 +1284,266 @@ function toggleDashboardFocusMode() {
         });
     }
 }
+const LAYOUT_MODE_KEY = 'dashboardLayoutMode';
+const MODES = ['canvas', 'grid', 'flex', 'stack'];
+
+window.__getLayoutMode = function() {
+    return localStorage.getItem(LAYOUT_MODE_KEY) || 'canvas';
+};
+
+window.__setLayoutMode = function(mode) {
+    if (!MODES.includes(mode)) return;
+    const canvas = document.getElementById('dashboardCanvas');
+    if (!canvas) return;
+
+    const prev = window.__getLayoutMode();
+
+    if (prev === 'canvas' && mode !== 'canvas') {
+        if (typeof window.__dashCanvasSave === 'function') window.__dashCanvasSave();
+        resetCanvasGroups();
+    }
+
+    localStorage.setItem(LAYOUT_MODE_KEY, mode);
+
+    MODES.forEach(m => canvas.classList.remove(`mode-${m}`));
+    canvas.classList.add(`mode-${mode}`);
+
+    if (mode === 'canvas') {
+        if (typeof window.__dashCanvasInit === 'function') window.__dashCanvasInit();
+    } else {
+        applyFlowLayout(mode);
+    }
+
+    updateLayoutToolbar(mode);
+    updateResizeHandlesVisibility();
+    if (typeof updateCardSizeClasses === 'function') updateCardSizeClasses();
+};
+
+function resetCanvasGroups() {
+    const canvasEl = document.getElementById('dashboardCanvas');
+    document.querySelectorAll('.dash-card-group').forEach(wrapper => {
+        const cards = Array.from(wrapper.querySelectorAll('.dash-card[data-card-id]'));
+        cards.forEach(card => {
+            card.classList.remove('grouped-card');
+            card.classList.add('canvas-positioned-item');
+            const minBtn = card.querySelector('.card-minimize-btn');
+            if (minBtn) minBtn.style.display = '';
+            delete card.dataset.restoreHeight;
+            canvasEl.appendChild(card);
+        });
+        wrapper.remove();
+    });
+}
+
+function updateLayoutToolbar(mode) {
+    document.querySelectorAll('.layout-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.layoutMode === mode);
+    });
+}
+
+function applyFlowLayout(mode) {
+    const cards = document.querySelectorAll('.dashboard-canvas .dash-card.canvas-card');
+    const storeKey = mode === 'grid' ? 'dashboardGridLayout' : mode === 'flex' ? 'dashboardFlexLayout' : 'dashboardStackLayout';
+    const store = JSON.parse(localStorage.getItem(storeKey) || '{}');
+
+    cards.forEach((card, i) => {
+        card.style.gridColumn = '';
+        card.style.flex = '';
+        card.style.minWidth = '';
+        card.style.width = '';
+        card.style.height = '';
+        card.style.order = '';
+
+        const key = card.dataset.cardId;
+        if (!key) return;
+        const layout = store[key];
+
+        if (mode === 'grid') {
+            card.style.gridColumn = 'span ' + (layout?.span || 4);
+        } else if (mode === 'flex') {
+            card.style.flex = '1 1 ' + (layout?.baseWidth || 300) + 'px';
+            card.style.minWidth = '220px';
+        } else if (mode === 'stack') {
+            card.style.width = '100%';
+            card.style.height = (layout?.height || 260) + 'px';
+        }
+
+        card.style.order = layout?.order ?? i;
+    });
+}
+
+function updateResizeHandlesVisibility() {
+    const mode = window.__getLayoutMode();
+    const resizeEnabled = localStorage.getItem('dashboardResizeHandles') !== 'false';
+    document.querySelectorAll('.resize-handle').forEach(handle => {
+        handle.style.display = (mode !== 'canvas' && resizeEnabled) ? '' : 'none';
+    });
+}
+
+function ensureResizeHandles() {
+    document.querySelectorAll('.dashboard-canvas .dash-card.canvas-card').forEach(card => {
+        if (card.querySelector('.resize-handle')) return;
+        const handle = document.createElement('div');
+        handle.className = 'resize-handle';
+        handle.dataset.cardId = card.dataset.cardId;
+        card.appendChild(handle);
+    });
+}
+
+let activeFlowResize = null;
+
+function initResizeHandlers() {
+    document.querySelectorAll('.resize-handle').forEach(handle => {
+        if (handle.dataset.resizeWired === '1') return;
+        handle.dataset.resizeWired = '1';
+        handle.addEventListener('mousedown', onResizeStart);
+        handle.addEventListener('touchstart', onResizeStart, { passive: false });
+    });
+}
+
+function onResizeStart(e) {
+    if (window.__getLayoutMode?.() === 'canvas') return;
+    if (activeFlowResize) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const card = e.target.closest('.dash-card');
+    if (!card) return;
+    const mode = window.__getLayoutMode?.();
+    const rect = card.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const startW = rect.width;
+    const startH = rect.height;
+
+    const storeKey = mode === 'grid' ? 'dashboardGridLayout' : mode === 'flex' ? 'dashboardFlexLayout' : 'dashboardStackLayout';
+    const store = JSON.parse(localStorage.getItem(storeKey) || '{}');
+    const key = card.dataset.cardId;
+    const initial = store[key] || {};
+
+    activeFlowResize = { card, mode, store, storeKey };
+
+    function onMove(ev) {
+        const dx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - clientX;
+        const dy = (ev.touches ? ev.touches[0].clientY : ev.clientY) - clientY;
+
+        if (mode === 'grid') {
+            const colWidth = card.parentElement.getBoundingClientRect().width / 12;
+            const spanDelta = Math.round(dx / colWidth);
+            const newSpan = Math.max(2, Math.min(12, (initial.span || 4) + spanDelta));
+            initial.span = newSpan;
+            card.style.gridColumn = 'span ' + newSpan;
+        } else if (mode === 'flex') {
+            const newW = Math.max(220, startW + dx);
+            initial.baseWidth = Math.round(newW);
+            card.style.flex = '1 1 ' + Math.round(newW) + 'px';
+        } else if (mode === 'stack') {
+            const newH = Math.max(140, startH + dy);
+            initial.height = Math.round(newH);
+            card.style.height = Math.round(newH) + 'px';
+        }
+    }
+
+    function onEnd() {
+        store[key] = { ...initial };
+        localStorage.setItem(storeKey, JSON.stringify(store));
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+        activeFlowResize = null;
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+}
+
+let activeFlowDrag = null;
+
+function initFlowDragReorder() {
+    document.querySelectorAll('.dashboard-canvas .card-drag-handle').forEach(handle => {
+        if (handle.dataset.flowWired === '1') return;
+        handle.dataset.flowWired = '1';
+        handle.addEventListener('mousedown', onFlowDragStart);
+        handle.addEventListener('touchstart', onFlowDragStart, { passive: false });
+    });
+}
+
+function onFlowDragStart(e) {
+    if (window.__getLayoutMode?.() === 'canvas' || activeFlowDrag) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const handle = e.target.closest('.card-drag-handle');
+    const card = handle.closest('.dash-card');
+    const mode = window.__getLayoutMode?.();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    card.style.opacity = '0.4';
+    card.style.zIndex = '100';
+
+    activeFlowDrag = { card, mode };
+
+    function onMove(ev) {
+        const x = ev.touches ? ev.touches[0].clientX : ev.clientX;
+        const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+        const currentCards = Array.from(document.querySelectorAll('.dashboard-canvas .dash-card.canvas-card'));
+        const target = findNearestCard(currentCards, x, y, card);
+        if (target && target !== card) {
+            const cardOrder = parseFloat(card.style.order) || 0;
+            const targetOrder = parseFloat(target.style.order) || 0;
+            card.style.order = targetOrder;
+            target.style.order = cardOrder;
+        }
+    }
+
+    function onEnd() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+        card.style.opacity = '';
+        card.style.zIndex = '';
+        persistFlowOrder(mode);
+        activeFlowDrag = null;
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+}
+
+function findNearestCard(cards, clientX, clientY, excludeCard) {
+    let nearest = null;
+    let minDist = Infinity;
+    cards.forEach(c => {
+        if (c === excludeCard) return;
+        const box = c.getBoundingClientRect();
+        const cx = box.left + box.width / 2;
+        const cy = box.top + box.height / 2;
+        const dist = Math.hypot(clientX - cx, clientY - cy);
+        if (dist < minDist) {
+            minDist = dist;
+            nearest = c;
+        }
+    });
+    return nearest;
+}
+
+function persistFlowOrder(mode) {
+    const cards = Array.from(document.querySelectorAll('.dashboard-canvas .dash-card.canvas-card'));
+    const storeKey = mode === 'grid' ? 'dashboardGridLayout' : mode === 'flex' ? 'dashboardFlexLayout' : 'dashboardStackLayout';
+    const store = JSON.parse(localStorage.getItem(storeKey) || '{}');
+    cards.forEach(card => {
+        const key = card.dataset.cardId;
+        if (!key) return;
+        store[key] = { ...store[key], order: parseFloat(card.style.order) || 0 };
+    });
+    localStorage.setItem(storeKey, JSON.stringify(store));
+}
+
 function initDashboardEnhancements() {
     setTimeout(animateCardsIn, 50);
     initLastUpdatedTimestamps();

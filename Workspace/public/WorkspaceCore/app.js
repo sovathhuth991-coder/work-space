@@ -198,7 +198,13 @@ document.addEventListener('DOMContentLoaded', () => {
             'handleAccountSignUp': () => window.handleAccountSignUp?.(),
             'handleAccountMagicLink': () => window.handleAccountMagicLink?.(),
             'handleAccountSignOut': () => window.handleAccountSignOut?.(),
-            'handleAccountSyncNow': () => window.handleAccountSyncNow?.()
+            'handleAccountSyncNow': () => window.handleAccountSyncNow?.(),
+            'setLayoutMode': (btn) => window.__setLayoutMode?.(btn.dataset.layoutMode),
+            'toggleResizeHandles': () => {
+                const current = localStorage.getItem('dashboardResizeHandles') !== 'false';
+                localStorage.setItem('dashboardResizeHandles', String(!current));
+                if (typeof updateResizeHandlesVisibility === 'function') updateResizeHandlesVisibility();
+            }
         };
 
         const handler = actionHandlers[action];

@@ -314,6 +314,18 @@
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                         <div id="streakDisplay"></div>
+                        <div class="layout-mode-group" style="display:flex;gap:4px;align-items:center;">
+                            <button class="matrix-btn layout-mode-btn active" data-action="setLayoutMode"
+                                data-layout-mode="canvas" title="Freeform canvas">Canvas</button>
+                            <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
+                                data-layout-mode="grid" title="CSS Grid layout">Grid</button>
+                            <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
+                                data-layout-mode="flex" title="Flex wrap layout">Flex Row</button>
+                            <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
+                                data-layout-mode="stack" title="Single column">Stack</button>
+                        </div>
+                        <button class="matrix-btn" data-action="toggleResizeHandles"
+                            title="Show/hide resize handles">↔ Resize</button>
                         <button class="matrix-btn" data-action="resetDashboardLayout"
                             title="Reset entire dashboard layout">↺ Reset</button>
                         <button class="dashboard-customize-btn" data-action="toggleCardVisibility"
