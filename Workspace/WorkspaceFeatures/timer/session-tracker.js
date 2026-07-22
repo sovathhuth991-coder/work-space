@@ -361,10 +361,10 @@
 
     // ----- Update current session UI -----
     function updateCurrentSessionDisplay() {
-        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(sessionFocusSeconds);
-        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(sessionBreakSeconds);
-        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(sessionIdleSeconds);
-        const total = sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds;
+        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(focusSeconds);
+        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(breakSeconds);
+        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(idleSeconds);
+        const total = focusSeconds + breakSeconds + idleSeconds;
         if (sessionTotalDisplay) sessionTotalDisplay.textContent = formatTime(total);
 
         // Keep the history panel's live "in progress" entry current while
@@ -429,9 +429,9 @@
         const startM = timeToMinutes(task.start);
         const endM = timeToMinutes(task.end);
         const dur = endM - startM;
-        if (dur > 0) scheduledInput.value = dur;
-        autoLabelBadge.textContent = '✅ Linked to task';
-        autoLabelBadge.style.color = '#2ecc71';
+        if (dur > 0 && scheduledInput) scheduledInput.value = dur;
+        if (autoLabelBadge) { autoLabelBadge.textContent = '✅ Linked to task';
+        autoLabelBadge.style.color = '#2ecc71'; }
 
         if (changed) {
             handleTaskChange(newId);
@@ -478,20 +478,20 @@
 
     // ----- Update UI (Daily Totals) -----
     function updateUI() {
-        focusDisplay.textContent = formatTime(focusSeconds);
-        breakDisplay.textContent = formatTime(breakSeconds);
+        if (focusDisplay) focusDisplay.textContent = formatTime(focusSeconds);
+        if (breakDisplay) breakDisplay.textContent = formatTime(breakSeconds);
         if (idleDisplay) idleDisplay.textContent = formatTime(idleSeconds);
 
         const totalSeconds = focusSeconds + breakSeconds + idleSeconds;
         if (totalDisplay) totalDisplay.textContent = formatTime(totalSeconds);
 
-        const scheduled = parseInt(scheduledInput.value) || 120;
+        const scheduled = scheduledInput ? (parseInt(scheduledInput.value) || 120) : 120;
         const scheduledSecs = scheduled * 60;
         const total = focusSeconds + breakSeconds;
         const pct = scheduledSecs > 0 ? Math.min((total / scheduledSecs) * 100, 100) : 0;
-        progressFill.style.width = pct + '%';
-        progressPercent.textContent = Math.round(pct) + '%';
-        scheduledDisplay.textContent = scheduled;
+        if (progressFill) progressFill.style.width = pct + '%';
+        if (progressPercent) progressPercent.textContent = Math.round(pct) + '%';
+        if (scheduledDisplay) scheduledDisplay.textContent = scheduled;
 
         // Update header stats
         if (headerFocusTime) headerFocusTime.textContent = formatTime(focusSeconds);

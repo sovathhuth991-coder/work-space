@@ -494,7 +494,7 @@
                                     </div>
                                 </div>
                                 <button class="dash-add-todo-btn" data-action="addDashTodo" title="Add a new task"
-                                    style="padding:4px 12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
+                                    style="width:100%;padding:12px;border-radius:99px;background:var(--accent-solid);border:none;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;margin-bottom:12px;">+
                                     Add Task</button>
                                 <ul class="strike-list" id="dashStrikeList"></ul>
                             </div>
@@ -598,7 +598,61 @@
                         <div id="cardVisibilityList"></div>
                         <button class="vis-close-btn" data-action="closeCardVisibility">Done</button>
                     </div>
-                </div>
+                
+                        <!-- ===== PANEL 2: POMODORO TIMER ===== -->
+                        <div id="pomodoroShell" class="pomodoro-shell" style="max-width: 520px; margin: 0 auto; width: 100%;">
+                            <div class="pomodoro-ring-container" id="pomodoroRingContainer">
+                                <svg viewBox="0 0 280 280">
+                                    <defs>
+                                        <linearGradient id="pomodoroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle class="pomodoro-ring-bg" cx="140" cy="140" r="130" />
+                                    <circle id="pomodoroRingGlow" class="pomodoro-ring-glow" cx="140" cy="140" r="130" />
+                                    <circle id="pomodoroRingFill" class="pomodoro-ring-fill" cx="140" cy="140" r="130" />
+                                </svg>
+                                <div class="timer-display-container">
+                                    <div id="pomodoroDisplay" class="timer-display-main">25:00</div>
+                                    <div id="pomodoroLabel" class="timer-display-label">Pomodoro</div>
+                                </div>
+                            </div>
+
+                            <div id="pomodoroPhase" class="timer-state-indicator">
+                                <span class="state-dot"></span>
+                                <span id="pomodoroPhaseText">Ready</span>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
+                                <button id="pomodoroStartBtn"
+                                    style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: var(--accent-gradient); border: none; color: #fff; cursor: pointer; font-size: 1rem;">Start</button>
+                                <button id="pomodoroPauseBtn"
+                                    style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;"
+                                    disabled>Pause</button>
+                                <button id="pomodoroResetBtn"
+                                    style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;">Reset</button>
+                            </div>
+
+                            <div id="pomodoroCycleBar" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;">
+                            </div>
+
+                            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                                <div style="background: var(--bg-primary); border-radius: var(--radius-sm); padding: 12px 20px; border: 1px solid var(--border-color); text-align: center;">
+                                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px;">Cycles</div>
+                                    <div id="pomoStatCycles" style="font-size: 1.2rem; font-weight: 700; color: var(--accent-1);">0</div>
+                                </div>
+                                <div style="background: var(--bg-primary); border-radius: var(--radius-sm); padding: 12px 20px; border: 1px solid var(--border-color); text-align: center;">
+                                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px;">Focus Time</div>
+                                    <div id="pomoStatFocus" style="font-size: 1.2rem; font-weight: 700; color: var(--accent-1);">0m</div>
+                                </div>
+                                <div style="background: var(--bg-primary); border-radius: var(--radius-sm); padding: 12px 20px; border: 1px solid var(--border-color); text-align: center;">
+                                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px;">Today</div>
+                                    <div id="pomoStatToday" style="font-size: 1.2rem; font-weight: 700; color: var(--accent-1);">0</div>
+                                </div>
+                            </div>
+                        </div>
+</div>
             </section>
 
             <!-- ===== LIBRARY VIEW ===== -->
@@ -922,237 +976,153 @@
                 <div class="view-header">
                     <div>
                         <p class="view-kicker">Focus Tools</p>
-                        <h1>Simple Countdown Timer</h1>
+                        <h1>Focus Timer</h1>
                     </div>
                 </div>
 
-                <!-- ===== SESSION TRACKER (Auto‑linked to Schedule) ===== -->
-                <div id="sessionTracker" class="session-tracker-enhanced"
-                    style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-                    <div class="session-tracker-header">
-                        <div class="session-tracker-title">Session Tracker</div>
-                        <div class="task-selector-wrapper">
-                            <select id="taskSelector" class="task-selector">
-                                <option value="">— Select a task —</option>
-                            </select>
-                            <span id="autoLabelBadge" class="auto-link-badge">🔗 Linked</span>
+                <!-- ===== TIMER LAYOUT: Total Timer + Sessions (top row), Focus Timer (center bottom) ===== -->
+                <div class="timer-main-layout">
+
+                    <!-- Top row: Total Timer + Today's Sessions side-by-side -->
+                    <div class="timer-top-row">
+
+                        <!-- Total Timer -->
+                        <div class="timer-panel timer-panel-total">
+                            <div class="timer-panel-header">
+                                <h2 class="timer-panel-title">⏱ Total Timer</h2>
+                            </div>
+
+                            <div class="current-session-task-info" id="currentSessionTaskInfo"
+                                style="font-size:0.8rem;color:var(--text-secondary); margin-bottom: 10px; text-align: center;">
+                                <span id="currentSessionTaskName">No active task</span>
+                                <span id="currentSessionTaskTime" style="color:var(--text-muted);font-size:0.7rem;"></span>
+                            </div>
+
+                            <div class="timer-stats-compact">
+                                <div class="timer-stat-row">
+                                    <span class="timer-stat-label">Focus</span>
+                                    <span class="timer-stat-value" id="sessionFocusDisplay">00:00</span>
+                                </div>
+                                <div class="timer-stat-row">
+                                    <span class="timer-stat-label">Break</span>
+                                    <span class="timer-stat-value" id="sessionBreakDisplay">00:00</span>
+                                </div>
+                                <div class="timer-stat-row">
+                                    <span class="timer-stat-label">Idle</span>
+                                    <span class="timer-stat-value" id="sessionIdleDisplay">00:00</span>
+                                </div>
+                                <div class="timer-stat-row timer-stat-row-total">
+                                    <span class="timer-stat-label">Total</span>
+                                    <span class="timer-stat-value" id="sessionTotalDisplay">00:00</span>
+                                </div>
+                            </div>
+
+                            <div class="session-actions" style="margin-top: 12px;">
+                                <button id="resetTrackerBtn" class="session-btn session-btn-reset" style="font-size:0.75rem; padding:6px 12px;">Reset Log</button>
+                                <button id="endSessionBtn" class="session-btn session-btn-end" style="font-size:0.75rem; padding:6px 12px;">End Session</button>
+                            </div>
                         </div>
-                        <div class="scheduled-input-wrapper">
-                            <label>Scheduled</label>
-                            <input type="number" id="trackerScheduled" value="120" min="1" class="scheduled-input">
-                            <span>mins</span>
+
+                        <!-- Today's Sessions -->
+                        <div id="sessionHistoryCard" class="session-tracker-enhanced timer-sessions-panel"
+                            style="background: var(--bg-card); padding: 16px; border-radius: 10px; border-left: 4px solid var(--accent-1);">
+                            <div class="session-tracker-header">
+                                <div class="session-tracker-title">📊 Today's Sessions</div>
+                            </div>
+                            <div id="sessionHistoryList" class="session-history-list"></div>
                         </div>
+
                     </div>
 
-                    <div class="session-time-display">
-                        <div class="time-block focus-block">
-                            <div class="time-label">Focus Time</div>
-                            <div class="time-value" id="focusTimeDisplay">00:00</div>
+                    <!-- Bottom row: Focus Timer centered -->
+                    <div class="timer-focus-wrapper">
+
+                        <!-- ===== MODE TOGGLE ===== -->
+                        <div class="pomodoro-mode-toggle"
+                            style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+                            <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
+                            <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
                         </div>
-                        <div class="time-block break-block">
-                            <div class="time-label">Break Time</div>
-                            <div class="time-value" id="breakTimeDisplay">00:00</div>
+
+                        <!-- ===== PANEL 2: FOCUS TIMER (Countdown) ===== -->
+                        <div class="timer-panel timer-panel-focus" style="max-width: 520px; margin: 0 auto; width: 100%;">
+                            <div class="timer-panel-header">
+                                <h2 class="timer-panel-title">🔵 Focus Timer</h2>
+                            </div>
+
+                            <div class="simple-timer-card"
+                                style="padding: 0; background: transparent; border: none; text-align: center;">
+
+                                <!-- Progress Ring -->
+                                <div class="timer-progress-ring">
+                                    <svg viewBox="0 0 280 280">
+                                        <defs>
+                                            <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" style="stop-color:#7c6df0;stop-opacity:1" />
+                                                <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+                                            </linearGradient>
+                                        </defs>
+                                        <circle class="ring-bg" cx="140" cy="140" r="130" />
+                                        <circle id="timerRingGlow" class="ring-glow" cx="140" cy="140" r="130" />
+                                        <circle id="timerRingFill" class="ring-fill" cx="140" cy="140" r="130" />
+                                    </svg>
+                                    <div class="timer-display-container">
+                                        <div id="countdownDisplay" class="timer-display-main">25:00</div>
+                                        <div class="timer-display-label">Countdown</div>
+                                    </div>
+                                </div>
+
+                                <!-- Timer State Indicator -->
+                                <div id="timerStateIndicator" class="timer-state-indicator">
+                                    <span class="state-dot"></span>
+                                    <span id="timerStateText">Ready</span>
+                                </div>
+
+                                <div
+                                    style="display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
+                                    <button id="startBtn"
+                                        style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: var(--accent-gradient); border: none; color: #fff; cursor: pointer; font-size: 1rem;">Start</button>
+                                    <button id="pauseBtn"
+                                        style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;"
+                                        disabled>Pause</button>
+                                    <button id="resetBtn"
+                                        style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;">Reset</button>
+                                </div>
+
+                                <div
+                                    style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
+                                    <button class="preset-btn" data-time="5"
+                                        style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">5
+                                        min</button>
+                                    <button class="preset-btn active" data-time="25"
+                                        style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: var(--accent-gradient); color: #fff; border: none; cursor: pointer;">25
+                                        min</button>
+                                    <button class="preset-btn" data-time="50"
+                                        style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">50
+                                        min</button>
+                                </div>
+
+                                <!-- Custom Timers -->
+                                <div id="customTimersContainer"
+                                    style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
+                                </div>
+
+                                <!-- Add Custom Timer -->
+                                <div
+                                    style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 16px;">
+                                    <input type="number" id="customTimerInput" placeholder="Custom minutes..." min="1" max="999"
+                                        style="padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; width: 140px; text-align: center; outline: none;">
+                                    <button id="addCustomTimerBtn"
+                                        style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); border: 1px solid var(--accent-1); color: var(--accent-1); cursor: pointer; transition: var(--transition);">
+                                        + Add Timer
+                                    </button>
+                                </div>
+
+                                <p style="font-size: 0.75rem; color: var(--text-muted);">Simple countdown timer</p>
+                            </div>
                         </div>
-                        <div class="time-block idle-block">
-                            <div class="time-label">Idle Time</div>
-                            <div class="time-value" id="idleTimeDisplay">00:00</div>
-                            <div class="time-subtitle">away from keyboard</div>
-                        </div>
-                        <div class="time-block total-block">
-                            <div class="time-label">Total Time</div>
-                            <div class="time-value" id="totalTimeDisplay">00:00</div>
-                        </div>
-                        <div class="time-block progress-block">
-                            <div class="time-label">Progress</div>
-                            <div class="time-value" id="progressPercent">0%</div>
-                            <div class="time-subtitle">of <span id="scheduledDisplay">120</span> min</div>
-                        </div>
+
                     </div>
-
-                    <div class="session-progress">
-                        <div id="progressFill" class="session-progress-fill" style="width: 0%;"></div>
-                    </div>
-
-                    <div class="session-actions">
-                        <button id="resetTrackerBtn" class="session-btn session-btn-reset">Reset Log</button>
-                        <button id="endSessionBtn" class="session-btn session-btn-end">✅ End Session & Log</button>
-                    </div>
-                </div>
-
-                <!-- ===== CURRENT SESSION TRACKER (Per-Task) ===== -->
-                <div id="currentSessionTracker" class="session-tracker-enhanced current-session-tracker"
-                    style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f97316;">
-                    <div class="session-tracker-header">
-                        <div class="session-tracker-title">Current Session <span
-                                style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">(resets per
-                                task)</span></div>
-                        <div class="current-session-task-info" id="currentSessionTaskInfo"
-                            style="font-size:0.85rem;color:var(--text-secondary);">
-                            <span id="currentSessionTaskName">No active task</span>
-                            <span id="currentSessionTaskTime" style="color:var(--text-muted);font-size:0.75rem;"></span>
-                        </div>
-                    </div>
-
-                    <div class="session-time-display session-time-display-4">
-                        <div class="time-block focus-block current-focus-block">
-                            <div class="time-label">Focus Time</div>
-                            <div class="time-value" id="sessionFocusDisplay">00:00</div>
-                        </div>
-                        <div class="time-block break-block current-break-block">
-                            <div class="time-label">Break Time</div>
-                            <div class="time-value" id="sessionBreakDisplay">00:00</div>
-                        </div>
-                        <div class="time-block idle-block current-idle-block">
-                            <div class="time-label">Idle Time</div>
-                            <div class="time-value" id="sessionIdleDisplay">00:00</div>
-                            <div class="time-subtitle">before you start</div>
-                        </div>
-                        <div class="time-block total-block current-total-block">
-                            <div class="time-label">Total Time</div>
-                            <div class="time-value" id="sessionTotalDisplay">00:00</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== SESSION HISTORY (Today, resets weekly) ===== -->
-                <div id="sessionHistoryCard" class="session-tracker-enhanced"
-                    style="background: var(--bg-card); padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--accent-1);">
-                    <div class="session-tracker-header">
-                        <div class="session-tracker-title">📊 Today's Sessions</div>
-                    </div>
-                    <div id="sessionHistoryList" class="session-history-list"></div>
-                </div>
-
-                <!-- ===== MODE TOGGLE (always visible) ===== -->
-                <div class="pomodoro-mode-toggle"
-                    style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
-                    <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
-                    <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
-                </div>
-
-                <!-- ===== SIMPLE COUNTDOWN TIMER ===== -->
-                <div class="simple-timer-card"
-                    style="max-width: 500px; margin: 0 auto; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
-
-                    <!-- Progress Ring -->
-                    <div class="timer-progress-ring">
-                        <svg viewBox="0 0 280 280">
-                            <defs>
-                                <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#7c6df0;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <circle class="ring-bg" cx="140" cy="140" r="130" />
-                            <circle id="timerRingGlow" class="ring-glow" cx="140" cy="140" r="130" />
-                            <circle id="timerRingFill" class="ring-fill" cx="140" cy="140" r="130" />
-                        </svg>
-                        <div class="timer-display-container">
-                            <div id="countdownDisplay" class="timer-display-main">25:00</div>
-                            <div class="timer-display-label">Focus Timer</div>
-                        </div>
-                    </div>
-
-                    <!-- Timer State Indicator -->
-                    <div id="timerStateIndicator" class="timer-state-indicator">
-                        <span class="state-dot"></span>
-                        <span id="timerStateText">Ready</span>
-                    </div>
-
-                    <div
-                        style="display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
-                        <button id="startBtn"
-                            style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: var(--accent-gradient); border: none; color: #fff; cursor: pointer; font-size: 1rem;">Start</button>
-                        <button id="pauseBtn"
-                            style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;"
-                            disabled>Pause</button>
-                        <button id="resetBtn"
-                            style="padding: 12px 32px; border-radius: 40px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; font-size: 1rem;">Reset</button>
-                    </div>
-
-                    <div
-                        style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
-                        <button class="preset-btn" data-time="5"
-                            style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">5
-                            min</button>
-                        <button class="preset-btn active" data-time="25"
-                            style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: var(--accent-gradient); color: #fff; border: none; cursor: pointer;">25
-                            min</button>
-                        <button class="preset-btn" data-time="50"
-                            style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer;">50
-                            min</button>
-                    </div>
-
-                    <!-- Custom Timers -->
-                    <div id="customTimersContainer"
-                        style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px;">
-                    </div>
-
-                    <!-- Add Custom Timer -->
-                    <div
-                        style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 16px;">
-                        <input type="number" id="customTimerInput" placeholder="Custom minutes..." min="1" max="999"
-                            style="padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; width: 140px; text-align: center; outline: none;">
-                        <button id="addCustomTimerBtn"
-                            style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); border: 1px solid var(--accent-1); color: var(--accent-1); cursor: pointer; transition: var(--transition);">
-                            + Add Timer
-                        </button>
-                    </div>
-
-                    <p style="font-size: 0.75rem; color: var(--text-muted);">Simple countdown timer</p>
-                </div>
-
-                <!-- ===== POMODORO MODE ===== -->
-                <div id="pomodoroShell" class="pomodoro-shell" style="max-width:500px;margin:0 auto;">
-
-                    <div class="pomodoro-ring-container" id="pomodoroRingContainer">
-                        <svg viewBox="0 0 280 280">
-                            <defs>
-                                <linearGradient id="pomodoroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <circle class="pomodoro-ring-bg" cx="140" cy="140" r="130" />
-                            <circle id="pomodoroRingGlow" class="pomodoro-ring-glow" cx="140" cy="140" r="130" />
-                            <circle id="pomodoroRingFill" class="pomodoro-ring-fill" cx="140" cy="140" r="130" />
-                        </svg>
-                        <div class="timer-display-container">
-                            <div id="pomodoroDisplay" class="pomodoro-display">25:00</div>
-                            <div id="pomodoroLabel" class="pomodoro-label">Pomodoro</div>
-                        </div>
-                    </div>
-
-                    <div id="pomodoroPhase" class="pomodoro-phase ready">
-                        <span class="state-dot"></span> Ready
-                    </div>
-
-                    <div id="pomodoroCycleBar" class="pomodoro-cycle-bar"></div>
-
-                    <div class="pomodoro-controls">
-                        <button id="pomodoroStartBtn" class="pomodoro-btn pomodoro-btn-primary">Start</button>
-                        <button id="pomodoroPauseBtn" class="pomodoro-btn pomodoro-btn-secondary"
-                            style="display:none;">Pause</button>
-                        <button id="pomodoroResetBtn" class="pomodoro-btn pomodoro-btn-secondary">Reset</button>
-                    </div>
-
-                    <div class="pomodoro-stats">
-                        <div class="pomodoro-stat">
-                            <span class="pomodoro-stat-value" id="pomoStatCycles">0</span>
-                            <span class="pomodoro-stat-label">This Set</span>
-                        </div>
-                        <div class="pomodoro-stat">
-                            <span class="pomodoro-stat-value" id="pomoStatFocus">0m</span>
-                            <span class="pomodoro-stat-label">Focus Today</span>
-                        </div>
-                        <div class="pomodoro-stat">
-                            <span class="pomodoro-stat-value" id="pomoStatToday">0</span>
-                            <span class="pomodoro-stat-label">Pomodoros</span>
-                        </div>
-                    </div>
-
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">25 min focus · 5 min break ·
-                        15 min long break</p>
                 </div>
             </section>
 
@@ -1734,25 +1704,31 @@
     ============================================================ -->
     <div class="lofi-widget" id="lofiWidget">
         <div class="lofi-header">
-            <div class="lofi-title">Ambient Mix Station</div>
-            <button class="lofi-toggle-btn" data-action="toggleLofiConsole" id="lofiToggleBtn">−</button>
+            <div class="lofi-title">🎵 Study Beats</div>
+            <button class="lofi-toggle-btn" data-action="toggleLofiConsole" id="lofiToggleBtn" title="Minimize">−</button>
         </div>
         <div class="lofi-body" id="lofiBody">
-            <!-- Local Audio Player with cache-busting -->
-            <audio id="rainAudioEngine" controls loop style="width:100%; border-radius:8px; margin-bottom:12px;">
+            <div class="lofi-track-row">
+                <div class="lofi-track-avatar">🎧</div>
+                <div class="lofi-track-info">
+                    <div class="lofi-track-title">Continuous Rain Layer</div>
+                    <div class="lofi-track-subtitle">Looping ambient rain for focus</div>
+                </div>
+            </div>
+            <div class="lofi-transport">
+                <button class="lofi-transport-btn" data-action="rainVolumeStep" data-step="-1"
+                    title="Volume down">⏮</button>
+                <button class="lofi-transport-btn lofi-play-btn" id="rainPlayBtn"
+                    data-action="toggleRainSound" title="Play/Pause">▶</button>
+                <button class="lofi-transport-btn" data-action="rainVolumeStep" data-step="1"
+                    title="Volume up">⏭</button>
+            </div>
+            <input type="range" id="rainVolume" class="lofi-volume-slider" min="0" max="1" step="0.1" value="0.5"
+                data-action="changeRainVolume" title="Volume">
+            <audio id="rainAudioEngine" loop style="display:none;">
                 <source src="Assets/Rain-Music.mp3?v=2" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
-
-            <!-- Rain Deck -->
-            <div class="rain-deck">
-                <div class="rain-info">
-                    <span>Continuous Rain Layer</span>
-                    <button id="rainPlayBtn" data-action="toggleRainSound">Play Rain</button>
-                </div>
-                <input type="range" id="rainVolume" min="0" max="1" step="0.1" value="0.5"
-                    data-action="changeRainVolume">
-            </div>
         </div>
     </div>
 

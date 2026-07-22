@@ -84,6 +84,14 @@
 
         if (!elements.shell) return;
 
+        // Ensure #pomodoroShell lives inside .timer-panel-focus so the mode
+        // toggle and the shell share the same visual container. If it was
+        // placed outside the panel in the HTML, move it to the right spot.
+        const focusPanel = document.querySelector('.timer-panel-focus');
+        if (focusPanel && elements.shell.parentElement !== focusPanel) {
+            focusPanel.appendChild(elements.shell);
+        }
+
         loadPomodoroStats();
         initRing();
         updateDisplay();
@@ -390,15 +398,26 @@
         const pomodoroBtn = document.getElementById('pomodoroPomoBtn');
 
         if (mode === 'pomodoro') {
-            if (countdownShell) countdownShell.style.display = 'none';
-            if (pomodoroShell) pomodoroShell.classList.add('active');
+            if (countdownShell) {
+                countdownShell.style.display = 'none';
+            } else {
+                console.warn('[Pomodoro] .simple-timer-card not found — cannot hide countdown shell');
+            }
+            if (pomodoroShell) {
+                pomodoroShell.classList.add('active');
+                pomodoroShell.style.display = 'block';
+            } else {
+                console.warn('[Pomodoro] #pomodoroShell not found');
+            }
             if (countdownBtn) countdownBtn.classList.remove('active');
             if (pomodoroBtn) pomodoroBtn.classList.add('active');
-            // Reset pomodoro state
             resetPomodoro();
         } else {
             if (countdownShell) countdownShell.style.display = 'block';
-            if (pomodoroShell) pomodoroShell.classList.remove('active');
+            if (pomodoroShell) {
+                pomodoroShell.classList.remove('active');
+                pomodoroShell.style.display = 'none';
+            }
             if (countdownBtn) countdownBtn.classList.add('active');
             if (pomodoroBtn) pomodoroBtn.classList.remove('active');
         }

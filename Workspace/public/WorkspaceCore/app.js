@@ -144,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'renderAnalytics': () => renderAnalytics?.(),
             'toggleLofiConsole': () => toggleLofiConsole?.(),
             'toggleRainSound': () => toggleRainSound?.(),
+            'rainVolumeStep': () => stepRainVolume?.(parseFloat(actionBtn.dataset.step)),
             'toggleFocusMode': () => toggleFocusMode?.(),
             'toggleFocusStatsView': () => toggleFocusStatsView?.(),
             'openTutorialGuide': () => openTutorialGuide?.(),
@@ -649,12 +650,21 @@ function toggleRainSound() {
     if (rainPlaying) {
         rainAudio.pause();
         rainPlaying = false;
-        btn && (btn.textContent = 'Play Rain');
+        btn && (btn.textContent = '▶');
     } else {
         rainAudio.play().catch(() => {});
         rainPlaying = true;
-        btn && (btn.textContent = 'Pause Rain');
+        btn && (btn.textContent = '⏸');
     }
+}
+
+function stepRainVolume(step) {
+    rainAudio ||= document.getElementById('rainAudioEngine');
+    if (!rainAudio) return;
+    const next = Math.max(0, Math.min(1, Math.round((rainAudio.volume + step * 0.1) * 10) / 10));
+    rainAudio.volume = next;
+    const slider = document.getElementById('rainVolume');
+    if (slider) slider.value = next;
 }
 
 function changeRainVolume(value) {
@@ -1053,6 +1063,7 @@ window.showShortcuts = showShortcuts;
 // Expose globally
 window.toggleLofiConsole = toggleLofiConsole;
 window.toggleRainSound = toggleRainSound;
+window.stepRainVolume = stepRainVolume;
 window.changeRainVolume = changeRainVolume;
 
 

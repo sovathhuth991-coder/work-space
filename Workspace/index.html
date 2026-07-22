@@ -507,34 +507,112 @@
 
                     </div>
 
-                    <!-- ===== WIDGETS: Quick Notes + Current Lesson + Bookmarks + any
-                         user-added custom widgets. Full width, below both columns —
-                         this section grows as the user adds widgets, so it's kept out
-                         of the two-column balance instead of making one column trail
-                         off far below the other. ===== -->
-                    <div class="dash-card" data-card-id="widgets">
+                    <!-- ===== THIS WEEK'S TASK PROGRESS (standalone, was the "chart" block
+                         inside Custom Widgets) ===== -->
+                    <div class="dash-card canvas-card" data-card-id="task-progress">
                         <div class="card-glow-border"></div>
                         <div class="card-inner">
                             <div class="card-header-drag"
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                <h3 style="margin:0;">📦 Custom Widgets</h3>
+                                <h3 style="margin:0;">📈 This Week's Task Progress</h3>
                                 <div class="card-controls">
-                                    <div class="widget-add-menu">
-                                        <button class="widget-add-btn" onclick="toggleWidgetAddMenu(event)"
-                                            title="Add a new block">+ Add Block</button>
-                                        <div class="widget-add-dropdown" id="widgetAddDropdown">
-                                            <button onclick="addWidget('notes')">📝 Notes</button>
-                                            <button onclick="addWidget('quote')">💬 Quote</button>
-                                            <button onclick="addWidget('links')">🔗 Links</button>
-                                            <button onclick="addWidget('stats')">📊 Stats</button>
-                                        </div>
-                                    </div>
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
                                 </div>
                             </div>
-                            <div id="dashWidgetsGrid" class="dash-widgets-grid"></div>
+                            <div id="dashTaskProgress"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== NOTES (was the "notes" block type inside Custom Widgets;
+                         still multi-instance — each is its own scratch-note block) ===== -->
+                    <div class="dash-card canvas-card" data-card-id="notes-blocks">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;">📝 Notes <span id="notesCount" class="widget-count-badge"></span></h3>
+                                <div class="card-controls">
+                                    <button class="matrix-btn" onclick="addWidget('notes')"
+                                        title="Add a notes block"
+                                        style="padding:4px 12px;font-size:0.75rem;">+ Add</button>
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                </div>
+                            </div>
+                            <div id="dashNotesGrid" class="dash-widgets-grid"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== QUOTE (was the "quote" block type inside Custom Widgets) ===== -->
+                    <div class="dash-card canvas-card" data-card-id="quote-blocks">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;">💬 Quote <span id="quoteCount" class="widget-count-badge"></span></h3>
+                                <div class="card-controls">
+                                    <button class="matrix-btn" onclick="addWidget('quote')"
+                                        title="Add a quote block"
+                                        style="padding:4px 12px;font-size:0.75rem;">+ Add</button>
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                </div>
+                            </div>
+                            <div id="dashQuoteGrid" class="dash-widgets-grid"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== LINKS (was the "links" block type inside Custom Widgets) ===== -->
+                    <div class="dash-card canvas-card" data-card-id="links-blocks">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;">🔗 Links <span id="linksCount" class="widget-count-badge"></span></h3>
+                                <div class="card-controls">
+                                    <button class="matrix-btn" onclick="addWidget('links')"
+                                        title="Add a links block"
+                                        style="padding:4px 12px;font-size:0.75rem;">+ Add</button>
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                </div>
+                            </div>
+                            <div id="dashLinksGrid" class="dash-widgets-grid"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== STATS (was the "stats" block type inside Custom Widgets) ===== -->
+                    <div class="dash-card canvas-card" data-card-id="stats-blocks">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;">📊 Stats <span id="statsCount" class="widget-count-badge"></span></h3>
+                                <div class="card-controls">
+                                    <button class="matrix-btn" onclick="addWidget('stats')"
+                                        title="Add a stats block"
+                                        style="padding:4px 12px;font-size:0.75rem;">+ Add</button>
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                </div>
+                            </div>
+                            <div id="dashStatsGrid" class="dash-widgets-grid"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== QUICK ACCESS: Current Lesson + Recent Bookmarks + Quick Notes.
+                         These were bundled inside the old Custom Widgets card but were never
+                         part of the +Add Block type system, so they stay together here under
+                         a renamed header now that the block system has moved out. ===== -->
+                    <div class="dash-card canvas-card" data-card-id="quick-access">
+                        <div class="card-glow-border"></div>
+                        <div class="card-inner">
+                            <div class="card-header-drag"
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                                <h3 style="margin:0;">🗂️ Quick Access</h3>
+                                <div class="card-controls">
+                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
+                                </div>
+                            </div>
                             <div id="dashQuickLinks" class="dash-quick-links"
                                 style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-                                <div
+                                <div class="quick-access-tile"
                                     style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
                                     <div
                                         style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">
@@ -542,7 +620,7 @@
                                     <div id="dashRecentLessons" style="font-size:0.9rem;color:var(--text-secondary);">No
                                         open lesson</div>
                                 </div>
-                                <div
+                                <div class="quick-access-tile"
                                     style="background:var(--bg-primary);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border-color);">
                                     <div
                                         style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">

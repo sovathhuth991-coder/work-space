@@ -292,7 +292,6 @@ body {
     }
 
     /* Session trackers */
-    #sessionTracker,
     #currentSessionTracker {
         padding: 12px !important;
     }
