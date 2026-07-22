@@ -1010,113 +1010,68 @@
                     </div>
                 </div>
 
-                <!-- ===== SESSION TRACKER (Auto‑linked to Schedule) ===== -->
-                <div id="sessionTracker" class="session-tracker-enhanced"
-                    style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-                    <div class="session-tracker-header">
-                        <div class="session-tracker-title">Session Tracker</div>
-                        <div class="task-selector-wrapper">
-                            <select id="taskSelector" class="task-selector">
-                                <option value="">— Select a task —</option>
-                            </select>
-                            <span id="autoLabelBadge" class="auto-link-badge">🔗 Linked</span>
+                <div class="timer-top-row" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+                    <!-- ===== TOTAL TIMER (Session Tracker + Current Session) ===== -->
+                    <div id="sessionTracker" class="session-tracker-enhanced"
+                        style="background: #1a1a1a; padding: 16px; border-radius: 10px; border-left: 4px solid #3498db;">
+                        <div class="session-tracker-header">
+                            <div class="session-tracker-title">⏱ Total Timer</div>
+                            <div class="task-selector-wrapper">
+                                <select id="taskSelector" class="task-selector">
+                                    <option value="">— Select a task —</option>
+                                </select>
+                                <span id="autoLabelBadge" class="auto-link-badge">🔗 Linked</span>
+                            </div>
+                            <div class="scheduled-input-wrapper">
+                                <label>Scheduled</label>
+                                <input type="number" id="trackerScheduled" value="120" min="1" class="scheduled-input">
+                                <span>mins</span>
+                            </div>
                         </div>
-                        <div class="scheduled-input-wrapper">
-                            <label>Scheduled</label>
-                            <input type="number" id="trackerScheduled" value="120" min="1" class="scheduled-input">
-                            <span>mins</span>
+
+                        <div class="session-time-display">
+                            <div class="time-block focus-block">
+                                <div class="time-label">Focus</div>
+                                <div class="time-value" id="focusTimeDisplay">00:00</div>
+                            </div>
+                            <div class="time-block break-block">
+                                <div class="time-label">Break</div>
+                                <div class="time-value" id="breakTimeDisplay">00:00</div>
+                            </div>
+                            <div class="time-block idle-block">
+                                <div class="time-label">Idle</div>
+                                <div class="time-value" id="idleTimeDisplay">00:00</div>
+                            </div>
+                            <div class="time-block total-block">
+                                <div class="time-label">Total</div>
+                                <div class="time-value" id="totalTimeDisplay">00:00</div>
+                            </div>
+                        </div>
+
+                        <div class="session-progress">
+                            <div id="progressFill" class="session-progress-fill" style="width: 0%;"></div>
+                        </div>
+
+                        <div class="session-actions">
+                            <button id="resetTrackerBtn" class="session-btn session-btn-reset">Reset</button>
+                            <button id="endSessionBtn" class="session-btn session-btn-end">End</button>
                         </div>
                     </div>
 
-                    <div class="session-time-display">
-                        <div class="time-block focus-block">
-                            <div class="time-label">Focus Time</div>
-                            <div class="time-value" id="focusTimeDisplay">00:00</div>
+                    <!-- ===== TODAY'S SESSIONS ===== -->
+                    <div id="sessionHistoryCard" class="session-tracker-enhanced"
+                        style="background: var(--bg-card); padding: 16px; border-radius: 10px; border-left: 4px solid var(--accent-1);">
+                        <div class="session-tracker-header">
+                            <div class="session-tracker-title">📊 Today's Sessions</div>
                         </div>
-                        <div class="time-block break-block">
-                            <div class="time-label">Break Time</div>
-                            <div class="time-value" id="breakTimeDisplay">00:00</div>
-                        </div>
-                        <div class="time-block idle-block">
-                            <div class="time-label">Idle Time</div>
-                            <div class="time-value" id="idleTimeDisplay">00:00</div>
-                            <div class="time-subtitle">away from keyboard</div>
-                        </div>
-                        <div class="time-block total-block">
-                            <div class="time-label">Total Time</div>
-                            <div class="time-value" id="totalTimeDisplay">00:00</div>
-                        </div>
-                        <div class="time-block progress-block">
-                            <div class="time-label">Progress</div>
-                            <div class="time-value" id="progressPercent">0%</div>
-                            <div class="time-subtitle">of <span id="scheduledDisplay">120</span> min</div>
-                        </div>
+                        <div id="sessionHistoryList" class="session-history-list"></div>
                     </div>
 
-                    <div class="session-progress">
-                        <div id="progressFill" class="session-progress-fill" style="width: 0%;"></div>
-                    </div>
-
-                    <div class="session-actions">
-                        <button id="resetTrackerBtn" class="session-btn session-btn-reset">Reset Log</button>
-                        <button id="endSessionBtn" class="session-btn session-btn-end">✅ End Session & Log</button>
-                    </div>
                 </div>
 
-                <!-- ===== CURRENT SESSION TRACKER (Per-Task) ===== -->
-                <div id="currentSessionTracker" class="session-tracker-enhanced current-session-tracker"
-                    style="background: #1a1a1a; padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f97316;">
-                    <div class="session-tracker-header">
-                        <div class="session-tracker-title">Current Session <span
-                                style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">(resets per
-                                task)</span></div>
-                        <div class="current-session-task-info" id="currentSessionTaskInfo"
-                            style="font-size:0.85rem;color:var(--text-secondary);">
-                            <span id="currentSessionTaskName">No active task</span>
-                            <span id="currentSessionTaskTime" style="color:var(--text-muted);font-size:0.75rem;"></span>
-                        </div>
-                    </div>
-
-                    <div class="session-time-display session-time-display-4">
-                        <div class="time-block focus-block current-focus-block">
-                            <div class="time-label">Focus Time</div>
-                            <div class="time-value" id="sessionFocusDisplay">00:00</div>
-                        </div>
-                        <div class="time-block break-block current-break-block">
-                            <div class="time-label">Break Time</div>
-                            <div class="time-value" id="sessionBreakDisplay">00:00</div>
-                        </div>
-                        <div class="time-block idle-block current-idle-block">
-                            <div class="time-label">Idle Time</div>
-                            <div class="time-value" id="sessionIdleDisplay">00:00</div>
-                            <div class="time-subtitle">before you start</div>
-                        </div>
-                        <div class="time-block total-block current-total-block">
-                            <div class="time-label">Total Time</div>
-                            <div class="time-value" id="sessionTotalDisplay">00:00</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== SESSION HISTORY (Today, resets weekly) ===== -->
-                <div id="sessionHistoryCard" class="session-tracker-enhanced"
-                    style="background: var(--bg-card); padding: 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--accent-1);">
-                    <div class="session-tracker-header">
-                        <div class="session-tracker-title">📊 Today's Sessions</div>
-                    </div>
-                    <div id="sessionHistoryList" class="session-history-list"></div>
-                </div>
-
-                <!-- ===== MODE TOGGLE (always visible) ===== -->
-                <div class="pomodoro-mode-toggle"
-                    style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
-                    <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
-                    <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
-                </div>
-
-                <!-- ===== SIMPLE COUNTDOWN TIMER ===== -->
-                <div class="simple-timer-card"
-                    style="max-width: 500px; margin: 0 auto; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
+                <!-- ===== FOCUS TIMER ===== -->
+                <div class="focus-timer-section" style="max-width: 500px; margin: 24px auto 0; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
 
                     <!-- Progress Ring -->
                     <div class="timer-progress-ring">
@@ -1176,7 +1131,7 @@
                     <div
                         style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 16px;">
                         <input type="number" id="customTimerInput" placeholder="Custom minutes..." min="1" max="999"
-                            style="padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; width: 140px; text-align: center; outline: none;">
+                            style="padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); font-size: 0.85rem; width: 140px; text-align: center; outline: none; font-family: inherit;">
                         <button id="addCustomTimerBtn"
                             style="padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(124, 109, 240, 0.15); border: 1px solid var(--accent-1); color: var(--accent-1); cursor: pointer; transition: var(--transition);">
                             + Add Timer
@@ -1186,8 +1141,15 @@
                     <p style="font-size: 0.75rem; color: var(--text-muted);">Simple countdown timer</p>
                 </div>
 
+                <!-- ===== MODE TOGGLE ===== -->
+                <div class="pomodoro-mode-toggle"
+                    style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
+                    <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
+                    <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
+                </div>
+
                 <!-- ===== POMODORO MODE ===== -->
-                <div id="pomodoroShell" class="pomodoro-shell" style="max-width:500px;margin:0 auto;">
+                <div id="pomodoroShell" class="pomodoro-shell" style="max-width:500px;margin:0 auto 40px;">
 
                     <div class="pomodoro-ring-container" id="pomodoroRingContainer">
                         <svg viewBox="0 0 280 280">
