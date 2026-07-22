@@ -1,0 +1,259 @@
+/* ============================================================
+   TASK FOCUS — pick a flexible task, get a countdown sized to
+   its target duration. Third timer mode alongside Countdown and
+   Pomodoro.
+   ============================================================ */
+
+.task-focus-shell {
+    text-align: center;
+}
+
+/* ---- Picker screen ---- */
+.task-focus-hint {
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    margin: 0 0 16px 0;
+}
+
+.task-focus-pick-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    max-height: 280px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.task-focus-empty {
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    text-align: center;
+    padding: 12px 0;
+    margin: 0;
+}
+
+.task-focus-pick-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.task-focus-pick-item:hover {
+    background: rgba(16, 185, 129, 0.06);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.task-focus-pick-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.task-focus-pick-title {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.task-focus-pick-duration {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+}
+
+.task-focus-pick-btn {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: var(--text-base);
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: var(--status-online);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.task-focus-pick-btn:hover {
+    background: rgba(16, 185, 129, 0.22);
+    transform: translateY(-1px);
+}
+
+.task-focus-quick-add {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.task-focus-quick-add input[type="text"] {
+    padding: 10px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: var(--text-md);
+    outline: none;
+    font-family: inherit;
+}
+
+.task-focus-quick-add input[type="text"]:focus {
+    border-color: var(--status-online);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.task-focus-quick-duration {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.task-focus-quick-duration input[type="number"] {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: var(--text-md);
+    text-align: center;
+    outline: none;
+    font-family: inherit;
+}
+
+.task-focus-quick-duration input[type="number"]:focus {
+    border-color: var(--status-online);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.task-focus-quick-duration button {
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-size: var(--text-md);
+    font-weight: 600;
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.task-focus-quick-duration button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+}
+
+/* ---- Session screen (ring reuses the same geometry as Countdown/Pomodoro) ---- */
+.task-focus-ring-container {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-focus-ring-container svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.task-focus-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 8;
+}
+
+.task-focus-ring-fill {
+    fill: none;
+    stroke: url(#taskFocusGradient);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 816.8;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+}
+
+.task-focus-ring-glow {
+    fill: none;
+    stroke: url(#taskFocusGradient);
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 816.8;
+    stroke-dashoffset: 0;
+    opacity: 0.3;
+    filter: blur(4px);
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.task-focus-display {
+    font-size: 3.6rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+    margin-bottom: 8px;
+}
+
+.task-focus-label {
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0 auto;
+    font-weight: 600;
+}
+
+#taskFocusStateIndicator.running {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--status-online);
+    animation: pulse 2s infinite;
+}
+
+#taskFocusStateIndicator.paused {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: var(--status-attention);
+}
+
+.task-focus-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .task-focus-ring-container {
+        width: 240px;
+        height: 240px;
+    }
+
+    .task-focus-display {
+        font-size: 2.8rem;
+    }
+}

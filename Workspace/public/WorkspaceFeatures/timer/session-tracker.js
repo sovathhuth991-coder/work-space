@@ -226,8 +226,14 @@
 
     // ----- Helpers -----
     function formatTime(sec) {
-        const m = Math.floor(sec / 60);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
         const s = sec % 60;
+        if (h > 0) {
+            if (m === 0 && s === 0) return `${h}h`;
+            if (s === 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+            return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+        }
         return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
     }
 

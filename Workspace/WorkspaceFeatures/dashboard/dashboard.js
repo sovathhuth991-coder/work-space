@@ -168,8 +168,14 @@ function updateHubSessionsWidget(current, next, todayEvents) {
     todaySessions.sort((a, b) => b.timestamp - a.timestamp);
     const recentSessions = todaySessions.slice(0, 3);
     const formatTimeShort = (sec) => {
-        const m = Math.floor(sec / 60);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
         const s = sec % 60;
+        if (h > 0) {
+            if (m === 0 && s === 0) return `${h}h`;
+            if (s === 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+            return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+        }
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     };
     const formatTimeRange = (timestamp) => {
@@ -243,8 +249,14 @@ function renderAllSessions(current, next, todayEvents) {
         return `${m}m ${String(s).padStart(2, '0')}s`;
     };
     const formatTimeShort = (sec) => {
-        const m = Math.floor(sec / 60);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
         const s = sec % 60;
+        if (h > 0) {
+            if (m === 0 && s === 0) return `${h}h`;
+            if (s === 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+            return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+        }
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     };
     const formatTimeRange = (timestamp) => {
@@ -390,8 +402,14 @@ function renderSessionHistory() {
     todaySessions.sort((a, b) => b.timestamp - a.timestamp);
 
     const formatTimeShort = (sec) => {
-        const m = Math.floor(sec / 60);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
         const s = sec % 60;
+        if (h > 0) {
+            if (m === 0 && s === 0) return `${h}h`;
+            if (s === 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+            return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+        }
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     };
 
@@ -488,8 +506,14 @@ window.showSessionDetailsModal = function(sessionTimestamp) {
         const clickedSession = todaySessions.find(s => s.timestamp === sessionTimestamp);
         if (!clickedSession) return;
         const formatTimeShort = (sec) => {
-            const m = Math.floor(sec / 60);
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
             const s = sec % 60;
+            if (h > 0) {
+                if (m === 0 && s === 0) return `${h}h`;
+                if (s === 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+                return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+            }
             return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         };
         const time = new Date(clickedSession.timestamp);
