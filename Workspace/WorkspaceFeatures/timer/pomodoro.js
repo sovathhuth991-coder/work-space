@@ -84,10 +84,10 @@
 
         if (!elements.shell) return;
 
-        // Ensure #pomodoroShell lives inside .timer-panel-focus so the mode
-        // toggle and the shell share the same visual container. If it was
-        // placed outside the panel in the HTML, move it to the right spot.
-        const focusPanel = document.querySelector('.timer-panel-focus');
+        // Ensure #pomodoroShell is inside .simple-timer-card so it shares the
+        // same visual container. If it was placed outside the card in the HTML,
+        // move it to the right spot.
+        const focusPanel = document.querySelector('.simple-timer-card');
         if (focusPanel && elements.shell.parentElement !== focusPanel) {
             focusPanel.appendChild(elements.shell);
         }
@@ -387,6 +387,11 @@
     let swapTimeout;
     function switchPomodoroMode(mode) {
         const card = document.querySelector('.simple-timer-card');
+        const countdownContent = card ? card.querySelector('.countdown-content') : null;
+        const pomodoroShell = document.getElementById('pomodoroShell');
+        const countdownBtn = document.getElementById('pomodoroCountdownBtn');
+        const pomodoroBtn = document.getElementById('pomodoroPomoBtn');
+
         if (swapTimeout) clearTimeout(swapTimeout);
         if (card) card.classList.add('swapping');
 
@@ -397,28 +402,17 @@
             phaseStartTime = null;
             elements.ringContainer?.classList.remove('pomodoro-running');
 
-            const countdownShell = card;
-            const pomodoroShell = document.getElementById('pomodoroShell');
-            const countdownBtn = document.getElementById('pomodoroCountdownBtn');
-            const pomodoroBtn = document.getElementById('pomodoroPomoBtn');
-
             if (mode === 'pomodoro') {
-                if (countdownShell) {
-                    countdownShell.style.display = 'none';
-                } else {
-                    console.warn('[Pomodoro] .simple-timer-card not found — cannot hide countdown shell');
-                }
+                if (countdownContent) countdownContent.style.display = 'none';
                 if (pomodoroShell) {
                     pomodoroShell.classList.add('active');
                     pomodoroShell.style.display = 'block';
-                } else {
-                    console.warn('[Pomodoro] #pomodoroShell not found');
                 }
                 if (countdownBtn) countdownBtn.classList.remove('active');
                 if (pomodoroBtn) pomodoroBtn.classList.add('active');
                 resetPomodoro();
             } else {
-                if (countdownShell) countdownShell.style.display = 'block';
+                if (countdownContent) countdownContent.style.display = 'block';
                 if (pomodoroShell) {
                     pomodoroShell.classList.remove('active');
                     pomodoroShell.style.display = 'none';

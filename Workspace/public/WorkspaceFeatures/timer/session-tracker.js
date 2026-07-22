@@ -480,6 +480,36 @@
         applyCurrentTask(selected);
     }
 
+    // ----- Get today's totals from history -----
+    function getTodayHistoryTotals() {
+        try {
+            const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+            const today = new Date().toDateString();
+            let focus = 0, break_ = 0, idle = 0;
+            for (const session of completedSessions) {
+                if (new Date(session.timestamp).toDateString() === today) {
+                    focus += session.focusSeconds || 0;
+                    break_ += session.breakSeconds || 0;
+                    idle += session.idleSeconds || 0;
+                }
+            }
+            return { focus, break: break_, idle, total: focus + break_ + idle };
+        } catch (e) {
+            return { focus: 0, break: 0, idle: 0, total: 0 };
+        }
+    }
+
+    function updateTotalTimerFromHistory() {
+        const history = getTodayHistoryTotals();
+        const totalFocus = history.focus + (focusSeconds || 0);
+        const totalBreak = history.break + (breakSeconds || 0);
+        const totalIdle = history.idle + (idleSeconds || 0);
+        if (focusDisplay) focusDisplay.textContent = formatTime(totalFocus);
+        if (breakDisplay) breakDisplay.textContent = formatTime(totalBreak);
+        if (idleDisplay) idleDisplay.textContent = formatTime(totalIdle);
+        if (totalDisplay) totalDisplay.textContent = formatTime(totalFocus + totalBreak + totalIdle);
+    }
+
     // ----- Update UI (Daily Totals) -----
     function updateUI() {
         if (focusDisplay) focusDisplay.textContent = formatTime(focusSeconds);
@@ -507,6 +537,8 @@
 
         // Update session tracker visual state
         updateSessionTrackerState();
+
+        updateTotalTimerFromHistory();
     }
 
     // ----- Update session tracker visual state -----
@@ -705,10 +737,6 @@
         const totalSecs = focusSeconds + breakSeconds + idleSeconds;
         const efficiency = scheduledSecs > 0 ? Math.round((focusSeconds / scheduledSecs) * 100) : 0;
 
-        // Log into the same history the auto-advance path uses, so manually
-        // ended sessions show up in Session History too — previously this
-        // only wrote to a separate, older `sessionHistory` key with no
-        // visible UI of its own.
         if (totalSecs >= 5) {
             const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
             completedSessions.push({
@@ -721,6 +749,7 @@
             });
             localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
             if (typeof renderSessionHistory === 'function') renderSessionHistory();
+            updateTotalTimerFromHistory();
         }
 
         if (typeof showToast === 'function') {
@@ -729,7 +758,6 @@
             alert(`📊 SESSION COMPLETE: ${label}\nFocus: ${formatTime(focusSeconds)} · Break: ${formatTime(breakSeconds)} · Idle: ${formatTime(idleSeconds)}\nEfficiency: ${efficiency}%`);
         }
 
-        // Legacy key some older code may still read — kept for compatibility.
         const history = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
         history.push({
             label,
@@ -737,12 +765,18 @@
             focusSeconds,
             breakSeconds,
             idleSeconds,
-            efficiency,
-            timestamp: Date.now()
+            totalSeconds: totalSecs
         });
         localStorage.setItem('sessionHistory', JSON.stringify(history));
 
-        resetTracker();
+        focusSeconds = 0;
+        breakSeconds = 0;
+        idleSeconds = 0;
+        idleStartTime = null;
+        focusStartTime = null;
+        breakStartTime = null;
+        lastActivityTime = Date.now();
+        updateUI();
     }
 
     // ===== Get completed sessions for dashboard =====
@@ -844,10 +878,6 @@
                 sessionIdleStartTime = Date.now();
                 sessionIdleTimeAtStart = sessionIdleSeconds;
             });
-        }
-
-        if (endSessionBtn) {
-            endSessionBtn.addEventListener('click', endSession);
         }
 
         if (scheduledInput) {
