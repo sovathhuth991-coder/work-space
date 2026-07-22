@@ -1449,14 +1449,21 @@ function onFlowDragStart(e) {
 
     card.style.opacity = '0.4';
     card.style.zIndex = '100';
+    let swapTarget = null;
+
+    function cardUnderPoint(x, y) {
+        const hit = document.elementsFromPoint(x, y)
+            .find(el => el.closest && el.closest('.dash-card[data-card-id]') && canvasEl.contains(el));
+        const found = hit && hit.closest('.dash-card[data-card-id]');
+        return (found && found !== card) ? found : null;
+    }
 
     function onMove(ev) {
         const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
         const x = ev.touches ? ev.touches[0].clientX : ev.clientX;
-        const others = Array.from(canvasEl.querySelectorAll(':scope > .dash-card[data-card-id]')).filter(c => c !== card);
-        const afterEl = dashGetDragAfterElement(others, mode === 'grid' ? x : y, mode);
-        if (afterEl == null) canvasEl.appendChild(card);
-        else canvasEl.insertBefore(card, afterEl);
+        if (swapTarget) swapTarget.classList.remove('flow-swap-target');
+        swapTarget = cardUnderPoint(x, y);
+        if (swapTarget) swapTarget.classList.add('flow-swap-target');
     }
     function onEnd() {
         document.removeEventListener('mousemove', onMove);
@@ -1465,7 +1472,20 @@ function onFlowDragStart(e) {
         document.removeEventListener('touchend', onEnd);
         card.style.opacity = '';
         card.style.zIndex = '';
-        dashPersistFlowOrder(mode);
+        if (swapTarget) {
+            swapTarget.classList.remove('flow-swap-target');
+            const cardNext = card.nextElementSibling;
+            if (swapTarget.nextElementSibling === card) {
+                canvasEl.insertBefore(card, swapTarget);
+            } else if (cardNext === swapTarget) {
+                canvasEl.insertBefore(swapTarget, card);
+            } else {
+                canvasEl.insertBefore(card, swapTarget);
+                canvasEl.insertBefore(swapTarget, cardNext);
+            }
+            dashPersistFlowOrder(mode);
+        }
+        swapTarget = null;
     }
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onEnd);

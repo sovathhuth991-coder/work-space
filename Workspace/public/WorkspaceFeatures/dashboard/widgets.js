@@ -1,5 +1,17 @@
 // ============================================================
-// WIDGETS – FIXED: Only add default audio if no audio widgets exist
+// WIDGETS — split into standalone per-type dashboard cards.
+// Each of Notes / Quote / Links / Stats is still multi-instance
+// (you can add several blocks of the same type), but each type
+// now lives in its own dash-card instead of a shared "Custom
+// Widgets" container with an add-block dropdown.
+//
+// "This Week's Task Progress" (previously the "chart" widget
+// type) and "Study Beats" (previously the "local-audio" widget
+// type) have been removed from this array-based system entirely:
+// Task Progress is now its own standalone always-on card (see
+// renderTaskProgressCard below), and Study Beats lives solely in
+// the separate Ambient Mix Station widget — having both was a
+// duplicate rain-sound player.
 // ============================================================
 
 let customWidgets = JSON.parse(localStorage.getItem('customWidgets') || '[]');
@@ -8,165 +20,154 @@ function saveCustomWidgets() {
     localStorage.setItem('customWidgets', JSON.stringify(customWidgets));
 }
 
-function renderWidgets() {
-    const grid = document.getElementById('dashWidgetsGrid');
-    if (!grid) return;
-    if (!customWidgets.length) {
-        grid.innerHTML = '<p style="color:#475569;font-style:italic;grid-column:1/-1;text-align:center;padding:40px;">No blocks yet — use + Add Block above to start building this out.</p>';
-        return;
-    }
-    grid.innerHTML = customWidgets.map(widget => {
-        let content = '';
-        switch (widget.type) {
-            case 'notes':
-                content = `<textarea placeholder="Write your notes..." onchange="updateWidgetContent('${widget.id}', this.value)">${escapeHtml(widget.content || '')}</textarea>`;
-                break;
-            case 'links':
-                content = `
-                    <div class="widget-links">${(widget.links || []).map((l, i) => `
-                        <div class="widget-link-item">
-                            <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${escapeHtml(l.name)}</a>
-                            <button class="widget-row-delete" onclick="removeWidgetListItem('${widget.id}','links',${i})" title="Remove">✕</button>
-                        </div>`).join('') || '<p class="widget-empty-hint">No links yet — add one below</p>'}
-                    </div>
-                    <div class="widget-add-row">
-                        <input type="text" id="linkName-${widget.id}" placeholder="Label" />
-                        <input type="text" id="linkUrl-${widget.id}" placeholder="https://..." />
-                        <button onclick="addWidgetLink('${widget.id}')" title="Add link">+</button>
-                    </div>
-                `;
-                break;
-            case 'stats':
-                content = `
-                    <div class="widget-stats">${(widget.stats || []).map((s, i) => `
-                        <div class="widget-stat-item">
-                            <span class="widget-stat-label">${escapeHtml(s.label)}</span>
-                            <span class="widget-stat-value">${escapeHtml(s.value)}</span>
-                            <button class="widget-row-delete" onclick="removeWidgetListItem('${widget.id}','stats',${i})" title="Remove">✕</button>
-                        </div>`).join('') || '<p class="widget-empty-hint">No stats yet — add one below</p>'}
-                    </div>
-                    <div class="widget-add-row">
-                        <input type="text" id="statLabel-${widget.id}" placeholder="Label" />
-                        <input type="text" id="statValue-${widget.id}" placeholder="Value" />
-                        <button onclick="addWidgetStat('${widget.id}')" title="Add stat">+</button>
-                    </div>
-                `;
-                break;
-            case 'timer': {
-                const m = Math.floor(widget.remainingSeconds / 60),
-                    s = widget.remainingSeconds % 60;
-                content = `<div class="widget-timer"><div class="widget-timer-display" id="timer-${widget.id}">${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}</div><div class="widget-timer-controls"><button class="widget-timer-btn" onclick="toggleWidgetTimer('${widget.id}')">${widget.timerRunning ? 'Pause' : 'Start'}</button><button class="widget-timer-btn" onclick="resetWidgetTimer('${widget.id}')">Reset</button></div></div>`;
-                break;
-            }
-            case 'chart': {
-                const total = events.length || 1;
-                const completed = events.filter(e => e.completed).length;
-                const pct = Math.round((completed / total) * 100);
-                content = `
-                    <div class="widget-chart">
-                        <div class="widget-chart-label">Completion: ${pct}%</div>
-                        <div class="widget-chart-bar">
-                            <div class="widget-chart-fill" style="width:${pct}%;"></div>
+// Renders the inner HTML for a single block. Only notes/quote/links/stats
+// are reachable from the UI now; timer/schedule/weather are kept as-is
+// in case they get wired up later, but nothing currently creates them.
+function renderWidgetBlock(widget) {
+    let content = '';
+    switch (widget.type) {
+        case 'notes':
+            content = `<textarea placeholder="Write your notes..." onchange="updateWidgetContent('${widget.id}', this.value)">${escapeHtml(widget.content || '')}</textarea>`;
+            break;
+        case 'links':
+            content = `
+                <div class="widget-links">${(widget.links || []).map((l, i) => `
+                    <div class="widget-link-item">
+                        <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${escapeHtml(l.name)}</a>
+                        <button class="widget-row-delete" onclick="removeWidgetListItem('${widget.id}','links',${i})" title="Remove">✕</button>
+                    </div>`).join('') || '<p class="widget-empty-hint">No links yet — add one below</p>'}
+                </div>
+                <div class="widget-add-row">
+                    <input type="text" id="linkName-${widget.id}" placeholder="Label" />
+                    <input type="text" id="linkUrl-${widget.id}" placeholder="https://..." />
+                    <button onclick="addWidgetLink('${widget.id}')" title="Add link">+</button>
+                </div>
+            `;
+            break;
+        case 'stats':
+            content = `
+                <div class="widget-stats">${(widget.stats || []).map((s, i) => `
+                    <div class="widget-stat-item">
+                        <span class="widget-stat-label">${escapeHtml(s.label)}</span>
+                        <span class="widget-stat-value">${escapeHtml(s.value)}</span>
+                        <button class="widget-row-delete" onclick="removeWidgetListItem('${widget.id}','stats',${i})" title="Remove">✕</button>
+                    </div>`).join('') || '<p class="widget-empty-hint">No stats yet — add one below</p>'}
+                </div>
+                <div class="widget-add-row">
+                    <input type="text" id="statLabel-${widget.id}" placeholder="Label" />
+                    <input type="text" id="statValue-${widget.id}" placeholder="Value" />
+                    <button onclick="addWidgetStat('${widget.id}')" title="Add stat">+</button>
+                </div>
+            `;
+            break;
+        case 'timer': {
+            const m = Math.floor(widget.remainingSeconds / 60),
+                s = widget.remainingSeconds % 60;
+            content = `<div class="widget-timer"><div class="widget-timer-display" id="timer-${widget.id}">${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}</div><div class="widget-timer-controls"><button class="widget-timer-btn" onclick="toggleWidgetTimer('${widget.id}')">${widget.timerRunning ? 'Pause' : 'Start'}</button><button class="widget-timer-btn" onclick="resetWidgetTimer('${widget.id}')">Reset</button></div></div>`;
+            break;
+        }
+        case 'schedule': {
+            const todayTasks = events.filter(e => e.day === getTodayName()).sort((a, b) => a.start.localeCompare(b.start));
+            content = `
+                <div class="widget-schedule">
+                    ${todayTasks.length === 0 ? '<p style="color:var(--text-muted);font-style:italic;">No tasks today</p>' :
+                    todayTasks.slice(0, 5).map(t => `
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color);">
+                            <span>${escapeHtml(t.title)}</span>
+                            <span style="color:var(--accent-1);font-size:0.8rem;">${t.start}</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted);">
-                            <span>${completed} done</span>
-                            <span>${total - completed} left</span>
-                        </div>
-                    </div>
-                `;
-                break;
-            }
-            case 'schedule': {
-                const todayTasks = events.filter(e => e.day === getTodayName()).sort((a,b) => a.start.localeCompare(b.start));
-                content = `
-                    <div class="widget-schedule">
-                        ${todayTasks.length === 0 ? '<p style="color:var(--text-muted);font-style:italic;">No tasks today</p>' :
-                        todayTasks.slice(0, 5).map(t => `
-                            <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color);">
-                                <span>${escapeHtml(t.title)}</span>
-                                <span style="color:var(--accent-1);font-size:0.8rem;">${t.start}</span>
-                            </div>
-                        `).join('')}
-                        ${todayTasks.length > 5 ? `<div style="color:var(--text-muted);font-size:0.7rem;margin-top:4px;">+ ${todayTasks.length - 5} more</div>` : ''}
-                    </div>
-                `;
-                break;
-            }
-            case 'quote':
-                content = `
+                    `).join('')}
+                    ${todayTasks.length > 5 ? `<div style="color:var(--text-muted);font-size:0.7rem;margin-top:4px;">+ ${todayTasks.length - 5} more</div>` : ''}
+                </div>
+            `;
+            break;
+        }
+        case 'quote':
+            content = `
+                <div class="widget-quote-block">
+                    <span class="widget-quote-mark" aria-hidden="true">&ldquo;</span>
                     <textarea class="widget-quote-input" placeholder="Write a quote..." onchange="updateWidgetField('${widget.id}', 'quoteText', this.value)">${escapeHtml(widget.quoteText || '')}</textarea>
                     <input type="text" class="widget-quote-author-input" placeholder="— Author" value="${escapeHtml(widget.quoteAuthor || '')}" onchange="updateWidgetField('${widget.id}', 'quoteAuthor', this.value)" />
-                `;
-                break;
-            case 'weather':
-                content = `<div class="widget-weather"><div class="widget-weather-icon">${escapeHtml(widget.icon || '🌤️')}</div><div class="widget-weather-temp">${escapeHtml(widget.temp || 28)}°C</div><div class="widget-weather-desc">${escapeHtml(widget.condition || 'Sunny')} · ${escapeHtml(widget.location || 'Unknown')}</div></div>`;
-                break;
-            case 'local-audio': {
-                const widgetId = widget.id;
-                const audioSrc = widget.src || '';
-                const label = widget.label || '';
-
-                content = `
-                    <div class="custom-audio-player" data-widget-id="${widgetId}">
-                        <audio class="custom-audio-element" src="${escapeHtml(audioSrc)}" preload="metadata" loop></audio>
-                        <div class="audio-player-inner">
-                            ${label ? `<div class="audio-info"><span class="audio-label">${escapeHtml(label)}</span></div>` : ''}
-                            <div class="audio-controls">
-                                <button class="audio-play-btn" onclick="toggleAudioPlayer('${widgetId}')">
-                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                        <polygon points="5,3 19,12 5,21" id="playIcon-${widgetId}" />
-                                        <rect x="6" y="4" width="3" height="16" id="pauseIcon1-${widgetId}" style="display:none;" />
-                                        <rect x="13" y="4" width="3" height="16" id="pauseIcon2-${widgetId}" style="display:none;" />
-                                    </svg>
-                                </button>
-                                <div class="audio-progress-container">
-                                    <span class="audio-current-time" id="currentTime-${widgetId}">0:00</span>
-                                    <div class="audio-progress-bar" id="progressBar-${widgetId}" onclick="seekAudio(event, '${widgetId}')">
-                                        <div class="audio-progress-fill" id="progressFill-${widgetId}" style="width:0%;"></div>
-                                    </div>
-                                    <span class="audio-duration" id="duration-${widgetId}">0:00</span>
-                                </div>
-                                <div class="audio-volume-container">
-                                    <button class="audio-volume-btn" onclick="toggleMute('${widgetId}')" id="volumeBtn-${widgetId}">🔊</button>
-                                    <input type="range" class="audio-volume-slider" min="0" max="1" step="0.05" value="0.8"
-                                           oninput="setVolume('${widgetId}', this.value)" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                break;
-            }
-            default:
-                content = `<p>Unknown widget type</p>`;
-        }
-        return `<div class="widget-card widget-${widget.type}" data-widget-id="${widget.id}"><div class="widget-header"><span class="widget-drag-handle" draggable="true" title="Drag to reorder">⠿</span><div class="widget-title">${escapeHtml(widget.title)}</div><div class="widget-actions"><button class="widget-btn delete" onclick="deleteWidget('${widget.id}')">✕</button></div></div><div class="widget-content">${content}</div></div>`;
-    }).join('');
-
-    initAudioPlayers();
-    initWidgetDragReorder();
-}
-
-// ============================================================
-// ADD BLOCK MENU
-// ============================================================
-function toggleWidgetAddMenu(e) {
-    if (e) e.stopPropagation();
-    const dropdown = document.getElementById('widgetAddDropdown');
-    if (dropdown) dropdown.classList.toggle('open');
-}
-
-function closeWidgetAddMenu() {
-    const dropdown = document.getElementById('widgetAddDropdown');
-    if (dropdown) dropdown.classList.remove('open');
-}
-
-document.addEventListener('click', (e) => {
-    const dropdown = document.getElementById('widgetAddDropdown');
-    if (dropdown && dropdown.classList.contains('open') && !e.target.closest('.widget-add-menu')) {
-        dropdown.classList.remove('open');
+                </div>
+            `;
+            break;
+        case 'weather':
+            content = `<div class="widget-weather"><div class="widget-weather-icon">${escapeHtml(widget.icon || '🌤️')}</div><div class="widget-weather-temp">${escapeHtml(widget.temp || 28)}°C</div><div class="widget-weather-desc">${escapeHtml(widget.condition || 'Sunny')} · ${escapeHtml(widget.location || 'Unknown')}</div></div>`;
+            break;
+        default:
+            content = `<p>Unknown widget type</p>`;
     }
-});
+    return `<div class="widget-card widget-${widget.type}" data-widget-id="${widget.id}"><div class="widget-header"><span class="widget-drag-handle" draggable="true" title="Drag to reorder">⠿</span><div class="widget-title">${escapeHtml(widget.title)}</div><div class="widget-actions"><button class="widget-btn delete" onclick="deleteWidget('${widget.id}')">✕</button></div></div><div class="widget-content">${content}</div></div>`;
+}
+
+const WIDGET_GRID_IDS = {
+    notes: 'dashNotesGrid',
+    quote: 'dashQuoteGrid',
+    links: 'dashLinksGrid',
+    stats: 'dashStatsGrid'
+};
+
+const WIDGET_COUNT_IDS = {
+    notes: 'notesCount',
+    quote: 'quoteCount',
+    links: 'linksCount',
+    stats: 'statsCount'
+};
+
+const WIDGET_EMPTY_CONFIG = {
+    notes: { icon: '📝', message: 'No notes yet — click to add one' },
+    quote: { icon: '💬', message: 'No quotes yet — click to add one' },
+    links: { icon: '🔗', message: 'No link blocks yet — click to add one' },
+    stats: { icon: '📊', message: 'No stat blocks yet — click to add one' }
+};
+
+function renderWidgetsByType(type) {
+    const gridId = WIDGET_GRID_IDS[type];
+    const grid = gridId && document.getElementById(gridId);
+    if (!grid) return;
+    const items = customWidgets.filter(w => w.type === type);
+
+    const countEl = document.getElementById(WIDGET_COUNT_IDS[type]);
+    if (countEl) countEl.textContent = items.length ? String(items.length) : '';
+
+    if (!items.length) {
+        const cfg = WIDGET_EMPTY_CONFIG[type] || { icon: '📦', message: 'Nothing here yet.' };
+        grid.innerHTML = `<div class="widget-card-empty" onclick="addWidget('${type}')" role="button" tabindex="0"><span class="widget-card-empty-icon">${cfg.icon}</span>${cfg.message}</div>`;
+        return;
+    }
+    grid.innerHTML = items.map(renderWidgetBlock).join('');
+    initWidgetDragReorder(gridId);
+}
+
+function renderWidgets() {
+    Object.keys(WIDGET_GRID_IDS).forEach(renderWidgetsByType);
+    renderTaskProgressCard();
+}
+
+// ============================================================
+// THIS WEEK'S TASK PROGRESS — standalone card, was the "chart"
+// widget type. Computed directly from `events` rather than being
+// a stored/addable block. Color-codes the number/bar so progress
+// is readable at a glance, not just as a raw percentage.
+// ============================================================
+function renderTaskProgressCard() {
+    const target = document.getElementById('dashTaskProgress');
+    if (!target) return;
+    const total = events.length || 1;
+    const completed = events.filter(e => e.completed).length;
+    const pct = Math.round((completed / total) * 100);
+    const tone = pct >= 70 ? '#34d399' : pct >= 35 ? '#f59e0b' : '#f43f5e';
+    target.innerHTML = `
+        <div class="task-progress-value" style="color:${tone};">${pct}<span style="font-size:1rem;font-weight:600;">% complete</span></div>
+        <div class="task-progress-track">
+            <div class="task-progress-fill" style="width:${pct}%; background:linear-gradient(90deg, var(--accent-1), ${tone});"></div>
+        </div>
+        <div class="task-progress-footer">
+            <span>✓ ${completed} done</span>
+            <span>${total - completed} left</span>
+        </div>
+    `;
+}
 
 function addWidget(type) {
     const widget = { id: `widget_${Date.now()}`, type };
@@ -193,8 +194,14 @@ function addWidget(type) {
     }
     customWidgets.push(widget);
     saveCustomWidgets();
-    renderWidgets();
-    closeWidgetAddMenu();
+    renderWidgetsByType(type);
+
+    // Focus the new block's primary field so you can start typing
+    // right away instead of having to click into it.
+    const grid = document.getElementById(WIDGET_GRID_IDS[type]);
+    const newCard = grid && grid.querySelector(`[data-widget-id="${widget.id}"]`);
+    const firstField = newCard && newCard.querySelector('textarea, input');
+    if (firstField) firstField.focus();
 }
 
 // ============================================================
@@ -221,7 +228,7 @@ function addWidgetLink(id) {
     w.links = w.links || [];
     w.links.push({ name, url });
     saveCustomWidgets();
-    renderWidgets();
+    renderWidgetsByType('links');
 }
 
 function addWidgetStat(id) {
@@ -236,7 +243,7 @@ function addWidgetStat(id) {
     w.stats = w.stats || [];
     w.stats.push({ label, value });
     saveCustomWidgets();
-    renderWidgets();
+    renderWidgetsByType('stats');
 }
 
 function removeWidgetListItem(id, field, index) {
@@ -244,7 +251,7 @@ function removeWidgetListItem(id, field, index) {
     if (!w || !Array.isArray(w[field])) return;
     w[field].splice(index, 1);
     saveCustomWidgets();
-    renderWidgets();
+    renderWidgetsByType(w.type);
 }
 
 // ============================================================
@@ -254,9 +261,13 @@ function removeWidgetListItem(id, field, index) {
 // select text never gets hijacked as a card drag. Only mouse/
 // trackpad input fires these events — touch reordering isn't wired
 // up yet, same limitation as plain HTML5 DnD generally has.
+//
+// Reordering is scoped within a single grid (i.e. within a single
+// type) — dragging a Notes block only reorders it among other
+// Notes blocks, since each type now has its own grid/card.
 // ============================================================
-function initWidgetDragReorder() {
-    const grid = document.getElementById('dashWidgetsGrid');
+function initWidgetDragReorder(gridId) {
+    const grid = document.getElementById(gridId);
     if (!grid) return;
     let dragSrcId = null;
 
@@ -291,128 +302,14 @@ function initWidgetDragReorder() {
             const fromIndex = customWidgets.findIndex(w => w.id === dragSrcId);
             const toIndex = customWidgets.findIndex(w => w.id === targetId);
             if (fromIndex === -1 || toIndex === -1) return;
+            const movedType = customWidgets[fromIndex].type;
             const [moved] = customWidgets.splice(fromIndex, 1);
             customWidgets.splice(toIndex, 0, moved);
             dragSrcId = null;
             saveCustomWidgets();
-            renderWidgets();
+            renderWidgetsByType(movedType);
         });
     });
-}
-
-// ============================================================
-// AUDIO PLAYER FUNCTIONS (unchanged)
-// ============================================================
-function initAudioPlayers() {
-    document.querySelectorAll('.custom-audio-player').forEach(player => {
-        if (player.dataset.initialized) return;
-        player.dataset.initialized = 'true';
-
-        const widgetId = player.dataset.widgetId;
-        const audio = player.querySelector('.custom-audio-element');
-
-        audio.addEventListener('loadedmetadata', () => {
-            const duration = document.getElementById(`duration-${widgetId}`);
-            if (duration) duration.textContent = formatAudioTime(audio.duration);
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            updateAudioProgress(widgetId);
-        });
-
-        audio.addEventListener('ended', () => {
-            const playIcon = document.getElementById(`playIcon-${widgetId}`);
-            const pause1 = document.getElementById(`pauseIcon1-${widgetId}`);
-            const pause2 = document.getElementById(`pauseIcon2-${widgetId}`);
-            if (playIcon) playIcon.style.display = 'block';
-            if (pause1) pause1.style.display = 'none';
-            if (pause2) pause2.style.display = 'none';
-            const progressFill = document.getElementById(`progressFill-${widgetId}`);
-            if (progressFill) progressFill.style.width = '0%';
-        });
-
-        const volumeSlider = player.querySelector('.audio-volume-slider');
-        if (volumeSlider) {
-            volumeSlider.value = audio.volume;
-        }
-    });
-}
-
-function toggleAudioPlayer(widgetId) {
-    const audio = document.querySelector(`.custom-audio-player[data-widget-id="${widgetId}"] .custom-audio-element`);
-    if (!audio) return;
-
-    const playIcon = document.getElementById(`playIcon-${widgetId}`);
-    const pause1 = document.getElementById(`pauseIcon1-${widgetId}`);
-    const pause2 = document.getElementById(`pauseIcon2-${widgetId}`);
-
-    if (audio.paused) {
-        audio.play();
-        playIcon.style.display = 'none';
-        pause1.style.display = 'block';
-        pause2.style.display = 'block';
-    } else {
-        audio.pause();
-        playIcon.style.display = 'block';
-        pause1.style.display = 'none';
-        pause2.style.display = 'none';
-    }
-}
-
-function formatAudioTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${String(secs).padStart(2, '0')}`;
-}
-
-function updateAudioProgress(widgetId) {
-    const audio = document.querySelector(`.custom-audio-player[data-widget-id="${widgetId}"] .custom-audio-element`);
-    if (!audio) return;
-    const progressFill = document.getElementById(`progressFill-${widgetId}`);
-    const currentTime = document.getElementById(`currentTime-${widgetId}`);
-
-    if (audio.duration && !isNaN(audio.duration)) {
-        const pct = (audio.currentTime / audio.duration) * 100;
-        if (progressFill) progressFill.style.width = `${pct}%`;
-        if (currentTime) currentTime.textContent = formatAudioTime(audio.currentTime);
-    }
-}
-
-function seekAudio(event, widgetId) {
-    const audio = document.querySelector(`.custom-audio-player[data-widget-id="${widgetId}"] .custom-audio-element`);
-    if (!audio || !audio.duration) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const pct = (event.clientX - rect.left) / rect.width;
-    audio.currentTime = pct * audio.duration;
-    updateAudioProgress(widgetId);
-}
-
-function setVolume(widgetId, value) {
-    const audio = document.querySelector(`.custom-audio-player[data-widget-id="${widgetId}"] .custom-audio-element`);
-    if (!audio) return;
-    audio.volume = parseFloat(value);
-    const btn = document.getElementById(`volumeBtn-${widgetId}`);
-    if (btn) {
-        btn.textContent = parseFloat(value) === 0 ? '🔇' : '🔊';
-    }
-}
-
-function toggleMute(widgetId) {
-    const audio = document.querySelector(`.custom-audio-player[data-widget-id="${widgetId}"] .custom-audio-element`);
-    if (!audio) return;
-    const btn = document.getElementById(`volumeBtn-${widgetId}`);
-    const slider = document.querySelector(`.custom-audio-player[data-widget-id="${widgetId}"] .audio-volume-slider`);
-    if (!btn || !slider) return;
-
-    if (audio.muted) {
-        audio.muted = false;
-        btn.textContent = '🔊';
-        slider.value = audio.volume;
-    } else {
-        audio.muted = true;
-        btn.textContent = '🔇';
-    }
 }
 
 // ============================================================
@@ -440,14 +337,14 @@ function toggleWidgetTimer(id) {
                 w.timerRunning = false;
                 w.remainingSeconds = w.minutes * 60;
                 showToast('Timer finished!', 'success');
-                renderWidgets();
+                renderWidgetsByType('timer');
             }
         }, 1000);
     } else {
         clearInterval(w.timerInterval);
     }
     saveCustomWidgets();
-    renderWidgets();
+    renderWidgetsByType('timer');
 }
 
 function resetWidgetTimer(id) {
@@ -457,7 +354,7 @@ function resetWidgetTimer(id) {
     w.timerRunning = false;
     w.remainingSeconds = w.minutes * 60;
     saveCustomWidgets();
-    renderWidgets();
+    renderWidgetsByType('timer');
 }
 
 function updateTimerDisplay(w) {
@@ -471,65 +368,31 @@ function updateTimerDisplay(w) {
 
 function deleteWidget(id) {
     const widget = customWidgets.find(w => w.id === id);
-    if (widget && widget.type === 'timer' && widget.timerInterval) {
+    if (!widget) return;
+    const hasContent = widget.content || widget.quoteText || (widget.links && widget.links.length) || (widget.stats && widget.stats.length);
+    if (hasContent && !confirm('Delete this block? This can\'t be undone.')) return;
+    if (widget.type === 'timer' && widget.timerInterval) {
         clearInterval(widget.timerInterval);
     }
     customWidgets = customWidgets.filter(w => w.id !== id);
     saveCustomWidgets();
-    renderWidgets();
+    renderWidgetsByType(widget.type);
 }
 
 // ============================================================
-// DEFAULT WIDGETS – FIXED: only add if no audio/chart widgets exist
+// MIGRATION — one-time cleanup of the two widget types that no
+// longer exist in this system: "local-audio" (the duplicate
+// Study Beats player — the real one now lives only in the
+// Ambient Mix Station widget) and "chart" (This Week's Task
+// Progress, now its own standalone card computed live instead of
+// a stored block). No new default blocks are auto-seeded anymore
+// — Notes/Quote/Links/Stats start empty until the user adds one.
 // ============================================================
-(function initDefaultWidgets() {
-    // Remove duplicate audio widgets (keep only the first one)
-    const audioWidgets = customWidgets.filter(w => w.type === 'local-audio');
-    if (audioWidgets.length > 1) {
-        // Keep the first audio widget, remove the rest
-        const firstAudioId = audioWidgets[0].id;
-        customWidgets = customWidgets.filter(w => w.type !== 'local-audio' || w.id === firstAudioId);
+(function migrateLegacyWidgetTypes() {
+    const before = customWidgets.length;
+    customWidgets = customWidgets.filter(w => w.type !== 'local-audio' && w.type !== 'chart');
+    if (customWidgets.length !== before) {
         saveCustomWidgets();
     }
-
-    const hasAudioWidget = customWidgets.some(w => w.type === 'local-audio');
-    if (!hasAudioWidget) {
-        customWidgets.push({
-            id: `widget_${Date.now()}`,
-            type: 'local-audio',
-            title: '🎵 Study Beats',
-            src: 'Assets/Rain-Music.mp3',
-            label: 'My favourite focus playlist'
-        });
-        saveCustomWidgets();
-    }
-
-    // Add a default chart widget if none exists
-    if (!customWidgets.some(w => w.type === 'chart')) {
-        customWidgets.push({
-            id: `widget_${Date.now() + 1}`,
-            type: 'chart',
-            title: "This Week's Task Progress"
-        });
-        saveCustomWidgets();
-    }
-
-    // Rename any existing widget still using the old default title
-    const renamed = customWidgets.some(w => w.type === 'chart' && w.title === '📊 Progress Overview');
-    if (renamed) {
-        customWidgets.forEach(w => {
-            if (w.type === 'chart' && w.title === '📊 Progress Overview') w.title = "This Week's Task Progress";
-        });
-        saveCustomWidgets();
-    }
-
     renderWidgets();
 })();
-
-// Expose functions globally
-window.toggleAudioPlayer = toggleAudioPlayer;
-window.seekAudio = seekAudio;
-window.updateAudioProgress = updateAudioProgress;
-window.setVolume = setVolume;
-window.toggleMute = toggleMute;
-window.initAudioPlayers = initAudioPlayers;

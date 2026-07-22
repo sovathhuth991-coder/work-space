@@ -26,8 +26,8 @@
     width: 100%;
 }
 
-.dash-card.canvas-card,
-.dash-card-group.canvas-card {
+.dashboard-canvas .dash-card.canvas-card,
+.dashboard-canvas .dash-card-group.canvas-card {
     position: absolute;
     margin: 0;
     box-sizing: border-box;
@@ -2349,6 +2349,7 @@ body {
 .dashboard-canvas.mode-grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
+    grid-auto-flow: row dense;
     gap: 16px;
 }
 .dashboard-canvas.mode-grid > .dash-card[data-card-id] {
@@ -2453,4 +2454,11 @@ body {
 }
 .dash-card:hover .resize-handle:hover {
     opacity: 1;
+}
+
+.dashboard-canvas.mode-grid > .dash-card.flow-swap-target,
+.dashboard-canvas.mode-flex > .dash-card.flow-swap-target,
+.dashboard-canvas.mode-stack > .dash-card.flow-swap-target {
+    outline: 2px solid var(--accent-1);
+    outline-offset: -2px;
 }

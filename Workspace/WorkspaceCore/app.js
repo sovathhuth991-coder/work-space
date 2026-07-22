@@ -153,6 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'closeSessionDetailsModal': () => closeSessionDetailsModal?.(),
             'showSessionDetailsModal': () => showSessionDetailsModal?.(),
             'resetDashboardLayout': () => resetDashboardLayout?.(),
+            'smartReorderDashboard': () => window.smartReorderDashboard?.(),
+            'toggleSettingsPanel': () => toggleSettingsPanel?.(),
+            'closeSettingsPanel': () => toggleSettingsPanel?.(),
             'setLayoutMode': () => window.__setLayoutMode?.(actionBtn.dataset.layoutMode),
             'toggleResizeHandles': () => window.__toggleResizeHandles?.(),
             'closeFocusGoalModal': () => closeFocusGoalModal?.(),
@@ -1028,6 +1031,17 @@ function toggleSidebarMenu() {
         if (backdrop) {
             backdrop.style.display = 'none';
         }
+
+        // Collapsing the sidebar resizes the canvas via a grid-template-
+        // columns transition, not a viewport change, so window 'resize'
+        // never fires. Re-run the canvas/flow layout once the transition
+        // ends so cards can rescale into the new width.
+        shell.addEventListener('transitionend', function onShellResize(ev) {
+            if (ev.propertyName !== 'grid-template-columns') return;
+            shell.removeEventListener('transitionend', onShellResize);
+            if (typeof window.__dashCanvasInit === 'function') window.__dashCanvasInit();
+            if (typeof window.__refreshFlowLayout === 'function') window.__refreshFlowLayout();
+        });
     }
 }
 
@@ -1035,6 +1049,24 @@ function toggleSidebarMenu() {
 window.addEventListener('resize', function() {
     if (window.innerWidth > 850) {
         closeSidebarMenu();
+    }
+});
+
+function toggleSettingsPanel() {
+    const overlay = document.getElementById('settingsOverlay');
+    if (!overlay) return;
+    const isActive = overlay.classList.contains('active');
+    if (isActive) { overlay.classList.remove('active'); overlay.style.display = 'none'; }
+    else { overlay.classList.add('active'); overlay.style.display = 'flex'; }
+}
+window.toggleSettingsPanel = toggleSettingsPanel;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    if (settingsOverlay) {
+        settingsOverlay.addEventListener('click', (e) => {
+            if (e.target === settingsOverlay) toggleSettingsPanel();
+        });
     }
 });
 

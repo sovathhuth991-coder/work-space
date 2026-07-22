@@ -964,6 +964,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 
     let activeDivider = null; // a group's divider being dragged to change the split ratio
     let dividerStartX = 0, dividerStartRatio = 0.5, dividerGroupWidth = 0;
+    let lastCanvasWidth = null; // detects real width changes (sidebar toggle, window resize)
 
     function canvas() { return document.getElementById('dashboardCanvas'); }
     function isCanvasMode() {
@@ -1056,6 +1057,52 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             maxBottom = Math.max(maxBottom, y + h);
         });
         el.style.minHeight = (maxBottom + 24) + 'px';
+    }
+
+    // Repacks every visible canvas card tightly, left-to-right / top-to-
+    // bottom (shelf packing) — removes dead space from past drags, resizes,
+    // and deletions. Keeps each card's own width/height and roughly its
+    // current reading order; doesn't re-rank by urgency or usage.
+    function smartReorderCanvas() {
+        const el = canvas();
+        if (!el || !isCanvasMode()) return;
+        const gap = 20;
+        const canvasWidth = el.getBoundingClientRect().width || 900;
+
+        const items = getPositionedItems()
+            .filter(item => item.style.display !== 'none')
+            .map(item => ({
+                item,
+                minimized: item.classList.contains('card-minimized'),
+                x: parseFloat(item.style.left) || 0,
+                y: parseFloat(item.style.top) || 0,
+                w: parseFloat(item.style.width) || 280,
+                h: item.classList.contains('card-minimized')
+                    ? (parseFloat(item.dataset.restoreHeight) || 260)
+                    : (parseFloat(item.style.height) || 260)
+            }))
+            .sort((a, b) => (a.y - b.y) || (a.x - b.x));
+
+        let cursorX = 0, cursorY = 0, shelfHeight = 0;
+        items.forEach(({ item, w, h, minimized }) => {
+            if (cursorX > 0 && cursorX + w > canvasWidth) {
+                cursorX = 0;
+                cursorY += shelfHeight + gap;
+                shelfHeight = 0;
+            }
+            item.style.left = cursorX + 'px';
+            item.style.top = cursorY + 'px';
+            item.style.width = w + 'px';
+            if (minimized) item.dataset.restoreHeight = h + 'px';
+            else item.style.height = h + 'px';
+
+            cursorX += w + gap;
+            shelfHeight = Math.max(shelfHeight, minimized ? 56 : h);
+        });
+
+        saveLayout();
+        updateCanvasHeight();
+        showToast('✨ Cards packed tight — no more gaps', 'info');
     }
 
     // ---- Rebuild any saved groups on load, before laying out positions ----
@@ -1479,7 +1526,20 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
 
         const canvasMode = isCanvasMode();
         const canvasWidth = el.getBoundingClientRect().width || 900;
-        const layout = loadLayout();
+        let layout = loadLayout();
+
+        // Sidebar open/close resizes the canvas via a CSS grid track, which
+        // doesn't fire a window 'resize' event. Rescale saved x/w
+        // proportionally so cards stretch or compress with the container
+        // instead of keeping stale pixel positions and leaving dead space.
+        if (canvasMode && lastCanvasWidth && Math.abs(lastCanvasWidth - canvasWidth) > 1) {
+            const ratio = canvasWidth / lastCanvasWidth;
+            Object.keys(layout).forEach(key => {
+                layout[key] = { ...layout[key], x: layout[key].x * ratio, w: layout[key].w * ratio };
+            });
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(layout)); } catch (e) {}
+        }
+        lastCanvasWidth = canvasWidth;
         const gap = 20;
         const leftW = Math.max(280, Math.round((canvasWidth - gap) * 0.6));
         // Automatic-placement column for any card without a saved layout or a
@@ -1569,6 +1629,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
     window.__dashCanvasSave = saveLayout;
     window.__dashCanvasUpdateHeight = updateCanvasHeight;
     window.__dashSplitGroup = splitGroup;
+    window.__dashCanvasSmartReorder = smartReorderCanvas;
 })();
 
 // ============================================================
@@ -1618,6 +1679,14 @@ function renumberAllCards() {
     if (typeof window.__dashCanvasUpdateHeight === 'function') window.__dashCanvasUpdateHeight();
 }
 
+function smartReorderDashboard() {
+    if (typeof window.__getLayoutMode === 'function' && window.__getLayoutMode() !== 'canvas') {
+        showToast('Switch to Canvas mode to auto-arrange cards', 'info');
+        return;
+    }
+    if (typeof window.__dashCanvasSmartReorder === 'function') window.__dashCanvasSmartReorder();
+}
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initDashboardCards);
@@ -1631,3 +1700,4 @@ window.resetDashboardLayout = resetDashboardLayout;
 window.renumberDashboardCards = renumberAllCards;
 window.updateCardSizeClasses = updateCardSizeClasses;
 window.openCardContextMenu = openContextMenu;
+window.smartReorderDashboard = smartReorderDashboard;

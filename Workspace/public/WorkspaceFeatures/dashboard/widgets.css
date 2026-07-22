@@ -6,13 +6,19 @@
    readout to match the other numeric displays. */
 .widget-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-left: 2px solid var(--status-live);
+    border: 1px solid rgba(124, 109, 240, 0.22);
     border-radius: 10px;
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.widget-card:hover {
+    border-color: rgba(124, 109, 240, 0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .widget-header {
@@ -20,6 +26,8 @@
     justify-content: space-between;
     align-items: center;
     gap: 6px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .widget-title {
@@ -95,245 +103,6 @@
     color: var(--text-secondary);
 }
 
-/* ============================================================
-   CUSTOM AUDIO PLAYER (Study Beats widget)
-   ============================================================ */
-
-.custom-audio-player {
-    background: var(--bg-card);
-    border-radius: var(--radius-md);
-    padding: 16px 18px;
-    border: 1px solid var(--border-color);
-    transition: var(--transition);
-}
-
-.custom-audio-player:hover {
-    border-color: var(--border-color-hover);
-    box-shadow: var(--shadow-glow);
-}
-
-.custom-audio-player .audio-player-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.custom-audio-player .audio-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.custom-audio-player .audio-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--text-primary);
-}
-
-.custom-audio-player .audio-label {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    opacity: 0.7;
-    margin-left: auto;
-}
-
-.custom-audio-player .audio-controls {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.custom-audio-player .audio-play-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: var(--accent-solid);
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-    flex-shrink: 0;
-    box-shadow: 0 0 20px rgba(124, 109, 240, 0.2);
-}
-
-.custom-audio-player .audio-play-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 30px rgba(124, 109, 240, 0.4);
-}
-
-.custom-audio-player .audio-play-btn:active {
-    transform: scale(0.95);
-}
-
-.custom-audio-player .audio-progress-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.custom-audio-player .audio-current-time,
-.custom-audio-player .audio-duration {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    font-feature-settings: "tnum";
-    min-width: 36px;
-    font-variant-numeric: tabular-nums;
-}
-
-.custom-audio-player .audio-progress-bar {
-    flex: 1;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 99px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: height 0.15s ease;
-}
-
-.custom-audio-player .audio-progress-bar:hover {
-    height: 6px;
-}
-
-.custom-audio-player .audio-progress-fill {
-    height: 100%;
-    background: var(--accent-solid);
-    border-radius: 99px;
-    width: 0%;
-    transition: width 0.1s linear;
-    position: relative;
-}
-
-.custom-audio-player .audio-progress-fill::after {
-    content: '';
-    position: absolute;
-    right: -4px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent-1);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    box-shadow: 0 0 12px var(--accent-glow);
-}
-
-.custom-audio-player .audio-progress-bar:hover .audio-progress-fill::after {
-    opacity: 1;
-}
-
-/* ---- Compact version for smaller screens ---- */
-@media (max-width: 500px) {
-    .custom-audio-player .audio-controls {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .custom-audio-player .audio-progress-container {
-        flex: 1 1 100%;
-        order: 2;
-    }
-
-    .custom-audio-player .audio-play-btn {
-        order: 1;
-    }
-
-    .custom-audio-player .audio-current-time,
-    .custom-audio-player .audio-duration {
-        font-size: 0.65rem;
-        min-width: 30px;
-    }
-}
-
-/* ---- Volume controls ---- */
-.custom-audio-player .audio-volume-container {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.custom-audio-player .audio-volume-btn {
-    background: none;
-    border: none;
-    font-size: 1.1rem;
-    cursor: pointer;
-    color: var(--text-muted);
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-}
-
-.custom-audio-player .audio-volume-btn:hover {
-    color: var(--text-primary);
-    transform: scale(1.1);
-}
-
-.custom-audio-player .audio-volume-slider {
-    width: 60px;
-    height: 4px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 99px;
-    outline: none;
-    transition: var(--transition);
-    cursor: pointer;
-}
-
-.custom-audio-player .audio-volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--accent-solid);
-    cursor: pointer;
-    box-shadow: 0 0 12px rgba(124, 109, 240, 0.3);
-}
-
-.custom-audio-player .audio-volume-slider::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--accent-1);
-    cursor: pointer;
-    border: none;
-}
-
-.custom-audio-player .audio-volume-slider:hover {
-    height: 6px;
-}
-
-/* ---- Chart widget ---- */
-.widget-chart-bar {
-    height: 8px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 99px;
-    overflow: hidden;
-    margin: 8px 0 4px;
-}
-.widget-chart-fill {
-    height: 100%;
-    background: var(--accent-solid);
-    border-radius: 99px;
-    transition: width 0.6s ease;
-}
-.widget-chart-label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
 /* ---- Schedule widget ---- */
 .widget-schedule {
     font-size: 0.9rem;
@@ -353,63 +122,6 @@
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
     align-items: start;
-}
-
-.widget-add-menu {
-    position: relative;
-}
-
-.widget-add-btn {
-    padding: 4px 12px;
-    border-radius: 99px;
-    background: var(--accent-solid);
-    border: none;
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: var(--transition);
-}
-
-.widget-add-btn:hover {
-    filter: brightness(1.1);
-}
-
-.widget-add-dropdown {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: calc(100% + 6px);
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-elevated);
-    padding: 6px;
-    z-index: 20;
-    min-width: 140px;
-}
-
-.widget-add-dropdown.open {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.widget-add-dropdown button {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    text-align: left;
-    padding: 8px 10px;
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: var(--transition-fast);
-}
-
-.widget-add-dropdown button:hover {
-    background: var(--bg-secondary);
 }
 
 /* ---- Drag-to-reorder blocks ---- */
@@ -454,6 +166,23 @@
     resize: vertical;
 }
 
+.widget-quote-block {
+    position: relative;
+}
+
+.widget-quote-mark {
+    position: absolute;
+    top: -14px;
+    left: -4px;
+    font-size: 2.6rem;
+    font-family: Georgia, serif;
+    color: var(--card-accent, #ec4899);
+    opacity: 0.25;
+    pointer-events: none;
+    line-height: 1;
+    z-index: 0;
+}
+
 .widget-quote-input {
     width: 100%;
     min-height: 60px;
@@ -466,6 +195,17 @@
     font-size: 0.9rem;
     font-family: inherit;
     resize: vertical;
+    position: relative;
+    z-index: 1;
+}
+
+.widget-quote-input:focus,
+.widget-quote-author-input:focus,
+.widget-content textarea:focus,
+.widget-add-row input:focus {
+    outline: none;
+    border-color: var(--accent-1);
+    box-shadow: 0 0 0 3px rgba(124, 109, 240, 0.15);
 }
 
 .widget-quote-author-input {
@@ -497,6 +237,14 @@
     padding: 6px 8px;
     background: var(--bg-primary);
     border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.widget-link-item:hover,
+.widget-stat-item:hover {
+    border-color: rgba(124, 109, 240, 0.25);
+    background: rgba(124, 109, 240, 0.05);
 }
 
 .widget-link-item a {
@@ -582,3 +330,91 @@
 /* ---- Mobile: card-controls (incl. the Add Block button) are
    already forced visible below 860px by dashboard.css, so the
    button doesn't need its own hover-only affordance there. ---- */
+
+/* ============================================================
+   THIS WEEK'S TASK PROGRESS (standalone card, was the "chart"
+   block type). Reuses the same gradient progress-bar look as
+   the Countdown card for visual consistency.
+   ============================================================ */
+.task-progress-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.task-progress-track {
+    margin-top: 12px;
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+.task-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent-1), #34d399);
+    transition: width 0.6s ease;
+}
+
+.task-progress-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* ---- Per-card empty states — clickable "add" zones ---- */
+.widget-card-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 28px 16px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border: 1.5px dashed rgba(124, 109, 240, 0.25);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.widget-card-empty:hover {
+    border-color: var(--card-accent, var(--accent-1));
+    background: rgba(124, 109, 240, 0.05);
+    color: var(--text-secondary);
+}
+
+.widget-card-empty .widget-card-empty-icon {
+    display: block;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+    opacity: 0.8;
+}
+
+/* ---- Block count badge in card headers ---- */
+.widget-count-badge {
+    display: inline-block;
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 99px;
+    background: rgba(124, 109, 240, 0.15);
+    color: var(--card-accent, var(--accent-1));
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.widget-count-badge:empty {
+    display: none;
+}
+
+/* ---- Quick Access tiles (Current Lesson / Recent Bookmarks) ---- */
+.quick-access-tile {
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.quick-access-tile:hover {
+    border-color: rgba(148, 163, 184, 0.4) !important;
+    transform: translateY(-2px);
+}

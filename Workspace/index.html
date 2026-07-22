@@ -201,8 +201,18 @@
                     </div>
                 </div>
 
-                <!-- Theme Selector -->
-                <select id="globalThemeSelector" data-action="applyTheme">
+                <!-- Settings -->
+                <button class="sidebar-btn" data-action="toggleSettingsPanel">⚙️ Settings</button>
+            </div>
+        </aside>
+
+        <!-- ===== SETTINGS OVERLAY ===== -->
+        <div class="card-visibility-overlay" id="settingsOverlay">
+            <div class="card-visibility-panel">
+                <h3>⚙️ Settings</h3>
+
+                <label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Theme</label>
+                <select id="globalThemeSelector" data-action="applyTheme" style="width:100%;margin-top:6px;">
                     <option value="cyberpunk">🌆 Cyberpunk</option>
                     <option value="minimal">☀️ Minimal</option>
                     <option value="ocean">🌊 Ocean</option>
@@ -212,20 +222,20 @@
                     <option value="auto">🌗 Auto (System)</option>
                 </select>
 
-                <!-- Tour & Shortcuts (two‑column) -->
-                <div class="sidebar-btn-row">
+                <div class="sidebar-btn-row" style="margin-top:16px;">
                     <button class="sidebar-btn" data-action="startTour">🎓 Tour</button>
                     <button class="sidebar-btn" data-action="showShortcuts">⌨️ Shortcuts</button>
                 </div>
 
-                <!-- Version -->
-                <div class="hub-version">v2.1.0 // Engine Active</div>
+                <!-- dev-tools.js inserts its 🛠️ button right before this -->
+                <div class="hub-version" style="margin-top:16px;">v2.1.0 // Engine Active</div>
 
-                <!-- Clear All Data -->
-                <button class="sidebar-btn danger" data-action="clearAllData">🗑️ Clear All Data</button>
+                <button class="sidebar-btn danger" data-action="clearAllData" style="margin-top:16px;">🗑️ Clear All Data</button>
                 <div class="sidebar-clear-note">Clears all saved data (lessons, tasks, habits, etc.)</div>
+
+                <button class="vis-close-btn" data-action="closeSettingsPanel">Done</button>
             </div>
-        </aside>
+        </div>
 
         <!-- ===== MAIN CONTENT AREA ===== -->
         <main class="hub-content">
@@ -328,6 +338,8 @@
                             title="Show/hide resize handles">↔ Resize</button>
                         <button class="matrix-btn" data-action="resetDashboardLayout"
                             title="Reset entire dashboard layout">↺ Reset</button>
+                        <button class="matrix-btn" data-action="smartReorderDashboard"
+                            title="Pack cards tight — remove empty gaps">✨ Smart Reorder</button>
                         <button class="dashboard-customize-btn" data-action="toggleCardVisibility"
                             title="Show/Hide dashboard cards">⚙️ Customize</button>
                     </div>
@@ -516,7 +528,6 @@
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;">📈 This Week's Task Progress</h3>
                                 <div class="card-controls">
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
                                 </div>
                             </div>
                             <div id="dashTaskProgress"></div>
@@ -535,7 +546,6 @@
                                     <button class="matrix-btn" onclick="addWidget('notes')"
                                         title="Add a notes block"
                                         style="padding:4px 12px;font-size:0.75rem;">+ Add</button>
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
                                 </div>
                             </div>
                             <div id="dashNotesGrid" class="dash-widgets-grid"></div>
@@ -553,7 +563,6 @@
                                     <button class="matrix-btn" onclick="addWidget('quote')"
                                         title="Add a quote block"
                                         style="padding:4px 12px;font-size:0.75rem;">+ Add</button>
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
                                 </div>
                             </div>
                             <div id="dashQuoteGrid" class="dash-widgets-grid"></div>
@@ -571,7 +580,6 @@
                                     <button class="matrix-btn" onclick="addWidget('links')"
                                         title="Add a links block"
                                         style="padding:4px 12px;font-size:0.75rem;">+ Add</button>
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
                                 </div>
                             </div>
                             <div id="dashLinksGrid" class="dash-widgets-grid"></div>
@@ -589,7 +597,6 @@
                                     <button class="matrix-btn" onclick="addWidget('stats')"
                                         title="Add a stats block"
                                         style="padding:4px 12px;font-size:0.75rem;">+ Add</button>
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
                                 </div>
                             </div>
                             <div id="dashStatsGrid" class="dash-widgets-grid"></div>
@@ -607,7 +614,6 @@
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                 <h3 style="margin:0;">🗂️ Quick Access</h3>
                                 <div class="card-controls">
-                                    <span class="card-drag-handle" title="Drag to move">⠿</span>
                                 </div>
                             </div>
                             <div id="dashQuickLinks" class="dash-quick-links"
