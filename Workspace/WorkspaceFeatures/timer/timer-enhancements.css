@@ -10,6 +10,12 @@
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-card);
     overflow: visible;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.simple-timer-card.swapping {
+    opacity: 0;
+    transform: scale(0.95);
 }
 
 /* ---- Progress Ring Container ---- */
@@ -539,50 +545,6 @@
     letter-spacing: 0.1em;
 }
 
-.session-tracker-title::before {
-    content: '📌';
-    font-size: 1rem;
-}
-
-.task-selector-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.task-selector-wrapper select {
-    background: #1e1e1e;
-    border: 1px solid #444;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    min-width: 180px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.task-selector-wrapper select:focus {
-    border-color: var(--accent-2);
-    box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.1);
-    outline: none;
-}
-
-/* Read-only current-task display — replaces the old manual dropdown.
-   No cursor/focus states since there's nothing to interact with; it
-   always just reflects whatever the schedule says is current. */
-.current-task-display {
-    background: #1e1e1e;
-    border: 1px solid #444;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    min-width: 180px;
-}
-
 .session-btn-history {
     background: var(--accent-2);
     color: #fff;
@@ -591,59 +553,6 @@
 .session-btn-history:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(91, 141, 239, 0.4);
-}
-
-.auto-link-badge {
-    font-size: 0.75rem;
-    color: var(--status-online);
-    background: rgba(16, 185, 129, 0.15);
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.auto-link-badge::before {
-    content: '🔗';
-}
-
-.scheduled-input-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.scheduled-input-wrapper label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.scheduled-input-wrapper input {
-    background: #2a2a2a;
-    border: 1px solid #444;
-    color: #fff;
-    width: 70px;
-    padding: 8px;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.scheduled-input-wrapper input:focus {
-    border-color: var(--accent-2);
-    box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.1);
-    outline: none;
-}
-
-.scheduled-input-wrapper span {
-    font-size: 0.8rem;
-    color: var(--text-muted);
 }
 
 /* ---- Time Display Grid ---- */
@@ -829,15 +738,6 @@
     .session-tracker-header {
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .task-selector-wrapper {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .task-selector-wrapper select {
-        width: 100%;
     }
 
     .session-time-display {

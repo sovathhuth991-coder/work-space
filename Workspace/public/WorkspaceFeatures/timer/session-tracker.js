@@ -430,8 +430,10 @@
         const endM = timeToMinutes(task.end);
         const dur = endM - startM;
         if (dur > 0 && scheduledInput) scheduledInput.value = dur;
-        if (autoLabelBadge) { autoLabelBadge.textContent = '✅ Linked to task';
-        autoLabelBadge.style.color = '#2ecc71'; }
+        if (autoLabelBadge) {
+            autoLabelBadge.textContent = '✅ Linked to task';
+            autoLabelBadge.style.color = '#2ecc71';
+        }
 
         if (changed) {
             handleTaskChange(newId);
@@ -447,9 +449,11 @@
 
         if (tasks.length === 0) {
             currentTaskData = null;
-            if (currentTaskDisplay) currentTaskDisplay.textContent = 'No tasks scheduled for today';
-            autoLabelBadge.textContent = '📭 No tasks';
-            autoLabelBadge.style.color = '#888';
+            if (currentTaskData) currentTaskDisplay.textContent = 'No tasks scheduled for today';
+            if (autoLabelBadge) {
+                autoLabelBadge.textContent = '📭 No tasks';
+                autoLabelBadge.style.color = '#888';
+            }
             updateCurrentSessionTaskInfo('No tasks today', '', '');
             return;
         }
@@ -696,7 +700,7 @@
     // ----- End Session -----
     function endSession() {
         const label = currentTaskData?.title || 'Untitled';
-        const scheduled = parseInt(scheduledInput.value) || 0;
+        const scheduled = scheduledInput ? (parseInt(scheduledInput.value) || 0) : 0;
         const scheduledSecs = scheduled * 60;
         const totalSecs = focusSeconds + breakSeconds + idleSeconds;
         const efficiency = scheduledSecs > 0 ? Math.round((focusSeconds / scheduledSecs) * 100) : 0;

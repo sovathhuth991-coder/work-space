@@ -384,43 +384,52 @@
     }
 
     // ----- MODE SWITCHING (between countdown and pomodoro) -----
+    let swapTimeout;
     function switchPomodoroMode(mode) {
-        // Reset pomodoro state first
-        clearInterval(pomoInterval);
-        pomoInterval = null;
-        isRunning = false;
-        phaseStartTime = null;
-        elements.ringContainer?.classList.remove('pomodoro-running');
+        const card = document.querySelector('.simple-timer-card');
+        if (swapTimeout) clearTimeout(swapTimeout);
+        if (card) card.classList.add('swapping');
 
-        const countdownShell = document.querySelector('.simple-timer-card');
-        const pomodoroShell = document.getElementById('pomodoroShell');
-        const countdownBtn = document.getElementById('pomodoroCountdownBtn');
-        const pomodoroBtn = document.getElementById('pomodoroPomoBtn');
+        swapTimeout = setTimeout(() => {
+            clearInterval(pomoInterval);
+            pomoInterval = null;
+            isRunning = false;
+            phaseStartTime = null;
+            elements.ringContainer?.classList.remove('pomodoro-running');
 
-        if (mode === 'pomodoro') {
-            if (countdownShell) {
-                countdownShell.style.display = 'none';
+            const countdownShell = card;
+            const pomodoroShell = document.getElementById('pomodoroShell');
+            const countdownBtn = document.getElementById('pomodoroCountdownBtn');
+            const pomodoroBtn = document.getElementById('pomodoroPomoBtn');
+
+            if (mode === 'pomodoro') {
+                if (countdownShell) {
+                    countdownShell.style.display = 'none';
+                } else {
+                    console.warn('[Pomodoro] .simple-timer-card not found — cannot hide countdown shell');
+                }
+                if (pomodoroShell) {
+                    pomodoroShell.classList.add('active');
+                    pomodoroShell.style.display = 'block';
+                } else {
+                    console.warn('[Pomodoro] #pomodoroShell not found');
+                }
+                if (countdownBtn) countdownBtn.classList.remove('active');
+                if (pomodoroBtn) pomodoroBtn.classList.add('active');
+                resetPomodoro();
             } else {
-                console.warn('[Pomodoro] .simple-timer-card not found — cannot hide countdown shell');
+                if (countdownShell) countdownShell.style.display = 'block';
+                if (pomodoroShell) {
+                    pomodoroShell.classList.remove('active');
+                    pomodoroShell.style.display = 'none';
+                }
+                if (countdownBtn) countdownBtn.classList.add('active');
+                if (pomodoroBtn) pomodoroBtn.classList.remove('active');
             }
-            if (pomodoroShell) {
-                pomodoroShell.classList.add('active');
-                pomodoroShell.style.display = 'block';
-            } else {
-                console.warn('[Pomodoro] #pomodoroShell not found');
-            }
-            if (countdownBtn) countdownBtn.classList.remove('active');
-            if (pomodoroBtn) pomodoroBtn.classList.add('active');
-            resetPomodoro();
-        } else {
-            if (countdownShell) countdownShell.style.display = 'block';
-            if (pomodoroShell) {
-                pomodoroShell.classList.remove('active');
-                pomodoroShell.style.display = 'none';
-            }
-            if (countdownBtn) countdownBtn.classList.add('active');
-            if (pomodoroBtn) pomodoroBtn.classList.remove('active');
-        }
+
+            if (card) card.classList.remove('swapping');
+            swapTimeout = null;
+        }, 300);
     }
 
     // ----- EXPOSE GLOBALLY -----
