@@ -825,6 +825,13 @@
     }
 
     // ===== Get completed sessions for dashboard =====
+    // ===== Recompute the Total Timer card (Focus/Break/Idle/Total) on demand —
+    // used by dashboard.js after deleting a completedSessions entry, so the
+    // numbers update immediately instead of waiting for the next tick =====
+    window.refreshSessionTrackerTotals = function() {
+        updateTotalTimerFromHistory();
+    };
+
     window.getCompletedSessions = function() {
         return JSON.parse(localStorage.getItem('completedSessions') || '[]');
     };

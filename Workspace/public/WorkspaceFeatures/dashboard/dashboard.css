@@ -1486,6 +1486,32 @@ body {
     transform: translateX(4px);
 }
 
+.session-history-delete-btn {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.session-history-item:hover .session-history-delete-btn {
+    opacity: 1;
+}
+
+.session-history-delete-btn:hover {
+    background: rgba(231, 76, 60, 0.15);
+    color: var(--status-danger);
+}
+
 /* ============================================================
    UNIFIED SESSIONS CONTAINER
    ============================================================ */

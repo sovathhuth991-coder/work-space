@@ -405,10 +405,10 @@
 
     // ----- Update current session UI -----
     function updateCurrentSessionDisplay() {
-        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(sessionFocusSeconds);
-        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(sessionBreakSeconds);
-        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(sessionIdleSeconds);
-        const total = sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds;
+        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(focusSeconds);
+        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(breakSeconds);
+        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(idleSeconds);
+        const total = focusSeconds + breakSeconds + idleSeconds;
         if (sessionTotalDisplay) sessionTotalDisplay.textContent = formatTime(total);
 
         // Keep the history panel's live "in progress" entry current while
@@ -825,6 +825,13 @@
     }
 
     // ===== Get completed sessions for dashboard =====
+    // ===== Recompute the Total Timer card (Focus/Break/Idle/Total) on demand —
+    // used by dashboard.js after deleting a completedSessions entry, so the
+    // numbers update immediately instead of waiting for the next tick =====
+    window.refreshSessionTrackerTotals = function() {
+        updateTotalTimerFromHistory();
+    };
+
     window.getCompletedSessions = function() {
         return JSON.parse(localStorage.getItem('completedSessions') || '[]');
     };
@@ -948,7 +955,7 @@
         // Keep the in-progress session snapshot current so a refresh
         // resumes it instead of restarting from zero (see loadSessionState).
         if (!window.sessionSaveInterval) {
-            window.sessionSaveInterval = setInterval(saveSessionState, 5000);
+            window.sessionSaveInterval = setInterval(saveSessionState, 1000);
         }
 
         // Start monitoring for day changes
