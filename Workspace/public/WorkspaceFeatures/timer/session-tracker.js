@@ -311,10 +311,19 @@
             .sort((a, b) => a.start.localeCompare(b.start));
     }
 
+    // ----- Dedupe check: skip if same task was already saved within 2s -----
+    function hasDuplicateSession(taskName) {
+        const sessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+        if (sessions.length === 0) return false;
+        const last = sessions[sessions.length - 1];
+        return last.taskName === taskName && (Date.now() - last.timestamp) < 2000;
+    }
+
     // ----- Save completed session to localStorage -----
     function saveCompletedSession() {
         const totalSecs = sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds;
         if (totalSecs < 5) return; // Don't save sessions less than 5 seconds
+        if (hasDuplicateSession(sessionTaskName)) return;
 
         const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
         completedSessions.push({
@@ -895,6 +904,9 @@
         focusSeconds = 0;
         breakSeconds = 0;
         idleSeconds = 0;
+        sessionFocusSeconds = 0;
+        sessionBreakSeconds = 0;
+        sessionIdleSeconds = 0;
         focusStartTime = null;
         breakStartTime = null;
         idleStartTime = null;
@@ -1032,7 +1044,6 @@
         });
 
         window.addEventListener('beforeunload', function() {
-            if (typeof saveCompletedSession === 'function') saveCompletedSession();
             if (typeof saveAccumulatedTime === 'function') saveAccumulatedTime();
         });
 

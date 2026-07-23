@@ -156,9 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
             'smartReorderDashboard': () => window.smartReorderDashboard?.(),
             'toggleSettingsPanel': () => toggleSettingsPanel?.(),
             'closeSettingsPanel': () => toggleSettingsPanel?.(),
-            'toggleAddFlexTaskForm': () => toggleAddFlexibleTaskForm?.(),
-            'submitNewFlexTask': () => submitNewFlexTask?.(),
-            'cancelAddFlexTask': () => cancelAddFlexTask?.(),
             'setLayoutMode': () => window.__setLayoutMode?.(actionBtn.dataset.layoutMode),
             'toggleResizeHandles': () => window.__toggleResizeHandles?.(),
             'closeFocusGoalModal': () => closeFocusGoalModal?.(),
@@ -208,25 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'handleAccountMagicLink': () => window.handleAccountMagicLink?.(),
             'handleAccountSignOut': () => window.handleAccountSignOut?.(),
             'handleAccountSyncNow': () => window.handleAccountSyncNow?.(),
-            'toggleAddFlexTaskForm': () => window.toggleAddFlexibleTaskForm?.(),
-            'cancelAddFlexTask': () => window.cancelAddFlexTask?.(),
-            'submitNewFlexTask': () => window.submitNewFlexTask?.(),
-            'startFlexTaskFocus': () => {
-                const id = actionBtn.dataset.id;
-                if (id) window.startFocusForTask?.(id);
-            },
-            'deleteFlexTask': () => {
-                const id = actionBtn.dataset.id;
-                if (id) window.deleteFlexibleTask?.(id);
-            },
-            'toggleFlexTask': () => {
-                const id = actionBtn.dataset.id;
-                if (id) window.toggleFlexibleTaskManual?.(id);
-            },
-            'focusFlexTask': () => {
-                const id = actionBtn.dataset.id;
-                if (id) window.selectTaskForFocus?.(id);
-            }
+            'toggleFlexTask': () => toggleFlexibleTaskManual?.(parseInt(actionBtn.dataset.id)),
+            'deleteFlexTask': () => deleteFlexibleTask?.(parseInt(actionBtn.dataset.id)),
+            'startFlexTaskFocus': () => window.startFocusForTask?.(parseInt(actionBtn.dataset.id)),
+            'focusFlexTask': () => window.selectTaskForFocus?.(parseInt(actionBtn.dataset.id))
         };
 
         const handler = actionHandlers[action];

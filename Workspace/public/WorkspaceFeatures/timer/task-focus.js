@@ -52,6 +52,14 @@
         if (elements.doneBtn) elements.doneBtn.addEventListener('click', markDoneEarly);
         if (elements.backBtn) elements.backBtn.addEventListener('click', backToPicker);
         if (elements.quickStartBtn) elements.quickStartBtn.addEventListener('click', submitQuickTask);
+
+        // Sub-tab switching
+        document.querySelectorAll('.task-focus-subtab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tfSubtab;
+                if (tab && typeof switchTaskFocusSubTab === 'function') switchTaskFocusSubTab(tab);
+            });
+        });
     }
 
     function initRing() {
@@ -97,11 +105,70 @@
 
     // ----- PICKER SCREEN -----
 
+    function getTodayScheduleTasks() {
+        if (typeof events === 'undefined' || !Array.isArray(events)) return [];
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        return events
+            .filter(e => e.day === today && !e.completed)
+            .sort((a, b) => a.start.localeCompare(b.start));
+    }
+
+    function eventDurationMinutes(ev) {
+        const [sh, sm] = ev.start.split(':').map(Number);
+        const [eh, em] = ev.end.split(':').map(Number);
+        return (eh * 60 + em) - (sh * 60 + sm);
+    }
+
+    function renderTaskFocusScheduleList() {
+        const el = document.getElementById('taskFocusScheduleList');
+        if (!el) return;
+        const tasks = getTodayScheduleTasks();
+        if (tasks.length === 0) {
+            el.innerHTML = '<p class="task-focus-empty">No incomplete tasks on today\'s schedule.</p>';
+            return;
+        }
+        el.innerHTML = tasks.map(ev => {
+            const dur = eventDurationMinutes(ev);
+            const durLabel = dur >= 60
+                ? `${Math.floor(dur / 60)}h ${dur % 60 ? dur % 60 + 'm' : ''}`.trim()
+                : `${dur}m`;
+            return `
+            <div class="task-focus-schedule-item">
+                <div class="task-focus-schedule-info">
+                    <span class="task-focus-schedule-title">${escapeHtml(ev.title)}</span>
+                    <span class="task-focus-schedule-time">${ev.start}–${ev.end} · ${durLabel}</span>
+                </div>
+                <button class="task-focus-pick-btn" data-action="focusScheduleTask" data-id="${ev.id}" data-kind="schedule">Focus</button>
+            </div>`;
+        }).join('');
+    }
+
+    function switchTaskFocusSubTab(tab) {
+        pauseTaskFocusIfRunning();
+
+        const scheduleBtn = document.querySelector('.task-focus-subtab[data-tf-subtab="schedule"]');
+        const flexibleBtn = document.querySelector('.task-focus-subtab[data-tf-subtab="flexible"]');
+        const scheduleList = document.getElementById('taskFocusScheduleList');
+        const flexWrap = document.getElementById('taskFocusFlexWrap');
+
+        if (scheduleBtn) scheduleBtn.classList.toggle('active', tab === 'schedule');
+        if (flexibleBtn) flexibleBtn.classList.toggle('active', tab === 'flexible');
+        if (scheduleList) scheduleList.style.display = tab === 'schedule' ? 'block' : 'none';
+        if (flexWrap) flexWrap.style.display = tab === 'flexible' ? 'block' : 'none';
+    }
+
     function showTaskFocusPicker() {
         if (elements.picker) elements.picker.style.display = 'block';
         if (elements.session) elements.session.style.display = 'none';
         currentTask = null;
+
+        renderTaskFocusScheduleList();
         renderTaskFocusPicker();
+
+        const scheduleTasks = getTodayScheduleTasks();
+        const flexTasks = typeof getIncompleteFlexibleTasks === 'function' ? getIncompleteFlexibleTasks() : [];
+        const defaultTab = scheduleTasks.length > 0 ? 'schedule' : (flexTasks.length > 0 ? 'flexible' : 'schedule');
+        switchTaskFocusSubTab(defaultTab);
     }
 
     function renderTaskFocusPicker() {
@@ -142,25 +209,45 @@
 
     // ----- SESSION SCREEN -----
 
-    function selectTaskForFocus(id) {
-        const task = typeof getFlexibleTaskById === 'function' ? getFlexibleTaskById(id) : null;
-        if (!task) {
-            if (typeof showToast === 'function') showToast("That task isn't there anymore — pick another", 'warning');
-            showTaskFocusPicker();
-            return;
+    function selectTaskForFocus(id, kind) {
+        kind = kind || 'flexible';
+        if (kind === 'schedule') {
+            const tasks = getTodayScheduleTasks();
+            const ev = tasks.find(e => e.id === id) || null;
+            if (!ev) {
+                if (typeof showToast === 'function') showToast("That task isn't there anymore — pick another", 'warning');
+                showTaskFocusPicker();
+                return;
+            }
+            const dur = eventDurationMinutes(ev);
+            currentTask = {
+                kind: 'schedule',
+                id: ev.id,
+                day: ev.day,
+                title: ev.title,
+                durationSeconds: dur * 60,
+                remainingSeconds: dur * 60
+            };
+        } else {
+            const task = typeof getFlexibleTaskById === 'function' ? getFlexibleTaskById(id) : null;
+            if (!task) {
+                if (typeof showToast === 'function') showToast("That task isn't there anymore — pick another", 'warning');
+                showTaskFocusPicker();
+                return;
+            }
+            currentTask = task;
         }
-        currentTask = task;
-        remainingSeconds = task.remainingSeconds != null ? task.remainingSeconds : task.durationSeconds;
-        currentTotal = task.durationSeconds;
+        remainingSeconds = currentTask.remainingSeconds != null ? currentTask.remainingSeconds : currentTask.durationSeconds;
+        currentTotal = currentTask.durationSeconds;
         isRunning = false;
         phaseStartTime = null;
 
         if (elements.picker) elements.picker.style.display = 'none';
         if (elements.session) elements.session.style.display = 'block';
-        if (elements.taskName) elements.taskName.textContent = task.title;
+        if (elements.taskName) elements.taskName.textContent = currentTask.title;
         if (elements.startBtn) {
             elements.startBtn.style.display = 'inline-block';
-            elements.startBtn.textContent = remainingSeconds < task.durationSeconds ? 'Resume' : 'Start';
+            elements.startBtn.textContent = remainingSeconds < currentTask.durationSeconds ? 'Resume' : 'Start';
         }
         if (elements.pauseBtn) elements.pauseBtn.style.display = 'none';
 
@@ -191,6 +278,7 @@
         if (remainingSeconds <= 0) {
             remainingSeconds = 0;
             updateDisplay();
+            if (currentTask) currentTask.remainingSeconds = 0;
             completeTask();
             return;
         }
@@ -207,7 +295,7 @@
     function persistProgress() {
         if (!currentTask) return;
         currentTask.remainingSeconds = remainingSeconds;
-        if (typeof updateFlexibleTaskRemaining === 'function') {
+        if (currentTask.kind === 'flexible' && typeof updateFlexibleTaskRemaining === 'function') {
             updateFlexibleTaskRemaining(currentTask.id, remainingSeconds);
         }
     }
@@ -296,9 +384,15 @@
         }
 
         // Final UI refresh to show cleared totals + history in the Total Timer
-        updateUI();
+        if (typeof window.updateTotalTimerFromHistory === 'function') window.updateTotalTimerFromHistory();
 
-        if (task && typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
+        if (task) {
+            if (task.kind === 'schedule') {
+                if (typeof toggleTaskComplete === 'function') toggleTaskComplete(task.id, task.day);
+            } else {
+                if (typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
+            }
+        }
         if (task && typeof showToast === 'function') showToast(`"${task.title}" complete! 🎉`, 'success');
 
         setState('ready');
@@ -325,9 +419,15 @@
         }
 
         // Final UI refresh to show cleared totals + history in the Total Timer
-        updateUI();
+        if (typeof window.updateTotalTimerFromHistory === 'function') window.updateTotalTimerFromHistory();
 
-        if (task && typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
+        if (task) {
+            if (task.kind === 'schedule') {
+                if (typeof toggleTaskComplete === 'function') toggleTaskComplete(task.id, task.day);
+            } else {
+                if (typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
+            }
+        }
         if (typeof showToast === 'function') showToast(`"${task.title}" marked done`, 'success');
         currentTask = null;
         showTaskFocusPicker();
@@ -345,6 +445,7 @@
     window.selectTaskForFocus = selectTaskForFocus;
     window.pauseTaskFocusIfRunning = pauseTaskFocusIfRunning;
     window.initTaskFocus = initTaskFocus;
+    window.switchTaskFocusSubTab = switchTaskFocusSubTab;
 
     // Switches to the Timer view's Task Focus mode and lands directly on a
     // given task's session screen — used by the "▶ Focus" button on the

@@ -775,8 +775,8 @@
                 <div id="flexibleTasksCard" class="session-tracker-enhanced flexible-tasks-card"
                     style="background: var(--bg-card); padding: 16px; border-radius: 10px; border-left: 4px solid var(--status-online);">
                     <div class="session-tracker-header">
-                        <div class="session-tracker-title">🎯 Flexible Tasks</div>
-                        <button class="matrix-btn" data-action="toggleAddFlexTaskForm">+ Add</button>
+                        <div class="session-tracker-title">Flexible Tasks</div>
+                        <button type="button" class="matrix-btn" id="flexAddToggleBtn">+ Add</button>
                     </div>
                     <p class="flexible-tasks-hint">Tasks that just need a chunk of time, not a fixed slot. Add one,
                         then start a focus session for it anytime from here or the Timer page.</p>
@@ -787,8 +787,8 @@
                             <input type="number" id="newFlexTaskMinutes" placeholder="Minutes" min="0" max="59">
                         </div>
                         <div class="flex-task-form-actions">
-                            <button class="matrix-btn" data-action="cancelAddFlexTask">Cancel</button>
-                            <button class="matrix-btn" data-action="submitNewFlexTask"
+                            <button type="button" class="matrix-btn" id="flexCancelBtn">Cancel</button>
+                            <button type="button" class="matrix-btn" id="flexSubmitBtn"
                                 style="background: var(--accent-gradient); color:#fff; border:none;">Add Task</button>
                         </div>
                     </div>
@@ -1220,26 +1220,13 @@
                     <!-- Picker screen: choose a flexible task or quick-add one -->
                     <div id="taskFocusPicker" class="task-focus-picker">
                         <p class="task-focus-hint">Pick a task — the timer will match its target time.</p>
-
-                        <!-- Sub-tabs: Today's Schedule / Flexible Tasks -->
-                        <div id="taskFocusSubTabs" class="task-focus-subtabs">
-                            <button data-tf-subtab="schedule" class="task-focus-subtab active">📅 Today's Schedule</button>
-                            <button data-tf-subtab="flexible" class="task-focus-subtab">🎯 Flexible Tasks</button>
-                        </div>
-
-                        <!-- Today's Schedule list (read-only) -->
-                        <div id="taskFocusScheduleList" class="task-focus-pick-list"></div>
-
-                        <!-- Flexible Tasks list + quick-add (wrapped so we can hide the whole block) -->
-                        <div id="taskFocusFlexWrap">
-                            <div id="taskFocusPickList" class="task-focus-pick-list"></div>
-                            <div class="task-focus-quick-add">
-                                <input type="text" id="taskFocusQuickTitle" placeholder="Or start something new (e.g. Math)" maxlength="80">
-                                <div class="task-focus-quick-duration">
-                                    <input type="number" id="taskFocusQuickHours" placeholder="Hrs" min="0" max="23">
-                                    <input type="number" id="taskFocusQuickMinutes" placeholder="Min" min="0" max="59">
-                                    <button id="taskFocusQuickStartBtn">Start</button>
-                                </div>
+                        <div id="taskFocusPickList" class="task-focus-pick-list"></div>
+                        <div class="task-focus-quick-add">
+                            <input type="text" id="taskFocusQuickTitle" placeholder="Or start something new (e.g. Math)" maxlength="80">
+                            <div class="task-focus-quick-duration">
+                                <input type="number" id="taskFocusQuickHours" placeholder="Hrs" min="0" max="23">
+                                <input type="number" id="taskFocusQuickMinutes" placeholder="Min" min="0" max="59">
+                                <button id="taskFocusQuickStartBtn">Start</button>
                             </div>
                         </div>
                     </div>

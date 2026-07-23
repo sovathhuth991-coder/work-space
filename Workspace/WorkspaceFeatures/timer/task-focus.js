@@ -278,6 +278,7 @@
         if (remainingSeconds <= 0) {
             remainingSeconds = 0;
             updateDisplay();
+            if (currentTask) currentTask.remainingSeconds = 0;
             completeTask();
             return;
         }
@@ -294,7 +295,7 @@
     function persistProgress() {
         if (!currentTask) return;
         currentTask.remainingSeconds = remainingSeconds;
-        if (typeof updateFlexibleTaskRemaining === 'function') {
+        if (currentTask.kind === 'flexible' && typeof updateFlexibleTaskRemaining === 'function') {
             updateFlexibleTaskRemaining(currentTask.id, remainingSeconds);
         }
     }
@@ -383,7 +384,7 @@
         }
 
         // Final UI refresh to show cleared totals + history in the Total Timer
-        updateUI();
+        if (typeof window.updateTotalTimerFromHistory === 'function') window.updateTotalTimerFromHistory();
 
         if (task) {
             if (task.kind === 'schedule') {
@@ -418,7 +419,7 @@
         }
 
         // Final UI refresh to show cleared totals + history in the Total Timer
-        updateUI();
+        if (typeof window.updateTotalTimerFromHistory === 'function') window.updateTotalTimerFromHistory();
 
         if (task) {
             if (task.kind === 'schedule') {

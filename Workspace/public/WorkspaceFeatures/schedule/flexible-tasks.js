@@ -55,8 +55,7 @@ function deleteFlexibleTask(id) {
 }
 
 function getFlexibleTaskById(id) {
-    const numId = Number(id);
-    return flexibleTasks.find(t => t.id === numId) || null;
+    return flexibleTasks.find(t => t.id === id) || null;
 }
 
 function getIncompleteFlexibleTasks() {
@@ -170,8 +169,19 @@ window.markFlexibleTaskComplete = markFlexibleTaskComplete;
 window.toggleFlexibleTaskManual = toggleFlexibleTaskManual;
 window.formatDurationShort = formatDurationShort;
 window.renderFlexibleTasksPanel = renderFlexibleTasksPanel;
-window.toggleAddFlexibleTaskForm = toggleAddFlexibleTaskForm;
-window.cancelAddFlexTask = cancelAddFlexTask;
-window.submitNewFlexTask = submitNewFlexTask;
 
-document.addEventListener('DOMContentLoaded', renderFlexibleTasksPanel);
+function initFlexibleTasksUI() {
+    renderFlexibleTasksPanel();
+    const addBtn = document.getElementById('flexAddToggleBtn');
+    const cancelBtn = document.getElementById('flexCancelBtn');
+    const submitBtn = document.getElementById('flexSubmitBtn');
+    if (addBtn) addBtn.addEventListener('click', toggleAddFlexibleTaskForm);
+    if (cancelBtn) cancelBtn.addEventListener('click', cancelAddFlexTask);
+    if (submitBtn) submitBtn.addEventListener('click', submitNewFlexTask);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFlexibleTasksUI);
+} else {
+    initFlexibleTasksUI();
+}
