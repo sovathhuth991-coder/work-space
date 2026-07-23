@@ -178,6 +178,9 @@
         if (elements.startBtn) elements.startBtn.style.display = 'none';
         if (elements.pauseBtn) elements.pauseBtn.style.display = 'inline-block';
         tfInterval = setInterval(tick, 100);
+
+        // Sync with total timer / session tracker
+        if (typeof startFocusAccumulation === 'function') startFocusAccumulation();
     }
 
     function tick() {
@@ -222,6 +225,9 @@
             elements.startBtn.textContent = 'Resume';
         }
         if (elements.pauseBtn) elements.pauseBtn.style.display = 'none';
+
+        // Pause total timer sync
+        if (typeof pauseFocusAccumulation === 'function') pauseFocusAccumulation();
     }
 
     // Exposed for pomodoro.js's mode switcher, so leaving this mode while
@@ -263,6 +269,9 @@
         isRunning = false;
         phaseStartTime = null;
 
+        // Stop total timer sync — this saves accumulated time and pauses the session tracker
+        if (typeof stopFocusAccumulation === 'function') stopFocusAccumulation();
+
         const task = currentTask;
         if (elements.ringContainer) {
             elements.ringContainer.style.animation = 'timerComplete 0.6s ease';
@@ -276,7 +285,18 @@
             sendNotification('🎯 Focus Session', `"${task.title}" is done — nice work.`, '🎯', 'task-focus-notification');
         }
 
+        // Save to completedSessions history BEFORE resetting daily totals,
+        // so renderSessionHistory() can show finished sessions independent of live counts.
         saveTaskFocusSession();
+
+        // Reset daily totals without triggering resetTracker's extra updateUI(),
+        // then do one final updateUI() ourselves so the display shows the new totals.
+        if (typeof window.resetDailyTotals === 'function') {
+            window.resetDailyTotals();
+        }
+
+        // Final UI refresh to show cleared totals + history in the Total Timer
+        updateUI();
 
         if (task && typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
         if (task && typeof showToast === 'function') showToast(`"${task.title}" complete! 🎉`, 'success');
@@ -293,9 +313,21 @@
         isRunning = false;
         phaseStartTime = null;
 
+        // Stop total timer sync — this saves accumulated time
+        if (typeof stopFocusAccumulation === 'function') stopFocusAccumulation();
+
         const task = currentTask;
         saveTaskFocusSession();
-        if (typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
+
+        // Reset daily totals without double-counting, then update UI once.
+        if (typeof window.resetDailyTotals === 'function') {
+            window.resetDailyTotals();
+        }
+
+        // Final UI refresh to show cleared totals + history in the Total Timer
+        updateUI();
+
+        if (task && typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
         if (typeof showToast === 'function') showToast(`"${task.title}" marked done`, 'success');
         currentTask = null;
         showTaskFocusPicker();
@@ -303,6 +335,7 @@
 
     function backToPicker() {
         pauseTaskFocusIfRunning();
+        if (typeof stopFocusAccumulation === 'function') stopFocusAccumulation();
         showTaskFocusPicker();
     }
 

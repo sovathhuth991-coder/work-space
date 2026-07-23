@@ -561,13 +561,6 @@
 
     // ----- Update UI (Daily Totals) -----
     function updateUI() {
-        if (focusDisplay) focusDisplay.textContent = formatTime(focusSeconds);
-        if (breakDisplay) breakDisplay.textContent = formatTime(breakSeconds);
-        if (idleDisplay) idleDisplay.textContent = formatTime(idleSeconds);
-
-        const totalSeconds = focusSeconds + breakSeconds + idleSeconds;
-        if (totalDisplay) totalDisplay.textContent = formatTime(totalSeconds);
-
         const scheduled = scheduledInput ? (parseInt(scheduledInput.value) || 120) : 120;
         const scheduledSecs = scheduled * 60;
         const total = focusSeconds + breakSeconds;
@@ -587,6 +580,7 @@
         // Update session tracker visual state
         updateSessionTrackerState();
 
+        // Total Timer shows history + live in one place to avoid overwriting
         updateTotalTimerFromHistory();
     }
 
@@ -737,9 +731,9 @@
 
     // ----- Start idle time tracking on page load -----
     function startIdleTrackingOnLoad() {
-        // Reset last activity time to now when page loads
-        // This ensures idle timer starts counting from page load, not from when script was parsed
-        lastActivityTime = Date.now();
+        if (!lastActivityTime) {
+            lastActivityTime = Date.now();
+        }
 
         // Start activity detection
         setupActivityDetection();
@@ -848,6 +842,7 @@
     };
 
     window.updateTotalTimerFromHistory = updateTotalTimerFromHistory;
+    window.saveCompletedSession = saveCompletedSession;
 
     // ===== External control for Task Focus mode =====
     window.startFocusAccumulation = function() {
@@ -1034,6 +1029,11 @@
                 updateUI();
                 startIdleTrackingOnLoad();
             }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (typeof saveCompletedSession === 'function') saveCompletedSession();
+            if (typeof saveAccumulatedTime === 'function') saveAccumulatedTime();
         });
 
         console.log('✅ Session Tracker (linked to schedule) initialized');
