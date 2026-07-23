@@ -226,6 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'focusFlexTask': () => {
                 const id = actionBtn.dataset.id;
                 if (id) window.selectTaskForFocus?.(id);
+            },
+            'focusScheduleTask': () => {
+                const id = actionBtn.dataset.id;
+                if (id) window.selectTaskForFocus?.(id, 'schedule');
             }
         };
 

@@ -8,6 +8,43 @@
     text-align: center;
 }
 
+/* ---- Sub-tabs ---- */
+.task-focus-subtabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0;
+}
+
+.task-focus-subtab {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.task-focus-subtab:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.task-focus-subtab.active {
+    color: var(--accent-1);
+    background: rgba(124, 109, 240, 0.08);
+    border-color: var(--border-color);
+    border-bottom: 1px solid var(--bg-card);
+    margin-bottom: -1px;
+}
+
 /* ---- Picker screen ---- */
 .task-focus-hint {
     font-size: var(--text-base);
@@ -31,6 +68,44 @@
     text-align: center;
     padding: 12px 0;
     margin: 0;
+}
+
+.task-focus-schedule-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.task-focus-schedule-item:hover {
+    background: rgba(124, 109, 240, 0.06);
+    border-color: rgba(124, 109, 240, 0.2);
+}
+
+.task-focus-schedule-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.task-focus-schedule-title {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.task-focus-schedule-time {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
 }
 
 .task-focus-pick-item {
