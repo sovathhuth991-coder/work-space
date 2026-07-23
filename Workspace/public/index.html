@@ -55,6 +55,7 @@
     <link rel="stylesheet" href="WorkspaceCore/layout.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/schedule/schedule.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/schedule/schedule-modal.css" />
+    <link rel="stylesheet" href="WorkspaceFeatures/schedule/flexible-tasks.css" />
     <link rel="stylesheet" href="WorkspaceShared/drag-drop.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/dashboard/dashboard.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/weather/weather.css" />
@@ -68,6 +69,7 @@
     <link rel="stylesheet" href="WorkspaceFeatures/dev-tools/dev-tools.css">
     <link rel="stylesheet" href="WorkspaceFeatures/timer/timer-enhancements.css">
     <link rel="stylesheet" href="WorkspaceFeatures/timer/pomodoro.css">
+    <link rel="stylesheet" href="WorkspaceFeatures/timer/task-focus.css">
     <link rel="stylesheet" href="WorkspaceFeatures/journal/journal.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/date-countdown/date-countdown.css" />
     <link rel="stylesheet" href="WorkspaceFeatures/reading/reading.css" />
@@ -769,6 +771,30 @@
                         for today</span>
                 </div>
 
+                <!-- ===== FLEXIBLE TASKS (duration-based, no fixed slot) ===== -->
+                <div id="flexibleTasksCard" class="session-tracker-enhanced flexible-tasks-card"
+                    style="background: var(--bg-card); padding: 16px; border-radius: 10px; border-left: 4px solid var(--status-online);">
+                    <div class="session-tracker-header">
+                        <div class="session-tracker-title">🎯 Flexible Tasks</div>
+                        <button class="matrix-btn" data-action="toggleAddFlexTaskForm">+ Add</button>
+                    </div>
+                    <p class="flexible-tasks-hint">Tasks that just need a chunk of time, not a fixed slot. Add one,
+                        then start a focus session for it anytime from here or the Timer page.</p>
+                    <div id="addFlexTaskForm" class="add-flex-task-form" style="display:none;">
+                        <input type="text" id="newFlexTaskTitle" placeholder="What do you need to do?" maxlength="80">
+                        <div class="flex-task-duration-inputs">
+                            <input type="number" id="newFlexTaskHours" placeholder="Hours" min="0" max="23">
+                            <input type="number" id="newFlexTaskMinutes" placeholder="Minutes" min="0" max="59">
+                        </div>
+                        <div class="flex-task-form-actions">
+                            <button class="matrix-btn" data-action="cancelAddFlexTask">Cancel</button>
+                            <button class="matrix-btn" data-action="submitNewFlexTask"
+                                style="background: var(--accent-gradient); color:#fff; border:none;">Add Task</button>
+                        </div>
+                    </div>
+                    <div id="flexibleTasksList" class="flexible-tasks-list"></div>
+                </div>
+
                 <section class="calendar-section-wrapper">
                     <div class="calendar-scroll">
                         <div class="calendar" id="calendar"></div>
@@ -1132,6 +1158,7 @@
                         style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
                         <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active">⏱ Countdown</button>
                         <button id="pomodoroPomoBtn" class="pomodoro-mode-btn">🍅 Pomodoro</button>
+                        <button id="taskFocusModeBtn" class="pomodoro-mode-btn">🎯 Task Focus</button>
                     </div>
 
                     <!-- POMODORO SHELL (always in DOM, display:none when inactive) -->
@@ -1185,6 +1212,57 @@
 
                     <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;">25 min focus · 5 min break ·
                         15 min long break</p>
+                </div>
+
+                <!-- TASK FOCUS SHELL (always in DOM, display:none when inactive) -->
+                <div id="taskFocusShell" class="task-focus-shell pomodoro-shell" style="max-width:500px;margin:0 auto;display:none;">
+
+                    <!-- Picker screen: choose a flexible task or quick-add one -->
+                    <div id="taskFocusPicker" class="task-focus-picker">
+                        <p class="task-focus-hint">Pick a task — the timer will match its target time.</p>
+                        <div id="taskFocusPickList" class="task-focus-pick-list"></div>
+                        <div class="task-focus-quick-add">
+                            <input type="text" id="taskFocusQuickTitle" placeholder="Or start something new (e.g. Math)" maxlength="80">
+                            <div class="task-focus-quick-duration">
+                                <input type="number" id="taskFocusQuickHours" placeholder="Hrs" min="0" max="23">
+                                <input type="number" id="taskFocusQuickMinutes" placeholder="Min" min="0" max="59">
+                                <button id="taskFocusQuickStartBtn">Start</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session screen: the dedicated countdown for the chosen task -->
+                    <div id="taskFocusSession" class="task-focus-session" style="display:none;">
+                        <div class="task-focus-ring-container" id="taskFocusRingContainer">
+                            <svg viewBox="0 0 280 280">
+                                <defs>
+                                    <linearGradient id="taskFocusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle class="task-focus-ring-bg" cx="140" cy="140" r="130" />
+                                <circle id="taskFocusRingGlow" class="task-focus-ring-glow" cx="140" cy="140" r="130" />
+                                <circle id="taskFocusRingFill" class="task-focus-ring-fill" cx="140" cy="140" r="130" />
+                            </svg>
+                            <div class="timer-display-container">
+                                <div id="taskFocusDisplay" class="task-focus-display">00:00</div>
+                                <div id="taskFocusTaskName" class="task-focus-label">Task</div>
+                            </div>
+                        </div>
+
+                        <div id="taskFocusStateIndicator" class="timer-state-indicator">
+                            <span class="state-dot"></span>
+                            <span id="taskFocusStateText">Ready</span>
+                        </div>
+
+                        <div class="task-focus-controls">
+                            <button id="taskFocusStartBtn" class="pomodoro-btn pomodoro-btn-primary">Start</button>
+                            <button id="taskFocusPauseBtn" class="pomodoro-btn pomodoro-btn-secondary" style="display:none;">Pause</button>
+                            <button id="taskFocusDoneBtn" class="pomodoro-btn pomodoro-btn-secondary">✓ Mark Done</button>
+                            <button id="taskFocusBackBtn" class="pomodoro-btn pomodoro-btn-secondary">← Switch Task</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -1848,11 +1926,13 @@
     <script type="text/javascript" src="WorkspaceShared/context-menu.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/schedule/schedule-core.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/schedule/schedule-planner.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/schedule/flexible-tasks.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/lessons/lessons.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/dashboard/dashboard.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/dashboard/live-widgets.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/timer/simple-timer.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/timer/pomodoro.js"></script>
+    <script type="text/javascript" src="WorkspaceFeatures/timer/task-focus.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/timer/session-tracker.js"></script>
     <script type="text/javascript" src="WorkspaceFeatures/weather/weather.js"></script>
     <script type="text/javascript" src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>

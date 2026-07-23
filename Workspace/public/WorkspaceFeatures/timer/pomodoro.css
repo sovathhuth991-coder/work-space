@@ -18,12 +18,6 @@
     display: block;
 }
 
-.simple-timer-card .pomodoro-shell {
-    margin-top: 0;
-    padding-top: 0;
-    margin-bottom: 0;
-}
-
 /* ---- Mode Toggle Row ---- */
 .pomodoro-mode-toggle {
     display: flex;

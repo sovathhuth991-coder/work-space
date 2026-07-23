@@ -79,7 +79,8 @@
             statFocus: document.getElementById('pomoStatFocus'),
             statToday: document.getElementById('pomoStatToday'),
             countdownBtn: document.getElementById('pomodoroCountdownBtn'),
-            pomodoroBtn: document.getElementById('pomodoroPomoBtn')
+            pomodoroBtn: document.getElementById('pomodoroPomoBtn'),
+            taskFocusBtn: document.getElementById('taskFocusModeBtn')
         };
 
         if (!elements.shell) return;
@@ -113,6 +114,9 @@
         }
         if (elements.pomodoroBtn) {
             elements.pomodoroBtn.addEventListener('click', () => switchPomodoroMode('pomodoro'));
+        }
+        if (elements.taskFocusBtn) {
+            elements.taskFocusBtn.addEventListener('click', () => switchPomodoroMode('taskFocus'));
         }
 
         // Set initial phase display
@@ -383,14 +387,16 @@
         updateStats();
     }
 
-    // ----- MODE SWITCHING (between countdown and pomodoro) -----
+    // ----- MODE SWITCHING (between countdown, pomodoro, and task focus) -----
     let swapTimeout;
     function switchPomodoroMode(mode) {
         const card = document.querySelector('.simple-timer-card');
         const countdownContent = card ? card.querySelector('.countdown-content') : null;
         const pomodoroShell = document.getElementById('pomodoroShell');
+        const taskFocusShell = document.getElementById('taskFocusShell');
         const countdownBtn = document.getElementById('pomodoroCountdownBtn');
         const pomodoroBtn = document.getElementById('pomodoroPomoBtn');
+        const taskFocusBtn = document.getElementById('taskFocusModeBtn');
 
         if (swapTimeout) clearTimeout(swapTimeout);
         if (card) card.classList.add('swapping');
@@ -402,23 +408,27 @@
             phaseStartTime = null;
             elements.ringContainer?.classList.remove('pomodoro-running');
 
-            if (mode === 'pomodoro') {
-                if (countdownContent) countdownContent.style.display = 'none';
-                if (pomodoroShell) {
-                    pomodoroShell.classList.add('active');
-                    pomodoroShell.style.display = 'block';
-                }
-                if (countdownBtn) countdownBtn.classList.remove('active');
-                if (pomodoroBtn) pomodoroBtn.classList.add('active');
-                resetPomodoro();
-            } else {
-                if (countdownContent) countdownContent.style.display = 'block';
-                if (pomodoroShell) {
-                    pomodoroShell.classList.remove('active');
-                    pomodoroShell.style.display = 'none';
-                }
-                if (countdownBtn) countdownBtn.classList.add('active');
-                if (pomodoroBtn) pomodoroBtn.classList.remove('active');
+            // Task Focus manages its own countdown loop, independent of this
+            // one — if we're leaving its mode, let it pause & save its own
+            // progress rather than reaching into its state from here.
+            if (mode !== 'taskFocus' && typeof window.pauseTaskFocusIfRunning === 'function') {
+                window.pauseTaskFocusIfRunning();
+            }
+
+            const panels = [
+                { el: countdownContent, btn: countdownBtn, match: 'countdown' },
+                { el: pomodoroShell, btn: pomodoroBtn, match: 'pomodoro' },
+                { el: taskFocusShell, btn: taskFocusBtn, match: 'taskFocus' }
+            ];
+            panels.forEach(p => {
+                const active = mode === p.match;
+                if (p.el) p.el.style.display = active ? 'block' : 'none';
+                if (p.btn) p.btn.classList.toggle('active', active);
+            });
+
+            if (mode === 'pomodoro') resetPomodoro();
+            if (mode === 'taskFocus' && typeof window.showTaskFocusPicker === 'function') {
+                window.showTaskFocusPicker();
             }
 
             if (card) card.classList.remove('swapping');

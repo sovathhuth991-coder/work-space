@@ -204,7 +204,26 @@ document.addEventListener('DOMContentLoaded', () => {
             'handleAccountSignUp': () => window.handleAccountSignUp?.(),
             'handleAccountMagicLink': () => window.handleAccountMagicLink?.(),
             'handleAccountSignOut': () => window.handleAccountSignOut?.(),
-            'handleAccountSyncNow': () => window.handleAccountSyncNow?.()
+            'handleAccountSyncNow': () => window.handleAccountSyncNow?.(),
+            'toggleAddFlexTaskForm': () => window.toggleAddFlexibleTaskForm?.(),
+            'cancelAddFlexTask': () => window.cancelAddFlexTask?.(),
+            'submitNewFlexTask': () => window.submitNewFlexTask?.(),
+            'startFlexTaskFocus': () => {
+                const id = actionBtn.dataset.id;
+                if (id) window.startFocusForTask?.(id);
+            },
+            'deleteFlexTask': () => {
+                const id = actionBtn.dataset.id;
+                if (id) window.deleteFlexibleTask?.(id);
+            },
+            'toggleFlexTask': () => {
+                const id = actionBtn.dataset.id;
+                if (id) window.toggleFlexibleTaskManual?.(id);
+            },
+            'focusFlexTask': () => {
+                const id = actionBtn.dataset.id;
+                if (id) window.selectTaskForFocus?.(id);
+            }
         };
 
         const handler = actionHandlers[action];
