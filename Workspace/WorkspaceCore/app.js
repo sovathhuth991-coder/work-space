@@ -503,13 +503,13 @@ function initGlobalSearch() {
     const input = document.getElementById('globalSearchInput');
     const dropdown = document.getElementById('globalSearchDropdown');
     const resultsLabel = document.getElementById('globalSearchResults');
-    if (!input) return;
+    if (!input || !dropdown) return;
 
     input.addEventListener('input', debounce((e) => {
         const query = e.target.value.trim().toLowerCase();
         if (!query) {
             dropdown.style.display = 'none';
-            resultsLabel.textContent = '';
+            if (resultsLabel) resultsLabel.textContent = '';
             return;
         }
 
@@ -599,7 +599,7 @@ function initGlobalSearch() {
 
     // Close dropdown on outside click
     document.addEventListener('click', (e) => {
-        if (!dropdown.contains(e.target) && e.target !== input) {
+        if (dropdown && !dropdown.contains(e.target) && e.target !== input) {
             dropdown.style.display = 'none';
         }
     });
@@ -613,8 +613,8 @@ function initGlobalSearch() {
 function handleGlobalSearchClick(item) {
     const dropdown = document.getElementById('globalSearchDropdown');
     const input = document.getElementById('globalSearchInput');
-    dropdown.style.display = 'none';
-    input.value = '';
+    if (dropdown) dropdown.style.display = 'none';
+    if (input) input.value = '';
 
     if (item.type.includes('Lesson') || item.type.includes('Block')) {
         switchView('lessons-view');

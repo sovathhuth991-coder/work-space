@@ -46,9 +46,13 @@ function initDragAndDrop() {
         e.dataTransfer.setData('text/plain', draggedEventId);
 
         // Prevent default drag image
-        const img = new Image();
-        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-        e.dataTransfer.setDragImage(img, 0, 0);
+        try {
+            const img = new Image();
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+            e.dataTransfer.setDragImage(img, 0, 0);
+        } catch (err) {
+            // Ignore security or CSP errors when setting drag image
+        }
     });
 
     document.addEventListener('drag', (e) => {
@@ -105,7 +109,9 @@ function initDragAndDrop() {
         // --- Drop onto a day card (change day) ---
         const dayBox = e.target.closest('.day');
         if (dayBox) {
-            const newDay = dayBox.querySelector('h3').textContent.replace('⭐️', '').trim();
+            const h3 = dayBox.querySelector('h3');
+            if (!h3) return;
+            const newDay = h3.textContent.replace('⭐️', '').trim();
             const event = events.find(ev => ev.id == draggedEventId);
             if (!event) return;
 
@@ -655,7 +661,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
         inner.appendChild(childB);
         wrapper.appendChild(inner);
 
-        container().appendChild(wrapper);
+        const c = container();
+        if (c) c.appendChild(wrapper);
         wireStatGroupWrapper(wrapper);
         return wrapper;
     }
@@ -1216,7 +1223,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
             applyRect(card, { x: groupX + i * (halfW + 20), y: groupY, w: halfW, h: groupRect.height });
             const minBtn = card.querySelector('.card-minimize-btn');
             if (minBtn) minBtn.style.display = '';
-            canvas().appendChild(card);
+            const c = canvas();
+            if (c) c.appendChild(card);
         });
 
         wrapper.remove();
@@ -1600,7 +1608,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeConte
                 card.classList.add('canvas-positioned-item');
                 const minBtn = card.querySelector('.card-minimize-btn');
                 if (minBtn) minBtn.style.display = '';
-                canvas().appendChild(card);
+                const c = canvas();
+                if (c) c.appendChild(card);
             });
             wrapper.remove();
         });

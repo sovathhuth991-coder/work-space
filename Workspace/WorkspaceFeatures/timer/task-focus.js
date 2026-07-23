@@ -65,7 +65,7 @@
                     }
                 }
             }
-            localStorage.removeItem('taskFocusPersisted');
+        }
         } catch (e) {
             console.warn('Could not load task focus state:', e);
         }

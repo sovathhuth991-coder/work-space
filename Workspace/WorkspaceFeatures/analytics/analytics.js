@@ -2,7 +2,8 @@ let analyticsCache = null;
 let analyticsCacheKey = '';
 
 function getAnalytics() {
-    const cacheKey = events.length + '-' + events.map(e => e.id + e.completed + e.category).join('-');
+    const evts = typeof events !== 'undefined' ? events : [];
+    const cacheKey = evts.length + '-' + evts.map(e => e.id + e.completed + e.category).join('-');
     if (analyticsCache && analyticsCacheKey === cacheKey) {
         return analyticsCache;
     }
@@ -11,27 +12,27 @@ function getAnalytics() {
     const weekStart = new Date(now);
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const weekEvents = events.filter(e => new Date(e.day) >= weekStart);
-    const monthEvents = events.filter(e => new Date(e.day) >= monthStart);
+    const weekEvents = evts.filter(e => new Date(e.day) >= weekStart);
+    const monthEvents = evts.filter(e => new Date(e.day) >= monthStart);
     const categoryBreakdown = {};
-    events.forEach(e => { const cat = e.category || 'study'; categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + 1; });
-    const totalStudyTime = events.filter(e => !e.completed).reduce((total, e) => {
+    evts.forEach(e => { const cat = e.category || 'study'; categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + 1; });
+    const totalStudyTime = evts.filter(e => !e.completed).reduce((total, e) => {
         const [sh, sm] = e.start.split(':').map(Number);
         const [eh, em] = e.end.split(':').map(Number);
         return total + ((eh * 60 + em) - (sh * 60 + sm));
     }, 0);
     const productiveHours = {};
-    events.forEach(e => { const hour = parseInt(e.start.split(':')[0]); productiveHours[hour] = (productiveHours[hour] || 0) + 1; });
+    evts.forEach(e => { const hour = parseInt(e.start.split(':')[0]); productiveHours[hour] = (productiveHours[hour] || 0) + 1; });
     const result = {
-        totalEvents: events.length,
-        completedEvents: events.filter(e => e.completed).length,
+        totalEvents: evts.length,
+        completedEvents: evts.filter(e => e.completed).length,
         weekEvents: weekEvents.length,
         monthEvents: monthEvents.length,
         categoryBreakdown,
         totalStudyTime,
-        completionRate: events.length ? (events.filter(e => e.completed).length / events.length * 100) : 0,
+        completionRate: evts.length ? (evts.filter(e => e.completed).length / evts.length * 100) : 0,
         productiveHours,
-        averageEventsPerDay: events.length / 7
+        averageEventsPerDay: evts.length / 7
     };
 
     analyticsCache = result;
@@ -40,8 +41,9 @@ function getAnalytics() {
 }
 
 function getOptimalStudyTimes() {
+    const evts = typeof events !== 'undefined' ? events : [];
     const prod = {};
-    events.forEach(e => {
+    evts.forEach(e => {
         if (e.completed) return;
         const hour = parseInt(e.start.split(':')[0]);
         const [sh, sm] = e.start.split(':').map(Number);
@@ -55,6 +57,7 @@ function getOptimalStudyTimes() {
 }
 
 function detectSchedulingConflicts() {
+    const evts = typeof events !== 'undefined' ? events : [];
     const conflicts = [];
     for (let i = 0; i < events.length; i++) {
         for (let j = i + 1; j < events.length; j++) {
@@ -190,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderHeatmap() {
     const container = document.getElementById('heatmapContainer');
     if (!container) return;
+    const evts = typeof events !== 'undefined' ? events : [];
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();
@@ -198,7 +202,7 @@ function renderHeatmap() {
 
     // Build a map of completed tasks per day
     const completionMap = {};
-    events.forEach(ev => {
+    evts.forEach(ev => {
         if (!ev.completed) return;
         const date = new Date(ev.day + ' ' + ev.start);
         const day = date.getDate();

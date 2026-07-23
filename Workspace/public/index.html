@@ -1067,6 +1067,36 @@
                         <div class="session-progress">
                             <div id="progressFill" class="session-progress-fill" style="width: 0%;"></div>
                         </div>
+
+                        <!-- ===== CURRENT SESSION ===== -->
+                        <div class="current-session-tracker session-tracker-enhanced"
+                            style="background: rgba(26, 26, 26, 0.6); padding: 14px; border-radius: 10px; border-left: 4px solid #f97316; margin-top: 16px;">
+                            <div class="session-tracker-header">
+                                <div class="session-tracker-title">🎯 Current Session</div>
+                            </div>
+                            <div id="currentSessionTaskInfo" style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-bottom:10px;">
+                                <div id="currentSessionTaskName" style="font-size:0.85rem;color:var(--text-primary);font-weight:600;">No active task</div>
+                                <div id="currentSessionTaskTime" style="font-size:0.75rem;color:var(--text-muted);"></div>
+                            </div>
+                            <div class="session-time-display session-time-display-4">
+                                <div class="time-block current-focus-block">
+                                    <div class="time-label">Focus</div>
+                                    <div class="time-value" id="sessionFocusDisplay">00:00</div>
+                                </div>
+                                <div class="time-block current-break-block">
+                                    <div class="time-label">Break</div>
+                                    <div class="time-value" id="sessionBreakDisplay">00:00</div>
+                                </div>
+                                <div class="time-block current-idle-block">
+                                    <div class="time-label">Idle</div>
+                                    <div class="time-value" id="sessionIdleDisplay">00:00</div>
+                                </div>
+                                <div class="time-block current-total-block">
+                                    <div class="time-label">Total</div>
+                                    <div class="time-value" id="sessionTotalDisplay">00:00</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- ===== TODAY'S SESSIONS ===== -->

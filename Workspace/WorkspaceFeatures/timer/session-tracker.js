@@ -405,18 +405,15 @@
 
     // ----- Update current session UI -----
     function updateCurrentSessionDisplay() {
-        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(focusSeconds);
-        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(breakSeconds);
-        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(idleSeconds);
-        const total = focusSeconds + breakSeconds + idleSeconds;
+        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(sessionFocusSeconds);
+        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(sessionBreakSeconds);
+        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(sessionIdleSeconds);
+        const total = sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds;
         if (sessionTotalDisplay) sessionTotalDisplay.textContent = formatTime(total);
 
-        // Keep the history panel's live "in progress" entry current while
-        // it's open — no point re-rendering it while hidden.
-        const historyCard = document.getElementById('sessionHistoryCard');
-        if (historyCard && historyCard.style.display !== 'none' && typeof renderSessionHistory === 'function') {
-            renderSessionHistory();
-        }
+        // Note: session history is refreshed by saveCompletedSession() /
+        // saveTaskFocusSession() / viewHistoryBtn instead; re-rendering it
+        // here on every tick causes hover twitching.
     }
 
     // ----- Update current session task info -----
@@ -494,7 +491,7 @@
 
         if (tasks.length === 0) {
             currentTaskData = null;
-            if (currentTaskData) currentTaskDisplay.textContent = 'No tasks scheduled for today';
+            currentTaskDisplay.textContent = 'No tasks scheduled for today';
             if (autoLabelBadge) {
                 autoLabelBadge.textContent = '📭 No tasks';
                 autoLabelBadge.style.color = '#888';
@@ -733,9 +730,9 @@
 
     // ----- Start idle time tracking on page load -----
     function startIdleTrackingOnLoad() {
-        // Reset last activity time to now when page loads
-        // This ensures idle timer starts counting from page load, not from when script was parsed
-        lastActivityTime = Date.now();
+        if (lastActivityTime === undefined) {
+            lastActivityTime = Date.now();
+        }
 
         // Start activity detection
         setupActivityDetection();
@@ -830,6 +827,21 @@
     // numbers update immediately instead of waiting for the next tick =====
     window.refreshSessionTrackerTotals = function() {
         updateTotalTimerFromHistory();
+    };
+
+    window.saveCompletedSession = saveCompletedSession;
+    window.updateTotalTimerFromHistory = updateTotalTimerFromHistory;
+
+    window.resetDailyTotals = function() {
+        focusSeconds = 0;
+        breakSeconds = 0;
+        idleSeconds = 0;
+        idleStartTime = null;
+        focusStartTime = null;
+        breakStartTime = null;
+        focusTimeAtStart = 0;
+        breakTimeAtStart = 0;
+        idleTimeAtStart = 0;
     };
 
     window.getCompletedSessions = function() {

@@ -405,18 +405,15 @@
 
     // ----- Update current session UI -----
     function updateCurrentSessionDisplay() {
-        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(focusSeconds);
-        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(breakSeconds);
-        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(idleSeconds);
-        const total = focusSeconds + breakSeconds + idleSeconds;
+        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(sessionFocusSeconds);
+        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(sessionBreakSeconds);
+        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(sessionIdleSeconds);
+        const total = sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds;
         if (sessionTotalDisplay) sessionTotalDisplay.textContent = formatTime(total);
 
-        // Keep the history panel's live "in progress" entry current while
-        // it's open — no point re-rendering it while hidden.
-        const historyCard = document.getElementById('sessionHistoryCard');
-        if (historyCard && historyCard.style.display !== 'none' && typeof renderSessionHistory === 'function') {
-            renderSessionHistory();
-        }
+        // Note: session history is refreshed by saveCompletedSession() /
+        // saveTaskFocusSession() / viewHistoryBtn instead; re-rendering it
+        // here on every tick causes hover twitching.
     }
 
     // ----- Update current session task info -----
