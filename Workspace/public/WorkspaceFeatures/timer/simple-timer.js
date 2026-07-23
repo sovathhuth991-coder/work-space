@@ -381,7 +381,7 @@
             }
         });
 
-        customTimerInput.addEventListener('keypress', function(e) {
+        customTimerInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const value = customTimerInput.value.trim();
                 if (value) {
