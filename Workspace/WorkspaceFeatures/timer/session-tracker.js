@@ -186,42 +186,83 @@
 
     function checkIdleState() {
         const timeSinceActivity = Date.now() - lastActivityTime;
-        const wasIdle = idleStartTime !== null;
         const shouldBeIdle = timeSinceActivity >= IDLE_THRESHOLD;
 
         // If user becomes idle and we're not already tracking idle time
         if (shouldBeIdle && !idleStartTime) {
+            // Entering idle state
             idleStartTime = Date.now();
             idleTimeAtStart = idleSeconds;
-            if (isRunning) {
-                // Pause focus/break timers when idle
-                if (focusStartTime) {
-                    const elapsed = Math.floor((Date.now() - focusStartTime) / 1000);
-                    focusSeconds = focusTimeAtStart + elapsed;
-                    focusStartTime = null;
-                }
-                if (breakStartTime) {
-                    const elapsed = Math.floor((Date.now() - breakStartTime) / 1000);
-                    breakSeconds = breakTimeAtStart + elapsed;
-                    breakStartTime = null;
-                }
+
+            // Pause daily focus/break timers when idle
+            if (focusStartTime) {
+                const elapsed = Math.floor((Date.now() - focusStartTime) / 1000);
+                focusSeconds = focusTimeAtStart + elapsed;
+                focusStartTime = null;
+            }
+            if (breakStartTime) {
+                const elapsed = Math.floor((Date.now() - breakStartTime) / 1000);
+                breakSeconds = breakTimeAtStart + elapsed;
+                breakStartTime = null;
+            }
+
+            // Pause session focus/break timers when idle
+            if (sessionFocusStartTime) {
+                const elapsed = Math.floor((Date.now() - sessionFocusStartTime) / 1000);
+                sessionFocusSeconds = sessionFocusTimeAtStart + elapsed;
+                sessionFocusStartTime = null;
+            }
+            if (sessionBreakStartTime) {
+                const elapsed = Math.floor((Date.now() - sessionBreakStartTime) / 1000);
+                sessionBreakSeconds = sessionBreakTimeAtStart + elapsed;
+                sessionBreakStartTime = null;
+            }
+            // Start session idle if not already
+            if (!sessionIdleStartTime) {
+                sessionIdleStartTime = Date.now();
+                sessionIdleTimeAtStart = sessionIdleSeconds;
             }
         }
         // If user becomes active again
         else if (!shouldBeIdle && idleStartTime) {
+            // Exiting idle state — finalize idle time
             const idleElapsed = Math.floor((Date.now() - idleStartTime) / 1000);
             idleSeconds = idleTimeAtStart + idleElapsed;
             idleStartTime = null;
 
-            // Resume focus/break timers if they were running
+            // Resume focus/break timers if they were running before idle
             if (isRunning && !isBreak) {
                 focusStartTime = Date.now();
                 focusTimeAtStart = focusSeconds;
+                sessionFocusStartTime = Date.now();
+                sessionFocusTimeAtStart = sessionFocusSeconds;
             } else if (isRunning && isBreak) {
                 breakStartTime = Date.now();
                 breakTimeAtStart = breakSeconds;
+                sessionBreakStartTime = Date.now();
+                sessionBreakTimeAtStart = sessionBreakSeconds;
+            }
+
+            // Stop session idle
+            if (sessionIdleStartTime) {
+                const elapsed = Math.floor((Date.now() - sessionIdleStartTime) / 1000);
+                sessionIdleSeconds = sessionIdleTimeAtStart + elapsed;
+                sessionIdleStartTime = null;
             }
         }
+
+        // While idle, continuously accumulate both daily and session idle time
+        if (shouldBeIdle && idleStartTime) {
+            const elapsed = Math.floor((Date.now() - idleStartTime) / 1000);
+            idleSeconds = idleTimeAtStart + elapsed;
+            if (sessionIdleStartTime) {
+                const sessionElapsed = Math.floor((Date.now() - sessionIdleStartTime) / 1000);
+                sessionIdleSeconds = sessionIdleTimeAtStart + sessionElapsed;
+            }
+        }
+
+        // Update UI every check so idle time displays in real-time
+        updateUI();
     }
 
     // ----- Helpers -----
@@ -367,10 +408,12 @@
 
     // ----- Update current session UI -----
     function updateCurrentSessionDisplay() {
-        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(focusSeconds);
-        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(breakSeconds);
-        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(idleSeconds);
-        const total = focusSeconds + breakSeconds + idleSeconds;
+        // Use session-level counters so idle time and per-session breakdown
+        // are correctly reflected in the Today's Sessions panel.
+        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(sessionFocusSeconds);
+        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(sessionBreakSeconds);
+        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(sessionIdleSeconds);
+        const total = sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds;
         if (sessionTotalDisplay) sessionTotalDisplay.textContent = formatTime(total);
 
         // Keep the history panel's live "in progress" entry current while
@@ -732,6 +775,7 @@
         breakTimeAtStart = 0;
         idleTimeAtStart = 0;
         lastActivityTime = Date.now();
+        saveAccumulatedTime();
         updateUI();
     }
 
@@ -801,6 +845,69 @@
             idleSeconds: sessionIdleSeconds,
             totalSeconds: sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds
         };
+    };
+
+    window.updateTotalTimerFromHistory = updateTotalTimerFromHistory;
+
+    // ===== External control for Task Focus mode =====
+    window.startFocusAccumulation = function() {
+        if (isRunning && !isBreak) return;
+        isRunning = true;
+        isBreak = false;
+        focusStartTime = Date.now();
+        focusTimeAtStart = focusSeconds;
+        startAccumulation();
+        if (sessionIdleStartTime) {
+            const idleElapsed = Math.floor((Date.now() - sessionIdleStartTime) / 1000);
+            sessionIdleSeconds = sessionIdleTimeAtStart + idleElapsed;
+            sessionIdleStartTime = null;
+        }
+        if (!sessionInterval) {
+            startCurrentSessionTracking();
+        } else {
+            sessionFocusStartTime = Date.now();
+            sessionFocusTimeAtStart = sessionFocusSeconds;
+        }
+        updateUI();
+    };
+
+    window.pauseFocusAccumulation = function() {
+        if (!isRunning || isBreak) return;
+        if (focusStartTime) {
+            const elapsed = Math.floor((Date.now() - focusStartTime) / 1000);
+            focusSeconds = focusTimeAtStart + elapsed;
+            focusStartTime = null;
+        }
+        if (sessionFocusStartTime) {
+            const elapsed = Math.floor((Date.now() - sessionFocusStartTime) / 1000);
+            sessionFocusSeconds = sessionFocusTimeAtStart + elapsed;
+            sessionFocusStartTime = null;
+        }
+        isRunning = false;
+        updateUI();
+        saveAccumulatedTime();
+    };
+
+    window.stopFocusAccumulation = function() {
+        pauseFocusAccumulation();
+        isBreak = false;
+    };
+
+    // Needed by Task Focus to clear daily totals without triggering another
+    // updateUI() -> updateTotalTimerFromHistory() cycle inside resetTracker().
+    window.resetDailyTotals = function() {
+        stopAccumulation();
+        focusSeconds = 0;
+        breakSeconds = 0;
+        idleSeconds = 0;
+        focusStartTime = null;
+        breakStartTime = null;
+        idleStartTime = null;
+        focusTimeAtStart = 0;
+        breakTimeAtStart = 0;
+        idleTimeAtStart = 0;
+        lastActivityTime = Date.now();
+        saveAccumulatedTime();
     };
 
     // ----- Hook into simple timer buttons -----

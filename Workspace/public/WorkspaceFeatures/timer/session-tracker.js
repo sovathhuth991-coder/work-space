@@ -803,6 +803,8 @@
         };
     };
 
+    window.updateTotalTimerFromHistory = updateTotalTimerFromHistory;
+
     // ----- Hook into simple timer buttons -----
     function initTracker() {
         const startBtn = document.getElementById('startBtn');

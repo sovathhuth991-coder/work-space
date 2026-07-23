@@ -55,7 +55,8 @@ function deleteFlexibleTask(id) {
 }
 
 function getFlexibleTaskById(id) {
-    return flexibleTasks.find(t => t.id === id) || null;
+    const numId = Number(id);
+    return flexibleTasks.find(t => t.id === numId) || null;
 }
 
 function getIncompleteFlexibleTasks() {

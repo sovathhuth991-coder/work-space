@@ -230,6 +230,33 @@
         if (isRunning) pauseTaskFocus();
     }
 
+    function saveTaskFocusSession() {
+        const task = currentTask;
+        if (!task) return;
+        const elapsed = task.durationSeconds - (task.remainingSeconds || 0);
+        if (elapsed < 5) return;
+
+        const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+        completedSessions.push({
+            taskName: task.title,
+            taskStart: '',
+            taskEnd: '',
+            focusSeconds: elapsed,
+            breakSeconds: 0,
+            idleSeconds: 0,
+            totalSeconds: elapsed,
+            timestamp: Date.now()
+        });
+        localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+
+        document.dispatchEvent(new CustomEvent('sessionCompleted', {
+            detail: { taskName: task.title }
+        }));
+
+        if (typeof renderSessionHistory === 'function') renderSessionHistory();
+        if (typeof updateTotalTimerFromHistory === 'function') updateTotalTimerFromHistory();
+    }
+
     function completeTask() {
         clearInterval(tfInterval);
         tfInterval = null;
@@ -248,6 +275,9 @@
         if (typeof sendNotification === 'function' && task) {
             sendNotification('🎯 Focus Session', `"${task.title}" is done — nice work.`, '🎯', 'task-focus-notification');
         }
+
+        saveTaskFocusSession();
+
         if (task && typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
         if (task && typeof showToast === 'function') showToast(`"${task.title}" complete! 🎉`, 'success');
 
@@ -264,6 +294,7 @@
         phaseStartTime = null;
 
         const task = currentTask;
+        saveTaskFocusSession();
         if (typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
         if (typeof showToast === 'function') showToast(`"${task.title}" marked done`, 'success');
         currentTask = null;
