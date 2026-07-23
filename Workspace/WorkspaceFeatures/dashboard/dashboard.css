@@ -1348,8 +1348,8 @@ body {
 .session-history-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
+    gap: 10px;
+    padding: 10px 14px;
     background: var(--bg-primary);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
@@ -1391,6 +1391,8 @@ body {
    an entry in the log. */
 .session-history-live {
     cursor: default;
+    background: rgba(239, 68, 68, 0.04);
+    border-color: rgba(239, 68, 68, 0.15);
 }
 
 .session-history-live::before {
@@ -1399,30 +1401,55 @@ body {
 }
 
 .session-history-live:hover {
-    background: var(--bg-primary);
-    border-color: var(--border-color);
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.25);
     transform: none;
 }
 
-.session-history-live .session-history-time {
-    color: var(--status-danger);
-    animation: sessionLivePulse 2s ease-in-out infinite;
+/* NOW indicator — pulsing red dot + label */
+.session-history-now-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
-@keyframes sessionLivePulse {
+.now-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--status-danger);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+    animation: nowPulse 2s ease-in-out infinite;
+}
 
-    0%,
-    100% {
-        opacity: 1;
-    }
+.now-text {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--status-danger);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
 
-    50% {
-        opacity: 0.5;
-    }
+@keyframes nowPulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+    50%      { opacity: 0.6; box-shadow: 0 0 3px rgba(239, 68, 68, 0.3); }
+}
+
+/* "Still in progress" pill on the live item */
+.session-history-still-progress {
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #f87171;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .session-history-live .session-history-time {
+    .session-history-now-indicator .now-dot {
         animation: none;
     }
 }
@@ -1435,6 +1462,12 @@ body {
     letter-spacing: 0.05em;
     min-width: 70px;
     flex-shrink: 0;
+}
+
+.session-history-item:not(.session-history-live) .session-history-time {
+    color: #60a5fa;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 .session-history-info {
@@ -1457,7 +1490,7 @@ body {
     color: var(--text-muted);
     display: flex;
     gap: 12px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .session-history-duration span {

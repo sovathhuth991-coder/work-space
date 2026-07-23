@@ -12,8 +12,6 @@
     const breakDisplay = document.getElementById('breakTimeDisplay');
     const idleDisplay = document.getElementById('idleTimeDisplay');
     const totalDisplay = document.getElementById('totalTimeDisplay');
-    const progressFill = document.getElementById('progressFill');
-    const progressPercent = document.getElementById('progressPercent');
     const scheduledDisplay = document.getElementById('scheduledDisplay');
     const resetTrackerBtn = document.getElementById('resetTrackerBtn');
     const endSessionBtn = document.getElementById('endSessionBtn');
@@ -562,11 +560,26 @@
         if (totalDisplay) totalDisplay.textContent = formatTime(totalSeconds);
 
         const scheduled = scheduledInput ? (parseInt(scheduledInput.value) || 120) : 120;
-        const scheduledSecs = scheduled * 60;
-        const total = focusSeconds + breakSeconds;
-        const pct = scheduledSecs > 0 ? Math.min((total / scheduledSecs) * 100, 100) : 0;
-        if (progressFill) progressFill.style.width = pct + '%';
-        if (progressPercent) progressPercent.textContent = Math.round(pct) + '%';
+
+        // Update progress bar segments (3 segments: Focus, Break, Idle)
+        const total = focusSeconds + breakSeconds + idleSeconds;
+        const focusSeg = document.querySelector('.progress-focus');
+        const breakSeg = document.querySelector('.progress-break');
+        const idleSeg = document.querySelector('.progress-idle');
+
+        if (total > 0) {
+            const focusPct = (focusSeconds / total) * 100;
+            const breakPct = (breakSeconds / total) * 100;
+            const idlePct = (idleSeconds / total) * 100;
+            if (focusSeg) focusSeg.style.width = focusPct + '%';
+            if (breakSeg) breakSeg.style.width = breakPct + '%';
+            if (idleSeg) idleSeg.style.width = idlePct + '%';
+        } else {
+            if (focusSeg) focusSeg.style.width = '33.33%';
+            if (breakSeg) breakSeg.style.width = '33.33%';
+            if (idleSeg) idleSeg.style.width = '33.34%';
+        }
+
         if (scheduledDisplay) scheduledDisplay.textContent = scheduled;
 
         // Update header stats

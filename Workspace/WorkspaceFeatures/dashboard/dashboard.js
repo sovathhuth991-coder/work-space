@@ -412,7 +412,10 @@ function renderSessionHistory() {
     const live = (typeof window.getCurrentSessionData === 'function') ? window.getCurrentSessionData() : null;
     const liveHtml = (live && live.taskName && live.totalSeconds > 0) ? `
         <div class="session-history-item session-history-live" title="Still in progress">
-            <div class="session-history-time">🔴 Now</div>
+            <div class="session-history-now-indicator">
+                <span class="now-dot"></span>
+                <span class="now-text">NOW</span>
+            </div>
             <div class="session-history-info">
                 <div class="session-history-task-name">${escapeHtml(live.taskName)}</div>
                 <div class="session-history-duration">
@@ -421,6 +424,7 @@ function renderSessionHistory() {
                     <span>⏳ ${formatTimeShort(live.totalSeconds || 0)}</span>
                 </div>
             </div>
+            <div class="session-history-still-progress">Still in progress</div>
         </div>
     ` : '';
 

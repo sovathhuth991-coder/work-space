@@ -23,7 +23,8 @@
     display: flex;
     gap: 8px;
     justify-content: center;
-    margin-bottom: 24px;
+    margin: 20px auto 0;
+    max-width: 500px;
 }
 
 .pomodoro-mode-btn {
@@ -39,17 +40,17 @@
 }
 
 .pomodoro-mode-btn:hover {
-    background: rgba(124, 109, 240, 0.1);
-    border-color: var(--accent-1);
-    color: var(--accent-1);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
     transform: translateY(-2px);
 }
 
 .pomodoro-mode-btn.active {
-    background: var(--accent-solid);
+    background: rgba(124, 109, 240, 0.2);
     color: #fff;
-    border: none;
-    box-shadow: 0 4px 20px rgba(124, 109, 240, 0.4);
+    border: 1px solid rgba(124, 109, 240, 0.5);
+    box-shadow: 0 0 20px rgba(124, 109, 240, 0.25);
 }
 
 /* ---- Pomodoro Progress Ring (overrides generic ring) ---- */

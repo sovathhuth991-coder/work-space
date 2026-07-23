@@ -1038,80 +1038,83 @@
 
                 <div class="timer-top-row" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
 
-                    <!-- ===== TOTAL TIMER (Session Tracker + Current Session) ===== -->
-                    <div id="sessionTracker" class="session-tracker-enhanced"
-                        style="background: #1a1a1a; padding: 16px; border-radius: 10px; border-left: 4px solid #3498db;">
-                        <div class="session-tracker-header">
-                            <div class="session-tracker-title">⏱ Total Timer</div>
-                        </div>
-
-                        <div class="session-time-display">
-                            <div class="time-block focus-block">
-                                <div class="time-label">Focus</div>
-                                <div class="time-value" id="focusTimeDisplay">00:00</div>
-                            </div>
-                            <div class="time-block break-block">
-                                <div class="time-label">Break</div>
-                                <div class="time-value" id="breakTimeDisplay">00:00</div>
-                            </div>
-                            <div class="time-block idle-block">
-                                <div class="time-label">Idle</div>
-                                <div class="time-value" id="idleTimeDisplay">00:00</div>
-                            </div>
-                            <div class="time-block total-block">
-                                <div class="time-label">Total</div>
-                                <div class="time-value" id="totalTimeDisplay">00:00</div>
-                            </div>
-                        </div>
-
-                        <div class="session-progress">
-                            <div id="progressFill" class="session-progress-fill" style="width: 0%;"></div>
-                        </div>
-
-                        <!-- ===== CURRENT SESSION ===== -->
-                        <div class="current-session-tracker session-tracker-enhanced"
-                            style="background: rgba(26, 26, 26, 0.6); padding: 14px; border-radius: 10px; border-left: 4px solid #f97316; margin-top: 16px;">
+                    <div class="timer-left-column">
+                        <!-- ===== TOTAL TIMER (Session Tracker + Current Session) ===== -->
+                        <div id="sessionTracker" class="session-tracker-enhanced"
+                            style="background: #1a1a1a; padding: 16px; border-radius: 10px; border-left: 4px solid #3498db;">
                             <div class="session-tracker-header">
-                                <div class="session-tracker-title">🎯 Current Session</div>
+                                <div class="session-tracker-title">⏱ Total Timer</div>
                             </div>
-                            <div id="currentSessionTaskInfo" style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-bottom:10px;">
-                                <div id="currentSessionTaskName" style="font-size:0.85rem;color:var(--text-primary);font-weight:600;">No active task</div>
-                                <div id="currentSessionTaskTime" style="font-size:0.75rem;color:var(--text-muted);"></div>
-                            </div>
-                            <div class="session-time-display session-time-display-4">
-                                <div class="time-block current-focus-block">
+
+                            <div class="session-time-display">
+                                <div class="time-block focus-block">
                                     <div class="time-label">Focus</div>
-                                    <div class="time-value" id="sessionFocusDisplay">00:00</div>
+                                    <div class="time-value" id="focusTimeDisplay">00:00</div>
                                 </div>
-                                <div class="time-block current-break-block">
+                                <div class="time-block break-block">
                                     <div class="time-label">Break</div>
-                                    <div class="time-value" id="sessionBreakDisplay">00:00</div>
+                                    <div class="time-value" id="breakTimeDisplay">00:00</div>
                                 </div>
-                                <div class="time-block current-idle-block">
+                                <div class="time-block idle-block">
                                     <div class="time-label">Idle</div>
-                                    <div class="time-value" id="sessionIdleDisplay">00:00</div>
+                                    <div class="time-value" id="idleTimeDisplay">00:00</div>
                                 </div>
-                                <div class="time-block current-total-block">
+                                <div class="time-block total-block">
                                     <div class="time-label">Total</div>
-                                    <div class="time-value" id="sessionTotalDisplay">00:00</div>
+                                    <div class="time-value" id="totalTimeDisplay">00:00</div>
+                                </div>
+                            </div>
+
+                            <div class="session-progress">
+                                <span class="progress-segment progress-focus" style="width: 33.33%"></span>
+                                <span class="progress-segment progress-break" style="width: 33.33%"></span>
+                                <span class="progress-segment progress-idle" style="width: 33.34%"></span>
+                            </div>
+
+                            <!-- ===== CURRENT SESSION ===== -->
+                            <div class="current-session-tracker session-tracker-enhanced"
+                                style="background: rgba(26, 26, 26, 0.6); padding: 14px; border-radius: 10px; border-left: 4px solid #f97316; margin-top: 16px;">
+                                <div class="session-tracker-header">
+                                    <div class="session-tracker-title">🎯 Current Session</div>
+                                </div>
+                                <div id="currentSessionTaskInfo" style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-bottom:10px;">
+                                    <div id="currentSessionTaskName" style="font-size:0.85rem;color:var(--text-primary);font-weight:600;">No active task</div>
+                                    <div id="currentSessionTaskTime" style="font-size:0.75rem;color:var(--text-muted);"></div>
+                                </div>
+                                <div class="session-time-display session-time-display-4">
+                                    <div class="time-block current-focus-block">
+                                        <div class="time-label">Focus</div>
+                                        <div class="time-value" id="sessionFocusDisplay">00:00</div>
+                                    </div>
+                                    <div class="time-block current-break-block">
+                                        <div class="time-label">Break</div>
+                                        <div class="time-value" id="sessionBreakDisplay">00:00</div>
+                                    </div>
+                                    <div class="time-block current-idle-block">
+                                        <div class="time-label">Idle</div>
+                                        <div class="time-value" id="sessionIdleDisplay">00:00</div>
+                                    </div>
+                                    <div class="time-block current-total-block">
+                                        <div class="time-label">Total</div>
+                                        <div class="time-value" id="sessionTotalDisplay">00:00</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- ===== TODAY'S SESSIONS ===== -->
-                    <div id="sessionHistoryCard" class="session-tracker-enhanced"
-                        style="background: var(--bg-card); padding: 16px; border-radius: 10px; border-left: 4px solid var(--accent-1);">
-                        <div class="session-tracker-header">
-                            <div class="session-tracker-title">📊 Today's Sessions</div>
+                        <!-- ===== TODAY'S SESSIONS ===== -->
+                        <div id="sessionHistoryCard" class="session-tracker-enhanced"
+                            style="background: var(--bg-card); padding: 16px; border-radius: 10px; border-left: 4px solid var(--accent-1);">
+                            <div class="session-tracker-header">
+                                <div class="session-tracker-title">📊 Today's Sessions</div>
+                            </div>
+                            <div id="sessionHistoryList" class="session-history-list"></div>
                         </div>
-                        <div id="sessionHistoryList" class="session-history-list"></div>
                     </div>
 
-                </div>
-
-                <!-- ===== FOCUS TIMER ===== -->
-                <div class="focus-timer-section simple-timer-card" style="max-width: 500px; margin: 24px auto 0; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
+                    <div class="timer-right-column">
+                        <!-- ===== FOCUS TIMER ===== -->
+                        <div class="focus-timer-section simple-timer-card" style="max-width: 500px; margin: 24px auto 0; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
 
                     <!-- COUNTDOWN CONTENT (hidden when Pomodoro active) -->
                     <div class="countdown-content">
@@ -1294,6 +1297,9 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
             </section>
 
             <!-- ===== WEATHER VIEW ===== -->
