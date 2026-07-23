@@ -405,10 +405,10 @@
 
     // ----- Update current session UI -----
     function updateCurrentSessionDisplay() {
-        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(focusSeconds);
-        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(breakSeconds);
-        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(idleSeconds);
-        const total = focusSeconds + breakSeconds + idleSeconds;
+        if (sessionFocusDisplay) sessionFocusDisplay.textContent = formatTime(sessionFocusSeconds);
+        if (sessionBreakDisplay) sessionBreakDisplay.textContent = formatTime(sessionBreakSeconds);
+        if (sessionIdleDisplay) sessionIdleDisplay.textContent = formatTime(sessionIdleSeconds);
+        const total = sessionFocusSeconds + sessionBreakSeconds + sessionIdleSeconds;
         if (sessionTotalDisplay) sessionTotalDisplay.textContent = formatTime(total);
 
         // Keep the history panel's live "in progress" entry current while
