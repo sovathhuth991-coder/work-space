@@ -15,6 +15,43 @@
     let timerStartTime = null;
     let timerRemainingAtStart = 0;
 
+    // ----- PERSISTENCE (survives refresh) -----
+    function saveTimerState() {
+        try {
+            localStorage.setItem('simpleTimerPersisted', JSON.stringify({
+                totalSeconds,
+                remainingSeconds,
+                isRunning,
+                timerStartTime,
+                timerRemainingAtStart
+            }));
+        } catch (e) {
+            console.warn('Could not save timer state:', e);
+        }
+    }
+
+    function loadTimerState() {
+        try {
+            const saved = localStorage.getItem('simpleTimerPersisted');
+            if (!saved) return;
+            const state = JSON.parse(saved);
+            if (state.remainingSeconds > 0) {
+                totalSeconds = state.totalSeconds || totalSeconds;
+                remainingSeconds = state.remainingSeconds;
+                if (state.isRunning && state.timerStartTime) {
+                    const elapsed = Math.floor((Date.now() - state.timerStartTime) / 1000);
+                    remainingSeconds = Math.max(0, (state.timerRemainingAtStart || remainingSeconds) - elapsed);
+                }
+                updateDisplay();
+                if (state.isRunning && remainingSeconds > 0) {
+                    startTimer(false);
+                }
+            }
+        } catch (e) {
+            console.warn('Could not load timer state:', e);
+        }
+    }
+
     // ----- DOM ELEMENTS -----
     const display = document.getElementById('countdownDisplay');
     const startBtn = document.getElementById('startBtn');
@@ -180,10 +217,11 @@
         }
     }
 
-    function startTimer() {
+    function startTimer(skipSave) {
         if (isRunning) return;
 
         isRunning = true;
+        if (!skipSave) saveTimerState();
         if (startBtn) startBtn.style.display = 'none';
         if (pauseBtn) {
             pauseBtn.style.display = 'inline-block';
@@ -210,6 +248,7 @@
                 isRunning = false;
                 remainingSeconds = 0;
                 timerStartTime = null;
+                localStorage.removeItem('simpleTimerPersisted');
                 updateDisplay();
 
                 // Sound + system notification so this is noticeable even if
@@ -250,6 +289,7 @@
 
         // Update state indicator
         updateTimerState('paused');
+        saveTimerState();
 
         if (startBtn) {
             startBtn.style.display = 'inline-block';
@@ -265,6 +305,7 @@
         remainingSeconds = totalSeconds;
         timerStartTime = null;
         timerRemainingAtStart = 0;
+        localStorage.removeItem('simpleTimerPersisted');
         updateDisplay();
 
         // Update state indicator
@@ -286,6 +327,7 @@
         isRunning = false;
         totalSeconds = minutes * 60;
         remainingSeconds = totalSeconds;
+        localStorage.removeItem('simpleTimerPersisted');
         updateDisplay();
 
         // Update active preset button
@@ -357,6 +399,7 @@
     loadCustomTimers();
     initProgressRing();
     updateDisplay();
+    loadTimerState();
     if (pauseBtn) pauseBtn.style.display = 'none';
 
 })();

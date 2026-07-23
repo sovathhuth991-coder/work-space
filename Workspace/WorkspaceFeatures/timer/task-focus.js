@@ -20,6 +20,57 @@
 
     let elements = {};
 
+    function saveTaskFocusState() {
+        try {
+            localStorage.setItem('taskFocusPersisted', JSON.stringify({
+                currentTask: currentTask ? {
+                    kind: currentTask.kind,
+                    id: currentTask.id,
+                    day: currentTask.day,
+                    title: currentTask.title,
+                    durationSeconds: currentTask.durationSeconds
+                } : null,
+                remainingSeconds,
+                isRunning,
+                phaseStartTime,
+                phaseRemainingAtStart
+            }));
+        } catch (e) {
+            console.warn('Could not save task focus state:', e);
+        }
+    }
+
+    function loadTaskFocusState() {
+        try {
+            const saved = localStorage.getItem('taskFocusPersisted');
+            if (!saved) return;
+            const state = JSON.parse(saved);
+            if (state.currentTask && state.remainingSeconds > 0) {
+                currentTask = state.currentTask;
+                remainingSeconds = state.remainingSeconds;
+                currentTotal = currentTask.durationSeconds;
+
+                if (elements.picker) elements.picker.style.display = 'none';
+                if (elements.session) elements.session.style.display = 'block';
+                if (elements.taskName) elements.taskName.textContent = currentTask.title;
+                setState('ready');
+                updateDisplay();
+
+                if (state.isRunning && state.phaseStartTime) {
+                    const elapsed = Math.floor((Date.now() - state.phaseStartTime) / 1000);
+                    remainingSeconds = Math.max(0, (state.phaseRemainingAtStart || remainingSeconds) - elapsed);
+                    if (currentTask) currentTask.remainingSeconds = remainingSeconds;
+                    if (remainingSeconds > 0) {
+                        startTaskFocus(false);
+                    }
+                }
+            }
+            localStorage.removeItem('taskFocusPersisted');
+        } catch (e) {
+            console.warn('Could not load task focus state:', e);
+        }
+    }
+
     function initTaskFocus() {
         elements = {
             shell: document.getElementById('taskFocusShell'),
@@ -60,6 +111,8 @@
                 if (tab && typeof switchTaskFocusSubTab === 'function') switchTaskFocusSubTab(tab);
             });
         });
+
+        loadTaskFocusState();
     }
 
     function initRing() {
@@ -255,13 +308,14 @@
         updateDisplay();
     }
 
-    function startTaskFocus() {
+    function startTaskFocus(skipSave) {
         if (isRunning || !currentTask) return;
         isRunning = true;
         phaseStartTime = Date.now();
         phaseRemainingAtStart = remainingSeconds;
         lastPersistedAt = Date.now();
         setState('running');
+        if (!skipSave) saveTaskFocusState();
         if (elements.startBtn) elements.startBtn.style.display = 'none';
         if (elements.pauseBtn) elements.pauseBtn.style.display = 'inline-block';
         tfInterval = setInterval(tick, 100);
@@ -284,10 +338,9 @@
         }
         updateDisplay();
 
-        // Persist progress roughly every 10s so a refresh mid-session
-        // doesn't lose much on a multi-hour task.
-        if (Date.now() - lastPersistedAt >= 10000) {
+        if (Date.now() - lastPersistedAt >= 1000) {
             persistProgress();
+            saveTaskFocusState();
             lastPersistedAt = Date.now();
         }
     }
@@ -307,6 +360,7 @@
         isRunning = false;
         phaseStartTime = null;
         persistProgress();
+        saveTaskFocusState();
         setState('paused');
         if (elements.startBtn) {
             elements.startBtn.style.display = 'inline-block';
@@ -377,6 +431,9 @@
         // so renderSessionHistory() can show finished sessions independent of live counts.
         saveTaskFocusSession();
 
+        // Clear persisted task focus state on completion
+        localStorage.removeItem('taskFocusPersisted');
+
         // Reset daily totals without triggering resetTracker's extra updateUI(),
         // then do one final updateUI() ourselves so the display shows the new totals.
         if (typeof window.resetDailyTotals === 'function') {
@@ -413,6 +470,9 @@
         const task = currentTask;
         saveTaskFocusSession();
 
+        // Clear persisted task focus state on early completion
+        localStorage.removeItem('taskFocusPersisted');
+
         // Reset daily totals without double-counting, then update UI once.
         if (typeof window.resetDailyTotals === 'function') {
             window.resetDailyTotals();
@@ -435,6 +495,7 @@
 
     function backToPicker() {
         pauseTaskFocusIfRunning();
+        saveTaskFocusState();
         if (typeof stopFocusAccumulation === 'function') stopFocusAccumulation();
         showTaskFocusPicker();
     }
