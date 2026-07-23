@@ -75,22 +75,22 @@
 }
 
 .timer-display-main {
-    font-size: 5rem;
+    font-size: 4.5rem;
     font-weight: 700;
     color: #fff;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
     line-height: 1;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 0 20px rgba(124, 109, 240, 0.5);
     margin-bottom: 8px;
 }
 
 .timer-display-label {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-weight: 700;
+    letter-spacing: 0.15em;
+    font-weight: 600;
 }
 
 /* ---- Timer State Indicators ---- */
@@ -139,49 +139,51 @@
     flex-wrap: wrap;
 }
 
-#startBtn, #pauseBtn, #resetBtn {
-    padding: 14px 36px !important;
-    border-radius: 99px !important;
+.timer-btn {
+    padding: 14px 36px;
+    border-radius: 40px;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     border: none;
+    position: relative;
+    overflow: hidden;
 }
 
-#startBtn {
-    background: var(--accent-gradient) !important;
-    color: #fff !important;
+.timer-btn-primary {
+    background: var(--accent-gradient);
+    color: #fff;
     box-shadow: 0 4px 20px rgba(124, 109, 240, 0.4);
 }
 
-#startBtn:hover {
+.timer-btn-primary:hover {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 30px rgba(124, 109, 240, 0.6);
 }
 
-#startBtn:active {
+.timer-btn-primary:active {
     transform: translateY(0) scale(0.98);
 }
 
-#pauseBtn, #resetBtn {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--text-secondary) !important;
+.timer-btn-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
 }
 
-#pauseBtn:hover, #resetBtn:hover {
+.timer-btn-secondary:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
     border-color: var(--border-color-hover);
     transform: translateY(-2px);
 }
 
-#pauseBtn:active, #resetBtn:active {
+.timer-btn-secondary:active {
     transform: translateY(0) scale(0.98);
 }
 
-#pauseBtn:disabled {
+.timer-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
     transform: none !important;
@@ -197,32 +199,32 @@
 }
 
 .preset-btn {
-    padding: 10px 22px !important;
-    border-radius: 20px !important;
-    font-size: 0.9rem !important;
+    padding: 10px 22px;
+    border-radius: 24px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
-    color: var(--text-secondary) !important;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-secondary);
     position: relative;
     overflow: hidden;
 }
 
 .preset-btn:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    color: #fff !important;
+    background: rgba(124, 109, 240, 0.15);
+    border-color: var(--accent-1);
+    color: var(--accent-1);
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 16px rgba(124, 109, 240, 0.2);
 }
 
 .preset-btn.active {
-    background: rgba(124, 109, 240, 0.2) !important;
-    color: #fff !important;
-    border: 1px solid rgba(124, 109, 240, 0.6) !important;
-    box-shadow: 0 0 20px rgba(124, 109, 240, 0.3);
+    background: var(--accent-solid);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 20px rgba(124, 109, 240, 0.4);
 }
 
 .preset-btn:active {
@@ -402,10 +404,6 @@
     grid-template-columns: repeat(4, 1fr) !important;
 }
 
-.session-time-display-4 .time-value {
-    font-size: 1.1rem;
-}
-
 /* ---- Current Session Mobile Responsive ---- */
 @media (max-width: 768px) {
     .current-session-tracker {
@@ -561,15 +559,15 @@
 .session-time-display {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin: 12px 0 0;
+    gap: 16px;
+    margin: 20px 0;
 }
 
 .time-block {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 8px;
-    padding: 10px 8px;
+    border-radius: 10px;
+    padding: 20px;
     text-align: center;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
@@ -614,20 +612,20 @@
 }
 
 .time-label {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .time-value {
-    font-size: 1.4rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
-    line-height: 1.1;
+    line-height: 1;
 }
 
 .time-block.focus-block .time-value {
@@ -661,26 +659,106 @@
     margin-top: 4px;
 }
 
-/* ---- Progress Bar (3-segment breakdown) ---- */
+/* ---- Small inline icons replacing emoji in headers/buttons ---- */
+.wh-icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+.timer-modes-label {
+    text-align: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+/* ---- Preset/custom timer grid (3 columns) ---- */
+.timer-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+/* Custom timers render inside this div, but display:contents makes it
+   invisible to layout so its buttons join the grid directly instead of
+   being trapped in their own row. */
+.timer-preset-grid #customTimersContainer {
+    display: contents;
+}
+
+.timer-preset-grid .preset-btn {
+    width: 100%;
+}
+
+.timer-preset-grid #customTimerInput {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    text-align: center;
+    outline: none;
+    font-family: inherit;
+}
+
+.timer-preset-grid #customTimerInput:focus {
+    border-color: var(--accent-1);
+}
+
+.timer-preset-grid #addCustomTimerBtn {
+    width: 100%;
+    padding: 10px 22px;
+    border-radius: 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: rgba(124, 109, 240, 0.15);
+    border: 1px solid var(--accent-1);
+    color: var(--accent-1);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.timer-preset-grid #addCustomTimerBtn:hover {
+    background: rgba(124, 109, 240, 0.25);
+}
+
+/* ---- Progress Bar Enhancement (3 segments: focus / break / idle) ---- */
 .session-progress {
-    display: flex;
-    height: 6px;
+    width: 100%;
+    height: 8px;
     background: rgba(255, 255, 255, 0.06);
     border-radius: 99px;
     overflow: hidden;
-    gap: 2px;
-    margin: 12px 0 0;
+    margin: 16px 0;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    display: flex;
 }
 
-.progress-segment {
+.session-progress-segment {
     height: 100%;
-    border-radius: 2px;
-    transition: width 0.4s ease;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.progress-focus { background: var(--status-online, #4CAF50); }
-.progress-break { background: var(--status-attention, #FF9800); }
-.progress-idle { background: var(--text-muted, #9E9E9E); }
+.session-progress-segment.segment-focus {
+    background: var(--status-online, #10b981);
+}
+
+.session-progress-segment.segment-break {
+    background: #f59e0b;
+}
+
+.session-progress-segment.segment-idle {
+    background: #6366f1;
+}
 
 /* ---- Responsive Session Tracker ---- */
 @media (max-width: 768px) {
@@ -808,13 +886,7 @@
     gap: 24px;
 }
 
-.timer-left-column {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.timer-right-column {
+.timer-focus-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;

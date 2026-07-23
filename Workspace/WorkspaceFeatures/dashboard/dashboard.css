@@ -1348,8 +1348,8 @@ body {
 .session-history-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
+    gap: 12px;
+    padding: 14px 16px;
     background: var(--bg-primary);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
@@ -1391,8 +1391,6 @@ body {
    an entry in the log. */
 .session-history-live {
     cursor: default;
-    background: rgba(239, 68, 68, 0.04);
-    border-color: rgba(239, 68, 68, 0.15);
 }
 
 .session-history-live::before {
@@ -1401,55 +1399,30 @@ body {
 }
 
 .session-history-live:hover {
-    background: rgba(239, 68, 68, 0.08);
-    border-color: rgba(239, 68, 68, 0.25);
+    background: var(--bg-primary);
+    border-color: var(--border-color);
     transform: none;
 }
 
-/* NOW indicator — pulsing red dot + label */
-.session-history-now-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.now-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--status-danger);
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-    animation: nowPulse 2s ease-in-out infinite;
-}
-
-.now-text {
-    font-size: 0.65rem;
-    font-weight: 700;
+.session-history-live .session-history-time {
     color: var(--status-danger);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    animation: sessionLivePulse 2s ease-in-out infinite;
 }
 
-@keyframes nowPulse {
-    0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
-    50%      { opacity: 0.6; box-shadow: 0 0 3px rgba(239, 68, 68, 0.3); }
-}
+@keyframes sessionLivePulse {
 
-/* "Still in progress" pill on the live item */
-.session-history-still-progress {
-    font-size: 0.65rem;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 9999px;
-    background: rgba(239, 68, 68, 0.08);
-    color: #f87171;
-    white-space: nowrap;
-    flex-shrink: 0;
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .session-history-now-indicator .now-dot {
+    .session-history-live .session-history-time {
         animation: none;
     }
 }
@@ -1462,12 +1435,6 @@ body {
     letter-spacing: 0.05em;
     min-width: 70px;
     flex-shrink: 0;
-}
-
-.session-history-item:not(.session-history-live) .session-history-time {
-    color: #60a5fa;
-    text-transform: none;
-    letter-spacing: normal;
 }
 
 .session-history-info {
@@ -1490,7 +1457,7 @@ body {
     color: var(--text-muted);
     display: flex;
     gap: 12px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .session-history-duration span {
@@ -1512,6 +1479,19 @@ body {
     color: var(--text-muted);
     transition: all 0.3s ease;
     flex-shrink: 0;
+}
+
+.session-history-duration .wh-icon {
+    width: 13px;
+    height: 13px;
+    margin-right: 0;
+    vertical-align: middle;
+}
+
+.session-history-arrow .wh-icon-chevron {
+    width: 16px;
+    height: 16px;
+    display: block;
 }
 
 .session-history-item:hover .session-history-arrow {

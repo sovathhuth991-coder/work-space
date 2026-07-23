@@ -407,24 +407,27 @@ function renderSessionHistory() {
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     };
 
+    // Small inline icons replacing emoji in this list — kept local to this
+    // function since it's the only place these particular rows render.
+    const ICON_CLOCK = '<svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>';
+    const ICON_CUP = '<svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12a3 3 0 0 1 0 6h-1"/><path d="M4 9v6a3 3 0 0 0 3 3h5a3 3 0 0 0 3-3V9"/><path d="M8 2c0 1-1 1.5-1 2.5S8 6 8 7"/><path d="M12 2c0 1-1 1.5-1 2.5S12 6 12 7"/></svg>';
+    const ICON_HOURGLASS = '<svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 3.5 6.5 5 8-1.5 1.5-5 3-5 8h10c0-5-3.5-6.5-5-8 1.5-1.5 5-3 5-8"/></svg>';
+    const ICON_CHEVRON = '<svg class="wh-icon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
+
     // The session currently in progress, if any — shown even though it
     // hasn't been saved to completedSessions yet.
     const live = (typeof window.getCurrentSessionData === 'function') ? window.getCurrentSessionData() : null;
     const liveHtml = (live && live.taskName && live.totalSeconds > 0) ? `
         <div class="session-history-item session-history-live" title="Still in progress">
-            <div class="session-history-now-indicator">
-                <span class="now-dot"></span>
-                <span class="now-text">NOW</span>
-            </div>
+            <div class="session-history-time">🔴 Now</div>
             <div class="session-history-info">
                 <div class="session-history-task-name">${escapeHtml(live.taskName)}</div>
                 <div class="session-history-duration">
-                    <span class="focus-time">⏱ ${formatTimeShort(live.focusSeconds || 0)}</span>
-                    <span class="break-time">☕ ${formatTimeShort(live.breakSeconds || 0)}</span>
-                    <span>⏳ ${formatTimeShort(live.totalSeconds || 0)}</span>
+                    <span class="focus-time">${ICON_CLOCK}${formatTimeShort(live.focusSeconds || 0)}</span>
+                    <span class="break-time">${ICON_CUP}${formatTimeShort(live.breakSeconds || 0)}</span>
+                    <span>${ICON_HOURGLASS}${formatTimeShort(live.totalSeconds || 0)}</span>
                 </div>
             </div>
-            <div class="session-history-still-progress">Still in progress</div>
         </div>
     ` : '';
 
@@ -452,13 +455,13 @@ function renderSessionHistory() {
                 <div class="session-history-info">
                     <div class="session-history-task-name">${escapeHtml(taskName)}</div>
                     <div class="session-history-duration">
-                        <span class="focus-time">⏱ ${focusTime}</span>
-                        <span class="break-time">☕ ${breakTime}</span>
-                        <span>⏳ ${totalDuration}</span>
+                        <span class="focus-time">${ICON_CLOCK}${focusTime}</span>
+                        <span class="break-time">${ICON_CUP}${breakTime}</span>
+                        <span>${ICON_HOURGLASS}${totalDuration}</span>
                     </div>
                 </div>
                 <button class="session-history-delete-btn" data-delete-timestamp="${session.timestamp}" title="Delete this entry">🗑</button>
-                <div class="session-history-arrow">→</div>
+                <div class="session-history-arrow">${ICON_CHEVRON}</div>
             </div>
         `;
     }).join('');

@@ -12,6 +12,10 @@
     const breakDisplay = document.getElementById('breakTimeDisplay');
     const idleDisplay = document.getElementById('idleTimeDisplay');
     const totalDisplay = document.getElementById('totalTimeDisplay');
+    const progressFocusSegment = document.getElementById('progressFocusSegment');
+    const progressBreakSegment = document.getElementById('progressBreakSegment');
+    const progressIdleSegment = document.getElementById('progressIdleSegment');
+    const progressPercent = document.getElementById('progressPercent');
     const scheduledDisplay = document.getElementById('scheduledDisplay');
     const resetTrackerBtn = document.getElementById('resetTrackerBtn');
     const endSessionBtn = document.getElementById('endSessionBtn');
@@ -559,28 +563,14 @@
         const totalSeconds = focusSeconds + breakSeconds + idleSeconds;
         if (totalDisplay) totalDisplay.textContent = formatTime(totalSeconds);
 
+        const focusPct = totalSeconds > 0 ? (focusSeconds / totalSeconds) * 100 : 0;
+        const breakPct = totalSeconds > 0 ? (breakSeconds / totalSeconds) * 100 : 0;
+        const idlePct = totalSeconds > 0 ? (idleSeconds / totalSeconds) * 100 : 0;
+        if (progressFocusSegment) progressFocusSegment.style.width = focusPct + '%';
+        if (progressBreakSegment) progressBreakSegment.style.width = breakPct + '%';
+        if (progressIdleSegment) progressIdleSegment.style.width = idlePct + '%';
+
         const scheduled = scheduledInput ? (parseInt(scheduledInput.value) || 120) : 120;
-
-        // Update progress bar segments (3 segments: Focus, Break, Idle)
-        const total = focusSeconds + breakSeconds + idleSeconds;
-        const focusSeg = document.querySelector('.progress-focus');
-        const breakSeg = document.querySelector('.progress-break');
-        const idleSeg = document.querySelector('.progress-idle');
-
-        if (total > 0) {
-            const focusPct = (focusSeconds / total) * 100;
-            const breakPct = (breakSeconds / total) * 100;
-            const idlePct = (idleSeconds / total) * 100;
-            if (focusSeg) focusSeg.style.width = focusPct + '%';
-            if (breakSeg) breakSeg.style.width = breakPct + '%';
-            if (idleSeg) idleSeg.style.width = idlePct + '%';
-        } else {
-            if (focusSeg) focusSeg.style.width = '33.33%';
-            if (breakSeg) breakSeg.style.width = '33.33%';
-            if (idleSeg) idleSeg.style.width = '33.34%';
-        }
-
-        if (scheduledDisplay) scheduledDisplay.textContent = scheduled;
 
         // Update header stats
         if (headerFocusTime) headerFocusTime.textContent = formatTime(focusSeconds);
