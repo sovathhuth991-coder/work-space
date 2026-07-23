@@ -1574,7 +1574,7 @@ body {
 }
 
 .session-item:active {
-    transform: translateX(2px) scale(0.99);
+    transform: none;
 }
 
 .session-item.current-session {

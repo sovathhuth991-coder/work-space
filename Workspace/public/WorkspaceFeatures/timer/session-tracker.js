@@ -955,7 +955,7 @@
         // Keep the in-progress session snapshot current so a refresh
         // resumes it instead of restarting from zero (see loadSessionState).
         if (!window.sessionSaveInterval) {
-            window.sessionSaveInterval = setInterval(saveSessionState, 5000);
+            window.sessionSaveInterval = setInterval(saveSessionState, 1000);
         }
 
         // Start monitoring for day changes

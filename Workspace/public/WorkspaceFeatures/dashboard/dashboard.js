@@ -303,12 +303,24 @@ function renderAllSessions(current, next, todayEvents) {
                             <span class="session-stat break">☕ ${breakTime}</span>
                             <span class="session-stat total">⏳ ${totalDuration}</span>
                         </div>
-                    </div>
+                    <button class="session-delete-btn" data-session-timestamp="${session.timestamp}" title="Delete this session">✕</button>
                     <div class="session-arrow">→</div>
                 </div>
             `;
         });
     }
+    container.querySelectorAll('.session-delete-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const ts = parseInt(this.dataset.sessionTimestamp);
+            if (!ts) return;
+            const sessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+            const filtered = sessions.filter(s => s.timestamp !== ts);
+            localStorage.setItem('completedSessions', JSON.stringify(filtered));
+            renderAllSessions(current, next, todayEvents);
+            if (typeof window.refreshSessionTrackerTotals === 'function') window.refreshSessionTrackerTotals();
+        });
+    });
     if (!current && todaySessions.length === 0) {
         html = `
             <div class="session-history-empty">
