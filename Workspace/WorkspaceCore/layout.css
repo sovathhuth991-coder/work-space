@@ -495,6 +495,24 @@ body {
     transition: all 0.2s ease;
 }
 
+/* ---- Shared icon library (WorkspaceShared/icons.js) ----
+   Base size for any inline icon dropped in via whIcon(); .menu-icon
+   overrides the size below so nav icons fill their existing 22px slot. */
+.wh-icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+.nav-btn .menu-icon .wh-icon {
+    width: 19px;
+    height: 19px;
+    margin-right: 0;
+    vertical-align: middle;
+}
+
 @keyframes rotate-nav-border {
     to {
         --nav-border-angle: 360deg;
