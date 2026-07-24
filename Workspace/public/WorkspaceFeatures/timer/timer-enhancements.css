@@ -508,7 +508,6 @@
     position: relative;
     background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
     border-radius: 12px;
-    border-left: 4px solid var(--accent-2);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -932,6 +931,26 @@
     transform: translateX(2px);
 }
 
+/* ---- Vertical Timer Sections Layout ---- */
+.timer-left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.timer-left-column #sessionTracker,
+.timer-left-column .current-session-tracker,
+.timer-left-column #sessionHistoryCard {
+    padding: 20px !important;
+}
+
+/* ---- Session History Card ---- */
+#sessionHistoryCard {
+    background: var(--bg-card);
+    padding: 16px;
+    border-radius: 10px;
+}
+
 /* ---- Responsive: stack vertically on smaller screens ---- */
 @media (max-width: 900px) {
     .timer-top-row {
@@ -941,6 +960,10 @@
 
     .timer-sessions-panel {
         max-height: none;
+    }
+
+    .timer-left-column {
+        gap: 16px;
     }
 }
 

@@ -825,6 +825,52 @@
     }
 
     // ===== Get completed sessions for dashboard =====
+    // ===== Shared write path for other timer engines — Simple Timer uses
+    // saveCompletedSession() above (reads its own session* state); Pomodoro
+    // and Task Focus keep separate state entirely, so they call this
+    // directly with explicit numbers instead. Same schema either way. =====
+    // ===== External sync hooks for Pomodoro/Task Focus =====
+    // Task Focus (and Pomodoro, via its own logCompletedSession calls)
+    // already log their own elapsed time to completedSessions when a
+    // session finishes — that's the authoritative record. These hooks only
+    // flip isRunning/idleStartTime so idle time doesn't wrongly accrue
+    // here while one of those is actively running elsewhere; they
+    // deliberately don't touch focusSeconds/focusStartTime, since doing
+    // that AND separately logging the completed session would double-count
+    // the same minutes.
+    window.startFocusAccumulation = function() {
+        isRunning = true;
+        isBreak = false;
+        idleStartTime = null;
+        updateUI();
+    };
+    window.pauseFocusAccumulation = function() {
+        isRunning = false;
+        idleStartTime = Date.now();
+        updateUI();
+    };
+    window.stopFocusAccumulation = window.pauseFocusAccumulation;
+
+    window.logCompletedSession = function({ taskName, taskStart, taskEnd, focusSeconds, breakSeconds, idleSeconds }) {
+        const totalSecs = (focusSeconds || 0) + (breakSeconds || 0) + (idleSeconds || 0);
+        if (totalSecs < 5) return; // same floor saveCompletedSession() uses
+        const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+        completedSessions.push({
+            taskName: taskName || 'Untitled Session',
+            taskStart: taskStart || '',
+            taskEnd: taskEnd || '',
+            focusSeconds: focusSeconds || 0,
+            breakSeconds: breakSeconds || 0,
+            idleSeconds: idleSeconds || 0,
+            totalSeconds: totalSecs,
+            timestamp: Date.now()
+        });
+        localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+        if (typeof renderSessionHistory === 'function') renderSessionHistory();
+        updateTotalTimerFromHistory();
+        document.dispatchEvent(new CustomEvent('sessionCompleted', { detail: { taskName } }));
+    };
+
     // ===== Recompute the Total Timer card (Focus/Break/Idle/Total) on demand —
     // used by dashboard.js after deleting a completedSessions entry, so the
     // numbers update immediately instead of waiting for the next tick =====

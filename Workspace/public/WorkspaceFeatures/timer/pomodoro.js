@@ -236,6 +236,10 @@
         }
 
         pomoInterval = setInterval(tick, 100);
+
+        // Keep session-tracker's idle detection accurate while this runs —
+        // see the matching hooks task-focus.js already uses.
+        if (typeof window.startFocusAccumulation === 'function') window.startFocusAccumulation();
     }
 
     function tick() {
@@ -259,6 +263,7 @@
 
     function phaseComplete() {
         const completedPhase = currentPhase;
+        const completedDuration = currentTotal; // capture before preparePhase() below reassigns it
 
         // Play notification sound via flash/visual
         const ringEl = elements.ringContainer;
@@ -280,6 +285,17 @@
                 ? 'Focus session complete — time for a break.'
                 : "Break's over — back to focus.";
             sendNotification('⏰ Pomodoro', msg, '🍅', 'pomodoro-notification');
+        }
+
+        // Log this phase to Today's Sessions / Total Timer — Pomodoro keeps
+        // its own state entirely separate from session-tracker.js, so this
+        // is the only way its time ever reaches either of them.
+        if (typeof window.logCompletedSession === 'function') {
+            if (completedPhase === 'focus') {
+                window.logCompletedSession({ taskName: 'Pomodoro — Focus', focusSeconds: completedDuration, breakSeconds: 0, idleSeconds: 0 });
+            } else {
+                window.logCompletedSession({ taskName: 'Pomodoro — Break', focusSeconds: 0, breakSeconds: completedDuration, idleSeconds: 0 });
+            }
         }
 
         if (currentPhase === 'focus') {
@@ -317,6 +333,21 @@
         pomoInterval = setInterval(tick, 100);
     }
 
+    // Logs whatever's been elapsed in the current phase but hasn't hit
+    // phaseComplete() yet — used when the user stops early (Reset button,
+    // or switching to another timer mode) instead of letting a phase
+    // finish naturally.
+    function logPomodoroPartialProgress() {
+        if (!isRunning || currentPhase === 'ready') return;
+        const elapsed = currentTotal - remainingSeconds;
+        if (elapsed < 5 || typeof window.logCompletedSession !== 'function') return;
+        if (currentPhase === 'focus') {
+            window.logCompletedSession({ taskName: 'Pomodoro — Focus', focusSeconds: elapsed, breakSeconds: 0, idleSeconds: 0 });
+        } else {
+            window.logCompletedSession({ taskName: 'Pomodoro — Break', focusSeconds: 0, breakSeconds: elapsed, idleSeconds: 0 });
+        }
+    }
+
     function preparePhase(phase) {
         setPhase(phase);
 
@@ -351,6 +382,8 @@
         phaseStartTime = null;
         elements.ringContainer?.classList.remove('pomodoro-running');
 
+        if (typeof window.pauseFocusAccumulation === 'function') window.pauseFocusAccumulation();
+
         if (elements.startBtn) {
             elements.startBtn.style.display = 'inline-block';
             elements.startBtn.textContent = 'Resume';
@@ -363,12 +396,14 @@
     }
 
     function resetPomodoro() {
+        logPomodoroPartialProgress();
         clearInterval(pomoInterval);
         pomoInterval = null;
         isRunning = false;
         phaseStartTime = null;
         cycleCount = 0;
         elements.ringContainer?.classList.remove('pomodoro-running');
+        if (typeof window.stopFocusAccumulation === 'function') window.stopFocusAccumulation();
 
         preparePhase('ready');
         setPhase('ready');
@@ -402,11 +437,13 @@
         if (card) card.classList.add('swapping');
 
         swapTimeout = setTimeout(() => {
+            logPomodoroPartialProgress();
             clearInterval(pomoInterval);
             pomoInterval = null;
             isRunning = false;
             phaseStartTime = null;
             elements.ringContainer?.classList.remove('pomodoro-running');
+            if (typeof window.stopFocusAccumulation === 'function') window.stopFocusAccumulation();
 
             // Task Focus manages its own countdown loop, independent of this
             // one — if we're leaving its mode, let it pause & save its own

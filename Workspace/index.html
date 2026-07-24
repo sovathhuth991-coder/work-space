@@ -1038,41 +1038,43 @@
 
                 <div class="timer-top-row" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
 
-                    <!-- ===== TOTAL TIMER (Session Tracker + Current Session) ===== -->
-                    <div id="sessionTracker" class="session-tracker-enhanced"
-                        style="background: #1a1a1a; padding: 16px; border-radius: 10px; border-left: 4px solid #3498db;">
-                        <div class="session-tracker-header">
-                            <div class="session-tracker-title"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> Total Timer</div>
-                        </div>
+                    <div class="timer-left-column">
+                        <!-- ===== TOTAL TIMER (Session Tracker + Current Session) ===== -->
+                        <div id="sessionTracker" class="session-tracker-enhanced"
+                            style="background: #1a1a1a; padding: 16px; border-radius: 10px;">
+                            <div class="session-tracker-header">
+                                <div class="session-tracker-title">⏱ Total Timer</div>
+                            </div>
 
-                        <div class="session-time-display">
-                            <div class="time-block focus-block">
-                                <div class="time-label">Focus</div>
-                                <div class="time-value" id="focusTimeDisplay">00:00</div>
+                            <div class="session-time-display">
+                                <div class="time-block focus-block">
+                                    <div class="time-label">Focus</div>
+                                    <div class="time-value" id="focusTimeDisplay">00:00</div>
+                                </div>
+                                <div class="time-block break-block">
+                                    <div class="time-label">Break</div>
+                                    <div class="time-value" id="breakTimeDisplay">00:00</div>
+                                </div>
+                                <div class="time-block idle-block">
+                                    <div class="time-label">Idle</div>
+                                    <div class="time-value" id="idleTimeDisplay">00:00</div>
+                                </div>
+                                <div class="time-block total-block">
+                                    <div class="time-label">Total</div>
+                                    <div class="time-value" id="totalTimeDisplay">00:00</div>
+                                </div>
                             </div>
-                            <div class="time-block break-block">
-                                <div class="time-label">Break</div>
-                                <div class="time-value" id="breakTimeDisplay">00:00</div>
-                            </div>
-                            <div class="time-block idle-block">
-                                <div class="time-label">Idle</div>
-                                <div class="time-value" id="idleTimeDisplay">00:00</div>
-                            </div>
-                            <div class="time-block total-block">
-                                <div class="time-label">Total</div>
-                                <div class="time-value" id="totalTimeDisplay">00:00</div>
-                            </div>
-                        </div>
 
-                        <div class="session-progress">
-                            <div id="progressFocusSegment" class="session-progress-segment segment-focus" style="width: 0%;"></div>
-                            <div id="progressBreakSegment" class="session-progress-segment segment-break" style="width: 0%;"></div>
-                            <div id="progressIdleSegment" class="session-progress-segment segment-idle" style="width: 0%;"></div>
+                            <div class="session-progress">
+                                <span class="progress-segment progress-focus" style="width: 33.33%"></span>
+                                <span class="progress-segment progress-break" style="width: 33.33%"></span>
+                                <span class="progress-segment progress-idle" style="width: 33.34%"></span>
+                            </div>
                         </div>
 
                         <!-- ===== CURRENT SESSION ===== -->
                         <div class="current-session-tracker session-tracker-enhanced"
-                            style="background: rgba(26, 26, 26, 0.6); padding: 14px; border-radius: 10px; border-left: 4px solid #ec4899; margin-top: 16px;">
+                            style="background: rgba(26, 26, 26, 0.6); padding: 14px; border-radius: 10px; margin-top: 0;">
                             <div class="session-tracker-header">
                                 <div class="session-tracker-title" style="color:#ec4899;"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg> Current Session</div>
                             </div>
@@ -1099,21 +1101,20 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- ===== TODAY'S SESSIONS ===== -->
-                    <div id="sessionHistoryCard" class="session-tracker-enhanced"
-                        style="background: var(--bg-card); padding: 16px; border-radius: 10px; border-left: 4px solid var(--accent-1);">
-                        <div class="session-tracker-header">
-                            <div class="session-tracker-title"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg> Today's Sessions</div>
+                        <!-- ===== TODAY'S SESSIONS ===== -->
+                        <div id="sessionHistoryCard" class="session-tracker-enhanced"
+                            style="background: var(--bg-card); padding: 16px; border-radius: 10px;">
+                            <div class="session-tracker-header">
+                                <div class="session-tracker-title">📊 Today's Sessions</div>
+                            </div>
+                            <div id="sessionHistoryList" class="session-history-list"></div>
                         </div>
-                        <div id="sessionHistoryList" class="session-history-list"></div>
                     </div>
 
-                </div>
-
-                <!-- ===== FOCUS TIMER ===== -->
-                <div class="focus-timer-section simple-timer-card" style="max-width: 500px; margin: 24px auto 0; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
+                    <div class="timer-right-column">
+                        <!-- ===== FOCUS TIMER ===== -->
+                        <div class="focus-timer-section simple-timer-card" style="max-width: 500px; margin: 24px auto 0; padding: 40px 32px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
 
                     <!-- COUNTDOWN CONTENT (hidden when Pomodoro active) -->
                     <div class="countdown-content">
@@ -2004,6 +2005,149 @@
                 });
             }
         }
+    </script>
+
+    <!-- ===== FAB DRAG FUNCTIONALITY ===== -->
+    <script type="text/javascript">
+        (function() {
+            const fabButtons = document.querySelectorAll('.fab-btn');
+            let activeFab = null;
+            let startX = 0, startY = 0;
+            let initialLeft = 0, initialTop = 0;
+            let rafId = null;
+            let targetX = 0, targetY = 0;
+            let hasMoved = false;
+
+            fabButtons.forEach(btn => {
+                // Initialize position: use saved coords or compute from current right/bottom
+                let savedLeft = localStorage.getItem('fab-' + btn.id + '-left');
+                let savedTop = localStorage.getItem('fab-' + btn.id + '-top');
+                if (savedLeft !== null && savedTop !== null) {
+                    btn.style.left = savedLeft;
+                    btn.style.top = savedTop;
+                    btn.style.right = 'auto';
+                    btn.style.bottom = 'auto';
+                } else {
+                    // Convert right/bottom to left/top so dragging has explicit coords
+                    const rect = btn.getBoundingClientRect();
+                    btn.style.left = rect.left + 'px';
+                    btn.style.top = rect.top + 'px';
+                    btn.style.right = 'auto';
+                    btn.style.bottom = 'auto';
+                }
+
+                // Use non-passive listeners so we can preventDefault
+                btn.addEventListener('mousedown', startDrag, { passive: false });
+                btn.addEventListener('touchstart', startDrag, { passive: false });
+            });
+
+            function startDrag(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                activeFab = e.currentTarget;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                startX = clientX;
+                startY = clientY;
+
+                const rect = activeFab.getBoundingClientRect();
+                initialLeft = rect.left;
+                initialTop = rect.top;
+
+                activeFab.classList.add('dragging');
+                activeFab.style.right = 'auto';
+                activeFab.style.bottom = 'auto';
+
+                // Immediately add capture-phase click blocker to prevent data-action handlers
+                const clickBlocker = function(ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    ev.stopImmediatePropagation();
+                    activeFab.removeEventListener('click', clickBlocker, true);
+                };
+                activeFab.addEventListener('click', clickBlocker, true);
+
+                document.addEventListener('mousemove', onDrag, { passive: false });
+                document.addEventListener('mouseup', endDrag, { passive: false });
+                document.addEventListener('touchmove', onDrag, { passive: false });
+                document.addEventListener('touchend', endDrag);
+            }
+
+            function onDrag(e) {
+                if (!activeFab) return;
+                e.preventDefault();
+
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                const deltaX = clientX - startX;
+                const deltaY = clientY - startY;
+
+                // Only set target and mark as moved if there's actual movement
+                if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+                    if (!hasMoved) {
+                        hasMoved = true;
+                    }
+                    targetX = initialLeft + deltaX;
+                    targetY = initialTop + deltaY;
+
+                    // Start animation loop on first movement
+                    if (rafId) cancelAnimationFrame(rafId);
+                    animateDrag();
+                }
+            }
+
+            function animateDrag() {
+                if (!activeFab) return;
+
+                const rect = activeFab.getBoundingClientRect();
+                const currentLeft = rect.left;
+                const currentTop = rect.top;
+
+                const lerp = 0.25;
+                const newLeft = currentLeft + (targetX - currentLeft) * lerp;
+                const newTop = currentTop + (targetY - currentTop) * lerp;
+
+                activeFab.style.left = newLeft + 'px';
+                activeFab.style.top = newTop + 'px';
+
+                const dx = Math.abs(targetX - newLeft);
+                const dy = Math.abs(targetY - newTop);
+
+                if (dx > 0.1 || dy > 0.1) {
+                    rafId = requestAnimationFrame(animateDrag);
+                }
+            }
+
+            function endDrag() {
+                if (!activeFab) return;
+
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('mouseup', endDrag);
+                document.removeEventListener('touchmove', onDrag);
+                document.removeEventListener('touchend', endDrag);
+
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+
+                activeFab.classList.remove('dragging');
+
+                // Save position only if we actually moved
+                if (hasMoved) {
+                    const left = activeFab.style.left;
+                    const top = activeFab.style.top;
+                    localStorage.setItem('fab-' + activeFab.id + '-left', left);
+                    localStorage.setItem('fab-' + activeFab.id + '-top', top);
+                }
+
+                activeFab = null;
+                hasMoved = false;
+            }
+        })();
     </script>
 </body>
 

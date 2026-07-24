@@ -15,12 +15,28 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: auto;
+    z-index: 9999;
 }
 
 .fab-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 24px rgba(124, 109, 240, 0.6);
 }
+
+.fab-btn.dragging {
+    transition: none !important;
+    cursor: grabbing;
+    opacity: 0.9;
+    transform: scale(1.15);
+    z-index: 99999 !important;
+    box-shadow: 0 8px 32px rgba(124, 109, 240, 0.8);
+}
+
 
 #quickAddBtn {
     bottom: 90px;
