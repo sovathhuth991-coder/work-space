@@ -149,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
             'toggleFocusStatsView': () => toggleFocusStatsView?.(),
             'openTutorialGuide': () => openTutorialGuide?.(),
             'closeTutorialGuide': () => closeTutorialGuide?.(),
-            'applyTheme': () => actionBtn.closest('select') && applyTheme?.(actionBtn.closest('select').value),
             'closeSessionDetailsModal': () => closeSessionDetailsModal?.(),
             'showSessionDetailsModal': () => showSessionDetailsModal?.(),
             'resetDashboardLayout': () => resetDashboardLayout?.(),
@@ -225,6 +224,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('lessonSearchInput')?.addEventListener('input', (e) => {
         searchLessons?.(e.target.value);
+    });
+
+    // Theme selection needs 'change', not 'click' — a <select>'s newly
+    // picked value isn't reliably available on the click that opens/closes
+    // it, only on the change event once a value is actually picked.
+    // Delegated so it also catches the custom-select.js dropdown, which
+    // dispatches a real 'change' on the underlying (hidden) select.
+    document.addEventListener('change', (e) => {
+        if (e.target && e.target.dataset && e.target.dataset.action === 'applyTheme' && typeof applyTheme === 'function') {
+            applyTheme(e.target.value);
+        }
     });
 
     // ============================================================

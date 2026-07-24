@@ -143,23 +143,6 @@
     font-weight: 600;
 }
 
-/* Theme selector options additionally borrow the color of the theme they
-   represent, rather than always using the current --accent-1. */
-.wh-select-option-theme {
-    border-left: 3px solid transparent;
-}
-
-.wh-select-option-theme:hover {
-    border-left-color: var(--wh-theme-accent, var(--accent-1));
-    background: color-mix(in srgb, var(--wh-theme-accent, var(--accent-1)) 10%, transparent);
-}
-
-.wh-select-option-theme.selected {
-    border-left-color: var(--wh-theme-accent, var(--accent-1));
-    background: color-mix(in srgb, var(--wh-theme-accent, var(--accent-1)) 15%, transparent);
-    color: var(--wh-theme-accent, var(--accent-1));
-}
-
 .wh-select-swatch {
     width: 9px;
     height: 9px;

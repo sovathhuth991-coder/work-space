@@ -216,13 +216,13 @@
 
                 <label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Theme</label>
                 <select id="globalThemeSelector" data-action="applyTheme" style="width:100%;margin-top:6px;">
-                    <option value="cyberpunk">🌆 Cyberpunk</option>
-                    <option value="minimal">☀️ Minimal</option>
-                    <option value="ocean">🌊 Ocean</option>
-                    <option value="sunset">🌅 Sunset</option>
-                    <option value="forest">🌲 Forest</option>
-                    <option value="midnight">🌙 Midnight</option>
-                    <option value="auto">🌗 Auto (System)</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                    <option value="minimal">Minimal</option>
+                    <option value="ocean">Ocean</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="forest">Forest</option>
+                    <option value="midnight">Midnight</option>
+                    <option value="auto">Auto (System)</option>
                 </select>
 
                 <div class="sidebar-btn-row" style="margin-top:16px;">
@@ -257,7 +257,7 @@
                 <button id="accountButton" data-action="openAccountModal" data-signed-in="false"
                     title="Sign in to sync across devices (optional)"
                     style="margin-left:auto; padding:6px 14px; border-radius:99px; background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); font-size:0.75rem; font-weight:600; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px;">
-                    <span>👤</span>
+                    <span><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
                     <span id="accountButtonLabel">Sign in</span>
                 </button>
                 <!-- Sideways Dropdown Toggle -->
@@ -266,10 +266,10 @@
                     <!-- Main Toggle Button -->
                     <button id="headerToggleMain" class="header-toggle-main" title="Quick Actions"
                         style="padding:6px 12px; border-radius:99px; background:var(--accent-gradient); border:none; color:#fff; font-size:0.75rem; font-weight:600; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(124, 109, 240, 0.3);">
-                        <span>⚡</span>
+                        <span><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 20 10 13 10 13 2"/></svg></span>
                         <span>Actions</span>
                         <span id="toggleArrow"
-                            style="transition:transform 0.3s ease; display:inline-block; font-size:0.7rem;">▶</span>
+                            style="transition:transform 0.3s ease; display:inline-flex; font-size:0.7rem;"><svg class="wh-icon" style="width:11px;height:11px;margin-right:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span>
                     </button>
 
                     <!-- Sideways Dropdown -->
@@ -279,28 +279,29 @@
                         <button id="toggleFocusStats" class="header-toggle-btn active"
                             data-action="toggleFocusStatsView" title="Toggle Focus Stats"
                             style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.75rem; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:6px; white-space:nowrap;">
-                            <span style="color:#2ecc71;">⏱</span>
+                            <span style="color:#2ecc71;display:inline-flex;"><svg class="wh-icon" style="margin-right:0;width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>
                             <span id="headerFocusTime">00:00</span>
                             <span style="opacity:0.4;">|</span>
-                            <span style="color:#f39c12;">☕</span>
+                            <span style="color:#f39c12;display:inline-flex;"><svg class="wh-icon" style="margin-right:0;width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12a3 3 0 0 1 0 6h-1"/><path d="M4 9v6a3 3 0 0 0 3 3h5a3 3 0 0 0 3-3V9"/><path d="M8 2c0 1-1 1.5-1 2.5S8 6 8 7"/><path d="M12 2c0 1-1 1.5-1 2.5S12 6 12 7"/></svg></span>
                             <span id="headerBreakTime">00:00</span>
                             <span style="opacity:0.4;">|</span>
-                            <span style="color:#95a5a6;">⏸</span>
+                            <span style="color:#95a5a6;display:inline-flex;"><svg class="wh-icon" style="margin-right:0;width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></span>
                             <span id="headerIdleTime">00:00</span>
                         </button>
 
                         <!-- Toggle 2: Focus Mode -->
                         <button id="toggleFocusMode" class="header-toggle-btn" data-action="toggleFocusMode"
                             title="Toggle Focus Mode"
-                            style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.8rem; cursor:pointer; transition:var(--transition); white-space:nowrap;">
-                            🧘 Focus
+                            style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.8rem; cursor:pointer; transition:var(--transition); white-space:nowrap; display:inline-flex; align-items:center; gap:5px;">
+                            <svg class="wh-icon" style="margin-right:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+                            Focus
                         </button>
 
                         <!-- Toggle 3: Theme -->
                         <button id="toggleTheme" class="header-toggle-btn" data-action="toggleTheme"
                             title="Toggle Dark/Light Mode"
-                            style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.85rem; cursor:pointer; transition:var(--transition); white-space:nowrap;">
-                            🌓
+                            style="padding:6px 12px; border-radius:99px; border:none; background:transparent; color:var(--text-secondary); font-size:0.85rem; cursor:pointer; transition:var(--transition); white-space:nowrap; display:inline-flex; align-items:center;">
+                            <svg class="wh-icon" style="margin-right:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
                         </button>
                     </div>
                 </div>
@@ -309,8 +310,11 @@
             <!-- ===== GLOBAL SEARCH BAR ===== -->
             <div class="global-search-bar"
                 style="position:relative; display:flex; justify-content:flex-end; padding: 8px 32px 0 0; gap:12px; align-items:center;">
-                <input type="text" id="globalSearchInput" placeholder="🔍 Search lessons, tasks, library..."
-                    style="flex:1; max-width:400px; padding:8px 14px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.9rem;" />
+                <div style="position:relative; flex:1; max-width:400px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--text-muted); pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="globalSearchInput" placeholder="Search lessons, tasks, library..."
+                        style="width:100%; padding:8px 14px 8px 34px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.9rem;" />
+                </div>
                 <span id="globalSearchResults" style="font-size:0.75rem; color:var(--text-muted);"></span>
                 <div id="globalSearchDropdown"
                     style="display:none; position:absolute; right:0; top:calc(100% + 4px); background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); max-width:500px; width:100%; max-height:400px; overflow-y:auto; padding:8px; z-index:999; box-shadow:var(--shadow-elevated);">
