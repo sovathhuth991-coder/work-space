@@ -28,6 +28,13 @@
     box-shadow: 0 6px 24px rgba(124, 109, 240, 0.6);
 }
 
+.wh-icon-fab {
+    width: 22px;
+    height: 22px;
+    margin-right: 0;
+    vertical-align: middle;
+}
+
 .fab-btn.dragging {
     transition: none !important;
     cursor: grabbing;
