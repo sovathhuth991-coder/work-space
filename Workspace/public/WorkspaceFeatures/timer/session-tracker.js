@@ -251,6 +251,9 @@
                     breakStartTime = null;
                 }
             }
+            // Broadcast idle to other timers (Bug 5 fix)
+            if (typeof window.pausePomodoro === 'function') window.pausePomodoro();
+            if (typeof window.pauseTaskFocus === 'function') window.pauseTaskFocus();
         }
         // If user becomes active again
         else if (!shouldBeIdle && idleStartTime) {
@@ -278,8 +281,12 @@
 
     // ----- Helpers -----
     function formatTime(sec) {
-        const m = Math.floor(sec / 60);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
         const s = sec % 60;
+        if (h > 0) {
+            return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }
         return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
     }
 
@@ -939,6 +946,27 @@
     };
 
     // ===== Get current session data for dashboard =====
+    // ===== Set current session task info externally (Simple Timer, Pomodoro, Task Focus) =====
+    window.setCurrentSessionTask = function(taskName, start, end) {
+        updateCurrentSessionTaskInfo(taskName, start, end);
+        // Reset current session timers for the new task
+        if (sessionInterval) {
+            clearInterval(sessionInterval);
+            sessionInterval = null;
+        }
+        sessionFocusSeconds = 0;
+        sessionBreakSeconds = 0;
+        sessionIdleSeconds = 0;
+        sessionFocusStartTime = null;
+        sessionBreakStartTime = null;
+        sessionIdleStartTime = null;
+        sessionFocusTimeAtStart = 0;
+        sessionBreakTimeAtStart = 0;
+        sessionIdleTimeAtStart = 0;
+        updateCurrentSessionDisplay();
+        saveSessionState();
+    };
+
     window.getCurrentSessionData = function() {
         return {
             taskName: sessionTaskName,
@@ -1074,6 +1102,9 @@
         // Initial population and UI
         updateCurrentTaskDisplay();
         updateUI();
+
+        // Render session history on load (Bug 4 fix)
+        if (typeof renderSessionHistory === 'function') renderSessionHistory();
 
         // Also refresh when switching to timer view
         document.addEventListener('viewChanged', function(e) {

@@ -465,6 +465,11 @@
             elements.ringContainer?.classList.remove('pomodoro-running');
             if (typeof window.stopFocusAccumulation === 'function') window.stopFocusAccumulation();
 
+            // Pause simple timer when switching away from countdown mode (Bug 6 fix)
+            if (mode !== 'countdown' && typeof window.pauseSimpleTimer === 'function') {
+                window.pauseSimpleTimer();
+            }
+
             // Task Focus manages its own countdown loop, independent of this
             // one — if we're leaving its mode, let it pause & save its own
             // progress rather than reaching into its state from here.
@@ -496,6 +501,7 @@
     // ----- EXPOSE GLOBALLY -----
     window.switchPomodoroMode = switchPomodoroMode;
     window.initPomodoro = initPomodoro;
+    window.pausePomodoro = pausePomodoro;
 
     // Auto-init when DOM is ready and timer view is loaded
     if (document.readyState === 'loading') {

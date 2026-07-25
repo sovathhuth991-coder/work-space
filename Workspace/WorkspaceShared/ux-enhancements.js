@@ -392,7 +392,7 @@ function initEnhancedSearch() {
 
     const filterContainer = document.createElement('div');
     filterContainer.id = 'searchFilters';
-    filterContainer.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+    filterContainer.style.cssText = 'display: flex; gap: 6px; align-items: center; justify-content: flex-end; width: 100%; max-width: 400px;';
 
     const filters = [
         { id: 'filterAll', label: 'All', value: 'all', active: true },
@@ -411,7 +411,11 @@ function initEnhancedSearch() {
         </button>
     `).join('');
 
-    searchInput.parentNode.insertBefore(filterContainer, searchInput.nextSibling);
+    // Insert after the input's wrapper (the small icon+input box), not
+    // after the bare input — otherwise this lands inside that wrapper's
+    // constrained layout and renders disconnected from the search bar.
+    const searchWrap = document.getElementById('globalSearchInputWrap') || searchInput.parentNode;
+    searchWrap.parentNode.insertBefore(filterContainer, searchWrap.nextSibling);
 
     // Add filter click handlers
     filterContainer.addEventListener('click', (e) => {

@@ -2467,6 +2467,48 @@ body {
     color: var(--text-primary);
 }
 
+/* ---- Dashboard toolbar container — groups the layout-mode segment and
+   the action-buttons segment into one visually cohesive unit instead of
+   a loose row of unrelated pills. ---- */
+.dash-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    flex-wrap: wrap;
+}
+
+.layout-mode-group,
+.dash-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.dash-toolbar-divider {
+    width: 1px;
+    align-self: stretch;
+    min-height: 22px;
+    background: var(--border-color);
+    flex-shrink: 0;
+}
+
+.dash-toolbar .matrix-btn,
+.dash-toolbar .dashboard-customize-btn {
+    display: inline-flex;
+    align-items: center;
+}
+
+@media (max-width: 640px) {
+    .dash-toolbar-divider {
+        display: none;
+    }
+}
+
 /* ---- Per-card resize handle (grid/flex/stack modes only) ---- */
 .resize-handle {
     position: absolute;

@@ -1122,19 +1122,19 @@ if (typeof JournalEngine !== 'undefined' && typeof JournalUI !== 'undefined') {
 // TUTORIAL CARDS GENERATOR
 // ============================================================
 const tutorialData = [
-    { icon: '📊', title: 'Dashboard', tutorial: 'dashboard', desc: 'Your command center. Learn about the banner, active session, master to-do, and stats cards.' },
-    { icon: '📅', title: 'Schedule', tutorial: 'schedule', desc: 'Master your weekly planning. Learn about day cards, task creation, timeline, and day navigation.' },
-    { icon: '⏱️', title: 'Focus Timer', tutorial: 'timer', desc: 'Boost productivity with timed sessions. Explore session tracker, presets, and custom timers.' },
-    { icon: '☑️', title: 'To-Do', tutorial: 'todo', desc: 'Master your task management. Learn to add tasks, track progress, and view momentum stats.' },
-    { icon: '📚', title: 'Lessons', tutorial: 'lessons', desc: 'Create and organize learning content. Explore the explorer panel, rich text editor, and slash commands.' },
-    { icon: '📖', title: 'Library', tutorial: 'library', desc: 'Store and organize resources. Learn to add links, videos, documents, and code snippets.' },
-    { icon: '✅', title: 'Habits', tutorial: 'habits', desc: 'Build consistency with daily tracking. Create habits, track streaks, and monitor completion rates.' },
-    { icon: '📈', title: 'Analytics', tutorial: 'analytics', desc: 'Insights into your productivity. Explore session history, category breakdown, and peak performance.' },
-    { icon: '📔', title: 'Journal', tutorial: 'journal', desc: 'Capture daily reflections. Learn the quick-add button, your stats, and browsing past entries.' },
-    { icon: '📕', title: 'Reading List', tutorial: 'reading', desc: 'Track books and articles. Learn to search, filter, add items, and update reading status.' },
-    { icon: '🌤️', title: 'Weather', tutorial: 'weather', desc: 'Check the forecast. Learn to change location and read current conditions and the multi-day forecast.' },
-    { icon: '🤖', title: 'AI Assistant', tutorial: 'ai', desc: 'Your workspace, in chat form. Connect a local AI, learn action permissions, and see what it can do.' },
-    { icon: '🕸️', title: 'Knowledge Graph', tutorial: 'graph', desc: 'Visualize how your lessons and links connect to each other.' }
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10.5V20a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9.5"/></svg>', title: 'Dashboard', tutorial: 'dashboard', desc: 'Your command center. Learn about the banner, active session, master to-do, and stats cards.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>', title: 'Schedule', tutorial: 'schedule', desc: 'Master your weekly planning. Learn about day cards, task creation, timeline, and day navigation.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>', title: 'Focus Timer', tutorial: 'timer', desc: 'Boost productivity with timed sessions. Explore session tracker, presets, and custom timers.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="7 12 10.5 15.5 17 8.5"/></svg>', title: 'To-Do', tutorial: 'todo', desc: 'Master your task management. Learn to add tasks, track progress, and view momentum stats.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 9l10 6 10-6-10-6z"/><path d="M2 15l10 6 10-6"/></svg>', title: 'Lessons', tutorial: 'lessons', desc: 'Create and organize learning content. Explore the explorer panel, rich text editor, and slash commands.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="4" height="16"/><rect x="10" y="6" width="4" height="14"/><rect x="16" y="3" width="4" height="17"/></svg>', title: 'Library', tutorial: 'library', desc: 'Store and organize resources. Learn to add links, videos, documents, and code snippets.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/></svg>', title: 'Habits', tutorial: 'habits', desc: 'Build consistency with daily tracking. Create habits, track streaks, and monitor completion rates.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="4" height="10" rx="0.5"/><rect x="10" y="4" width="4" height="16" rx="0.5"/><rect x="16" y="13" width="4" height="7" rx="0.5"/></svg>', title: 'Analytics', tutorial: 'analytics', desc: 'Insights into your productivity. Explore session history, category breakdown, and peak performance.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>', title: 'Journal', tutorial: 'journal', desc: 'Capture daily reflections. Learn the quick-add button, your stats, and browsing past entries.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>', title: 'Reading List', tutorial: 'reading', desc: 'Track books and articles. Learn to search, filter, add items, and update reading status.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 19a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 16.9 8.5 4 4 0 0 1 17.5 19h-11z"/></svg>', title: 'Weather', tutorial: 'weather', desc: 'Check the forecast. Learn to change location and read current conditions and the multi-day forecast.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M9 7V3M15 7V3M9 21v-4M15 21v-4M7 9H3M7 15H3M21 9h-4M21 15h-4"/></svg>', title: 'AI Assistant', tutorial: 'ai', desc: 'Your workspace, in chat form. Connect a local AI, learn action permissions, and see what it can do.' },
+    { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="1.6"/><circle cx="19" cy="6" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="5" cy="18" r="1.6"/><circle cx="19" cy="18" r="1.6"/><path d="M6.4 6.9l4.6 4.3M17.6 6.9l-4.6 4.3M6.4 17.1l4.6-4.3M17.6 17.1l-4.6-4.3M5 7.6v8.8M19 7.6v8.8"/></svg>', title: 'Knowledge Graph', tutorial: 'graph', desc: 'Visualize how your lessons and links connect to each other.' }
 ];
 
 function renderTutorialCards() {
@@ -1145,12 +1145,12 @@ function renderTutorialCards() {
         <div class="tutorial-card" data-tutorial="${t.tutorial}"
              style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden;">
             <div class="card-glow-border"></div>
-            <div style="font-size: 2.5rem; margin-bottom: 12px;">${t.icon}</div>
+            <div style="width:32px; height:32px; margin-bottom: 14px; color: var(--accent-1);">${t.icon}</div>
             <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">${t.title}</h3>
             <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">${t.desc}</p>
             <div style="display: flex; align-items: center; gap: 8px; color: var(--accent-1); font-size: 0.85rem; font-weight: 600;">
                 <span>Start Tutorial</span>
-                <span style="transition: transform 0.3s;">→</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;transition: transform 0.3s;"><polyline points="9 6 15 12 9 18"/></svg>
             </div>
         </div>
     `).join('');

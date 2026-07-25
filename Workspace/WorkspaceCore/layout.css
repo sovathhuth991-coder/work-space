@@ -1304,6 +1304,7 @@ body.minimal-ui .nav-btn:hover {
     align-items: stretch;
     gap: 2px;
     min-width: 210px;
+    max-width: min(230px, calc(100vw - 24px));
     display: flex;
     overflow: visible !important;
     background: var(--bg-card);
