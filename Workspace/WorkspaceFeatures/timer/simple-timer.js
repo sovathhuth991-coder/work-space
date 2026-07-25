@@ -263,6 +263,16 @@
                     showToast('⏰ Timer complete!', 'success', 5000);
                 }
 
+                // Log this completed session to Total Timer / Today's Sessions
+                if (typeof window.logCompletedSession === 'function') {
+                    window.logCompletedSession({
+                        taskName: 'Simple Timer',
+                        focusSeconds: totalSeconds,
+                        breakSeconds: 0,
+                        idleSeconds: 0
+                    });
+                }
+
                 // Reset to initial state
                 updateTimerState('ready');
                 if (startBtn) {
@@ -394,6 +404,9 @@
 
     // Expose so the inline delete button's onclick can reach it (same pattern as pomodoro.js)
     window.deleteCustomTimer = deleteCustomTimer;
+
+    // Expose pause function so other timer modes can pause this one when switching (Bug 6 fix)
+    window.pauseSimpleTimer = pauseTimer;
 
     // ----- INITIALIZE -----
     loadCustomTimers();
