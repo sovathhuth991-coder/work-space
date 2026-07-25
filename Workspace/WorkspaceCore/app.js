@@ -837,6 +837,23 @@ function initHeaderToggles() {
 
     // Toggle dropdown visibility
     if (mainToggleBtn && toggleDropdown) {
+        function positionDropdown() {
+            // Computed fresh from the button's actual on-screen position every
+            // time it opens (position:fixed + inline coords), rather than
+            // relying on CSS position:absolute relative to an ancestor — that
+            // approach kept ending up misplaced/offscreen depending on
+            // header layout, so this is the version that can't drift.
+            const rect = mainToggleBtn.getBoundingClientRect();
+            const panelWidth = Math.min(230, window.innerWidth - 24);
+            let left = rect.right - panelWidth;
+            left = Math.max(12, Math.min(left, window.innerWidth - panelWidth - 12));
+            toggleDropdown.style.position = 'fixed';
+            toggleDropdown.style.top = (rect.bottom + 10) + 'px';
+            toggleDropdown.style.left = left + 'px';
+            toggleDropdown.style.right = 'auto';
+            toggleDropdown.style.width = panelWidth + 'px';
+        }
+
         mainToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const isShowing = toggleDropdown.classList.contains('show');
@@ -847,11 +864,16 @@ function initHeaderToggles() {
                     toggleArrow.style.transform = 'rotate(0deg)';
                 }
             } else {
+                positionDropdown();
                 toggleDropdown.classList.add('show');
                 if (toggleArrow) {
                     toggleArrow.style.transform = 'rotate(90deg)';
                 }
             }
+        });
+
+        window.addEventListener('resize', () => {
+            if (toggleDropdown.classList.contains('show')) positionDropdown();
         });
 
         // Close dropdown when clicking outside
