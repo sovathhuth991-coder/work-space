@@ -55,21 +55,17 @@
         if (select.id === 'globalThemeSelector' && THEME_GRADIENTS[option.value]) {
             return `<span class="wh-select-swatch wh-select-swatch-gradient" style="background:${THEME_GRADIENTS[option.value]}"></span>`;
         }
-        if ((select.id === 'category' || select.id === 'library-category' || select.id === 'library-category-filter')
-            && CATEGORY_COLORS[option.value]) {
+        if (select.id === 'category' && CATEGORY_COLORS[option.value]) {
             return `<span class="wh-select-swatch" style="background:${CATEGORY_COLORS[option.value]}"></span>`;
         }
         return '';
     }
 
-    // Strips a leading emoji + space from option text, since the swatch
-    // (for the selects that get one) already carries that meaning visually
-    // — keeping both would be redundant. Selects with no swatch keep their
-    // original text untouched, emoji and all.
+    // Option text is already emoji-free at the source now — this just
+    // returns it as-is (kept as its own function so future options only
+    // need updating here if that ever changes).
     function labelFor(select, option) {
-        const hasSwatch = swatchFor(select, option) !== '';
-        if (!hasSwatch) return option.textContent;
-        return option.textContent.replace(/^\p{Emoji_Presentation}\s*/u, '').trim();
+        return option.textContent;
     }
 
     function enhanceSelect(select) {
@@ -109,6 +105,12 @@
                 row.className = 'wh-select-option' + (option.selected ? ' selected' : '');
                 row.style.setProperty('--wh-option-index', i);
                 row.innerHTML = `${swatchFor(select, option)}<span>${labelFor(select, option)}</span>`;
+                if (select.id === 'globalThemeSelector') {
+                    const gradient = THEME_GRADIENTS[option.value];
+                    const firstColor = gradient && gradient.match(/#[0-9a-f]{6}/i);
+                    if (firstColor) row.style.setProperty('--wh-theme-accent', firstColor[0]);
+                    row.classList.add('wh-select-option-theme');
+                }
                 row.addEventListener('click', () => {
                     select.value = option.value;
                     select.dispatchEvent(new Event('change', { bubbles: true }));

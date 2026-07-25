@@ -237,9 +237,10 @@
 
         pomoInterval = setInterval(tick, 100);
 
-        // Keep session-tracker's idle detection accurate while this runs —
-        // see the matching hooks task-focus.js already uses.
-        if (typeof window.startFocusAccumulation === 'function') window.startFocusAccumulation();
+        // Keep session-tracker's live Focus/Break/Idle numbers in sync
+        // while this phase runs — logPomodoroPartialProgress/phaseComplete
+        // hand the settled time off to history once the phase ends.
+        if (typeof window.startFocusAccumulation === 'function') window.startFocusAccumulation(currentPhase !== 'focus');
     }
 
     function tick() {
@@ -287,6 +288,12 @@
             sendNotification('⏰ Pomodoro', msg, '🍅', 'pomodoro-notification');
         }
 
+        // Settle the live focusSeconds/breakSeconds counter before logging —
+        // see the comment in logPomodoroPartialProgress() for why the order
+        // matters here (a still-ticking trackerInterval would otherwise
+        // regenerate the same elapsed amount right after the decrement).
+        if (typeof window.pauseFocusAccumulation === 'function') window.pauseFocusAccumulation();
+
         // Log this phase to Today's Sessions / Total Timer — Pomodoro keeps
         // its own state entirely separate from session-tracker.js, so this
         // is the only way its time ever reaches either of them.
@@ -331,6 +338,12 @@
         }
 
         pomoInterval = setInterval(tick, 100);
+
+        // Resume live ticking for the phase that just started — settled
+        // by pauseFocusAccumulation() above, so this begins clean from
+        // wherever the daily total actually stands, not from a stale
+        // mid-phase baseline.
+        if (typeof window.startFocusAccumulation === 'function') window.startFocusAccumulation(currentPhase !== 'focus');
     }
 
     // Logs whatever's been elapsed in the current phase but hasn't hit
@@ -340,6 +353,13 @@
     function logPomodoroPartialProgress() {
         if (!isRunning || currentPhase === 'ready') return;
         const elapsed = currentTotal - remainingSeconds;
+        // Settle the live focusSeconds/breakSeconds counter FIRST — if this
+        // ran after logCompletedSession's decrement instead, the still-ticking
+        // trackerInterval would just regenerate the same elapsed amount on
+        // its next 100ms tick (focusStartTime wouldn't be cleared yet) and
+        // silently undo the decrement, causing exactly the double-count
+        // logCompletedSession is supposed to prevent.
+        if (typeof window.stopFocusAccumulation === 'function') window.stopFocusAccumulation();
         if (elapsed < 5 || typeof window.logCompletedSession !== 'function') return;
         if (currentPhase === 'focus') {
             window.logCompletedSession({ taskName: 'Pomodoro — Focus', focusSeconds: elapsed, breakSeconds: 0, idleSeconds: 0 });

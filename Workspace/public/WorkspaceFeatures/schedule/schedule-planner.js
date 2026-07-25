@@ -206,12 +206,12 @@ function buildFormZone(day, defaults) {
                 </div>
                 <div class="form-row">
                     <select id="category" class="form-select">
-                        <option value="study">📚 Study</option>
-                        <option value="work">💼 Work</option>
-                        <option value="personal">🧘 Personal</option>
-                        <option value="fitness">🏋️ Fitness</option>
-                        <option value="social">🎉 Social</option>
-                        <option value="other">📌 Other</option>
+                        <option value="study">Study</option>
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="fitness">Fitness</option>
+                        <option value="social">Social</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
                 <div class="form-row">
