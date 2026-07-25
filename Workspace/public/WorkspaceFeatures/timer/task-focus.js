@@ -383,25 +383,9 @@
         const elapsed = task.durationSeconds - (task.remainingSeconds || 0);
         if (elapsed < 5) return;
 
-        const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
-        completedSessions.push({
-            taskName: task.title,
-            taskStart: '',
-            taskEnd: '',
-            focusSeconds: elapsed,
-            breakSeconds: 0,
-            idleSeconds: 0,
-            totalSeconds: elapsed,
-            timestamp: Date.now()
-        });
-        localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
-
-        document.dispatchEvent(new CustomEvent('sessionCompleted', {
-            detail: { taskName: task.title }
-        }));
-
-        if (typeof renderSessionHistory === 'function') renderSessionHistory();
-        if (typeof updateTotalTimerFromHistory === 'function') updateTotalTimerFromHistory();
+        if (typeof window.logCompletedSession === 'function') {
+            window.logCompletedSession({ taskName: task.title, focusSeconds: elapsed, breakSeconds: 0, idleSeconds: 0 });
+        }
     }
 
     function completeTask() {

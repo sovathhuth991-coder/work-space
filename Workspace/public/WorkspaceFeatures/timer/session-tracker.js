@@ -267,6 +267,13 @@
                 breakTimeAtStart = breakSeconds;
             }
         }
+
+        // Repaint every tick regardless of whether a transition just
+        // happened — updateUI() reads the *live* idle value below, not
+        // the raw variable, so this is what actually makes idle time
+        // visibly count up instead of only updating once you move the
+        // mouse again.
+        updateUI();
     }
 
     // ----- Helpers -----
@@ -547,7 +554,7 @@
         const history = getTodayHistoryTotals();
         const totalFocus = history.focus + (focusSeconds || 0);
         const totalBreak = history.break + (breakSeconds || 0);
-        const totalIdle = history.idle + (idleSeconds || 0);
+        const totalIdle = history.idle + getLiveIdleSeconds();
         if (focusDisplay) focusDisplay.textContent = formatTime(totalFocus);
         if (breakDisplay) breakDisplay.textContent = formatTime(totalBreak);
         if (idleDisplay) idleDisplay.textContent = formatTime(totalIdle);
@@ -555,17 +562,27 @@
     }
 
     // ----- Update UI (Daily Totals) -----
+    // idleSeconds itself is only finalized at a state transition (see
+    // checkIdleState) — while still idle, this adds the time elapsed
+    // since idleStartTime so the display reflects "right now," not
+    // "as of the last time you moved the mouse."
+    function getLiveIdleSeconds() {
+        if (idleStartTime) return idleTimeAtStart + Math.floor((Date.now() - idleStartTime) / 1000);
+        return idleSeconds;
+    }
+
     function updateUI() {
+        const liveIdleSeconds = getLiveIdleSeconds();
         if (focusDisplay) focusDisplay.textContent = formatTime(focusSeconds);
         if (breakDisplay) breakDisplay.textContent = formatTime(breakSeconds);
-        if (idleDisplay) idleDisplay.textContent = formatTime(idleSeconds);
+        if (idleDisplay) idleDisplay.textContent = formatTime(liveIdleSeconds);
 
-        const totalSeconds = focusSeconds + breakSeconds + idleSeconds;
+        const totalSeconds = focusSeconds + breakSeconds + liveIdleSeconds;
         if (totalDisplay) totalDisplay.textContent = formatTime(totalSeconds);
 
         const focusPct = totalSeconds > 0 ? (focusSeconds / totalSeconds) * 100 : 0;
         const breakPct = totalSeconds > 0 ? (breakSeconds / totalSeconds) * 100 : 0;
-        const idlePct = totalSeconds > 0 ? (idleSeconds / totalSeconds) * 100 : 0;
+        const idlePct = totalSeconds > 0 ? (liveIdleSeconds / totalSeconds) * 100 : 0;
         if (progressFocusSegment) progressFocusSegment.style.width = focusPct + '%';
         if (progressBreakSegment) progressBreakSegment.style.width = breakPct + '%';
         if (progressIdleSegment) progressIdleSegment.style.width = idlePct + '%';
@@ -575,7 +592,7 @@
         // Update header stats
         if (headerFocusTime) headerFocusTime.textContent = formatTime(focusSeconds);
         if (headerBreakTime) headerBreakTime.textContent = formatTime(breakSeconds);
-        if (headerIdleTime) headerIdleTime.textContent = formatTime(idleSeconds);
+        if (headerIdleTime) headerIdleTime.textContent = formatTime(liveIdleSeconds);
 
         // Update current session display as well
         updateCurrentSessionDisplay();
@@ -830,42 +847,66 @@
     // and Task Focus keep separate state entirely, so they call this
     // directly with explicit numbers instead. Same schema either way. =====
     // ===== External sync hooks for Pomodoro/Task Focus =====
-    // Task Focus (and Pomodoro, via its own logCompletedSession calls)
-    // already log their own elapsed time to completedSessions when a
-    // session finishes — that's the authoritative record. These hooks only
-    // flip isRunning/idleStartTime so idle time doesn't wrongly accrue
-    // here while one of those is actively running elsewhere; they
-    // deliberately don't touch focusSeconds/focusStartTime, since doing
-    // that AND separately logging the completed session would double-count
-    // the same minutes.
-    window.startFocusAccumulation = function() {
+    // These now genuinely tick the same live focusSeconds/breakSeconds
+    // counters the Simple Timer uses (via startAccumulation(), the same
+    // function its own Start button calls) — that's what makes the Total
+    // Timer/header numbers move in real time during a Pomodoro phase or a
+    // Task Focus session, not just once it's finished.
+    //
+    // The double-count risk that created: once that time is *also* logged
+    // to completedSessions on completion, it would otherwise be counted
+    // twice (once live, once in history). logCompletedSession() below
+    // closes that by subtracting back out whatever it just logged, so the
+    // handoff from "live" to "history" is seamless.
+    window.startFocusAccumulation = function(isBreakPhase) {
         isRunning = true;
-        isBreak = false;
+        isBreak = !!isBreakPhase;
         idleStartTime = null;
+        startAccumulation();
         updateUI();
     };
     window.pauseFocusAccumulation = function() {
+        if (focusStartTime) {
+            focusSeconds = focusTimeAtStart + Math.floor((Date.now() - focusStartTime) / 1000);
+            focusStartTime = null;
+        }
+        if (breakStartTime) {
+            breakSeconds = breakTimeAtStart + Math.floor((Date.now() - breakStartTime) / 1000);
+            breakStartTime = null;
+        }
         isRunning = false;
         idleStartTime = Date.now();
+        idleTimeAtStart = idleSeconds;
         updateUI();
     };
     window.stopFocusAccumulation = window.pauseFocusAccumulation;
 
-    window.logCompletedSession = function({ taskName, taskStart, taskEnd, focusSeconds, breakSeconds, idleSeconds }) {
-        const totalSecs = (focusSeconds || 0) + (breakSeconds || 0) + (idleSeconds || 0);
+    window.logCompletedSession = function({ taskName, taskStart, taskEnd, focusSeconds: fSecs, breakSeconds: bSecs, idleSeconds: iSecs }) {
+        const totalSecs = (fSecs || 0) + (bSecs || 0) + (iSecs || 0);
         if (totalSecs < 5) return; // same floor saveCompletedSession() uses
         const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
         completedSessions.push({
             taskName: taskName || 'Untitled Session',
             taskStart: taskStart || '',
             taskEnd: taskEnd || '',
-            focusSeconds: focusSeconds || 0,
-            breakSeconds: breakSeconds || 0,
-            idleSeconds: idleSeconds || 0,
+            focusSeconds: fSecs || 0,
+            breakSeconds: bSecs || 0,
+            idleSeconds: iSecs || 0,
             totalSeconds: totalSecs,
             timestamp: Date.now()
         });
         localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
+
+        // Hand off: this chunk just moved from "live" to "history" —
+        // remove it from the live counters so the next repaint (history +
+        // live) doesn't add it in twice. pauseFocusAccumulation() already
+        // ran before this in every call site, so focusSeconds/breakSeconds
+        // here are the settled totals, not still-ticking ones.
+        focusSeconds = Math.max(0, focusSeconds - (fSecs || 0));
+        breakSeconds = Math.max(0, breakSeconds - (bSecs || 0));
+        focusTimeAtStart = focusSeconds;
+        breakTimeAtStart = breakSeconds;
+
         if (typeof renderSessionHistory === 'function') renderSessionHistory();
         updateTotalTimerFromHistory();
         document.dispatchEvent(new CustomEvent('sessionCompleted', { detail: { taskName } }));
