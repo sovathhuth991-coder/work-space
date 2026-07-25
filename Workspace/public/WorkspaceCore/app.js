@@ -837,6 +837,30 @@ function initHeaderToggles() {
 
     // Toggle dropdown visibility
     if (mainToggleBtn && toggleDropdown) {
+        // Move the dropdown to be a direct child of <body>. If ANY ancestor
+        // in its original position has a CSS transform/filter/will-change
+        // set (this app uses plenty for hover/card animations), that
+        // ancestor — not the viewport — becomes the containing block for a
+        // position:fixed descendant, which silently breaks the coordinate
+        // math below no matter how correct it is. Body is never
+        // transformed, so this guarantees fixed actually means "relative
+        // to the viewport" here.
+        if (toggleDropdown.parentElement !== document.body) {
+            document.body.appendChild(toggleDropdown);
+        }
+
+        function positionDropdown() {
+            const rect = mainToggleBtn.getBoundingClientRect();
+            const panelWidth = Math.min(230, window.innerWidth - 24);
+            let left = rect.right - panelWidth;
+            left = Math.max(12, Math.min(left, window.innerWidth - panelWidth - 12));
+            toggleDropdown.style.position = 'fixed';
+            toggleDropdown.style.top = (rect.bottom + 10) + 'px';
+            toggleDropdown.style.left = left + 'px';
+            toggleDropdown.style.right = 'auto';
+            toggleDropdown.style.width = panelWidth + 'px';
+        }
+
         mainToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const isShowing = toggleDropdown.classList.contains('show');
@@ -847,11 +871,16 @@ function initHeaderToggles() {
                     toggleArrow.style.transform = 'rotate(0deg)';
                 }
             } else {
+                positionDropdown();
                 toggleDropdown.classList.add('show');
                 if (toggleArrow) {
                     toggleArrow.style.transform = 'rotate(90deg)';
                 }
             }
+        });
+
+        window.addEventListener('resize', () => {
+            if (toggleDropdown.classList.contains('show')) positionDropdown();
         });
 
         // Close dropdown when clicking outside

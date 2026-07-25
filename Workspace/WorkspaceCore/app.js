@@ -837,12 +837,19 @@ function initHeaderToggles() {
 
     // Toggle dropdown visibility
     if (mainToggleBtn && toggleDropdown) {
+        // Move the dropdown to be a direct child of <body>. If ANY ancestor
+        // in its original position has a CSS transform/filter/will-change
+        // set (this app uses plenty for hover/card animations), that
+        // ancestor — not the viewport — becomes the containing block for a
+        // position:fixed descendant, which silently breaks the coordinate
+        // math below no matter how correct it is. Body is never
+        // transformed, so this guarantees fixed actually means "relative
+        // to the viewport" here.
+        if (toggleDropdown.parentElement !== document.body) {
+            document.body.appendChild(toggleDropdown);
+        }
+
         function positionDropdown() {
-            // Computed fresh from the button's actual on-screen position every
-            // time it opens (position:fixed + inline coords), rather than
-            // relying on CSS position:absolute relative to an ancestor — that
-            // approach kept ending up misplaced/offscreen depending on
-            // header layout, so this is the version that can't drift.
             const rect = mainToggleBtn.getBoundingClientRect();
             const panelWidth = Math.min(230, window.innerWidth - 24);
             let left = rect.right - panelWidth;
