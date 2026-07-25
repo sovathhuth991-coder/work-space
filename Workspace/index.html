@@ -4,8 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="mobile-fix.css">
-    <link rel="stylesheet" href="schedule-mobile-fix.css">
     <title>Workspace</title>
 
     <!-- ===== FORCE NO CACHING (development) ===== -->
@@ -311,17 +309,20 @@
 
             <!-- ===== GLOBAL SEARCH BAR ===== -->
             <div class="global-search-bar"
-                style="position:relative; display:flex; justify-content:flex-end; padding: 8px 32px 0 0; gap:12px; align-items:center;">
-                <div style="position:relative; flex:1; max-width:400px;">
+                style="position:relative; display:flex; flex-direction:column; align-items:flex-end; gap:8px; padding: 8px 32px 12px 0;">
+                <div id="globalSearchInputWrap" style="position:relative; width:100%; max-width:400px;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--text-muted); pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input type="text" id="globalSearchInput" placeholder="Search lessons, tasks, library..."
                         style="width:100%; padding:8px 14px 8px 34px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.9rem;" />
+                    <span id="globalSearchResults" style="position:absolute; right:0; top:calc(100% + 4px); font-size:0.7rem; color:var(--text-muted);"></span>
                 </div>
-                <span id="globalSearchResults" style="font-size:0.75rem; color:var(--text-muted);"></span>
                 <div id="globalSearchDropdown"
                     style="display:none; position:absolute; right:0; top:calc(100% + 4px); background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); max-width:500px; width:100%; max-height:400px; overflow-y:auto; padding:8px; z-index:999; box-shadow:var(--shadow-elevated);">
                 </div>
             </div>
+            <!-- (globalSearchResults moved up next to the input; keeping the id
+                 for any existing JS that targets it, but position no longer
+                 floats disconnected below-right of the search box) -->
 
             <!-- ===== DASHBOARD VIEW ===== -->
             <section id="dashboard-view" class="hub-view active">
@@ -333,24 +334,29 @@
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                         <div id="streakDisplay"></div>
-                        <div class="layout-mode-group" style="display:flex;gap:4px;align-items:center;">
-                            <button class="matrix-btn layout-mode-btn active" data-action="setLayoutMode"
-                                data-layout-mode="canvas" title="Freeform canvas">Canvas</button>
-                            <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
-                                data-layout-mode="grid" title="CSS Grid layout">Grid</button>
-                            <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
-                                data-layout-mode="flex" title="Flex wrap layout">Flex Row</button>
-                            <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
-                                data-layout-mode="stack" title="Single column">Stack</button>
+                        <div class="dash-toolbar">
+                            <div class="layout-mode-group">
+                                <button class="matrix-btn layout-mode-btn active" data-action="setLayoutMode"
+                                    data-layout-mode="canvas" title="Freeform canvas"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="5" rx="1"/><rect x="14" y="3" width="7" height="9" rx="1"/><rect x="3" y="12" width="7" height="9" rx="1"/><rect x="14" y="16" width="7" height="5" rx="1"/></svg>Canvas</button>
+                                <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
+                                    data-layout-mode="grid" title="CSS Grid layout"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Grid</button>
+                                <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
+                                    data-layout-mode="flex" title="Flex wrap layout"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="5" height="12" rx="1"/><rect x="10" y="6" width="5" height="12" rx="1"/><rect x="17" y="6" width="4" height="12" rx="1"/></svg>Flex Row</button>
+                                <button class="matrix-btn layout-mode-btn" data-action="setLayoutMode"
+                                    data-layout-mode="stack" title="Single column"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="16" width="16" height="4" rx="1"/></svg>Stack</button>
+                            </div>
+                            <div class="dash-toolbar-divider"></div>
+                            <div class="dash-toolbar-actions">
+                                <button class="matrix-btn" data-action="toggleResizeHandles"
+                                    title="Show/hide resize handles"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>Resize</button>
+                                <button class="matrix-btn" data-action="resetDashboardLayout"
+                                    title="Reset entire dashboard layout"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M3.5 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.65 4.36A9 9 0 0 0 20.5 15"/></svg>Reset</button>
+                                <button class="matrix-btn" data-action="smartReorderDashboard"
+                                    title="Pack cards tight — remove empty gaps"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 16v6M2 12h6M16 12h6M5 5l4 4M15 15l4 4M19 5l-4 4M9 15l-4 4"/></svg>Smart Reorder</button>
+                                <button class="dashboard-customize-btn" data-action="toggleCardVisibility"
+                                    title="Show/Hide dashboard cards"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="currentColor"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2" fill="currentColor"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="2" fill="currentColor"/></svg>Customize</button>
+                            </div>
                         </div>
-                        <button class="matrix-btn" data-action="toggleResizeHandles"
-                            title="Show/hide resize handles">↔ Resize</button>
-                        <button class="matrix-btn" data-action="resetDashboardLayout"
-                            title="Reset entire dashboard layout">↺ Reset</button>
-                        <button class="matrix-btn" data-action="smartReorderDashboard"
-                            title="Pack cards tight — remove empty gaps">✨ Smart Reorder</button>
-                        <button class="dashboard-customize-btn" data-action="toggleCardVisibility"
-                            title="Show/Hide dashboard cards">⚙️ Customize</button>
                     </div>
                 </div>
                 <div class="dashboard-grid">
@@ -1001,16 +1007,18 @@
                         <p class="view-kicker">Documentation</p>
                         <h1>Tutorial & Guide</h1>
                     </div>
-                    <button class="matrix-btn" data-action="openTutorialGuide">📄 Open Full Guide</button>
+                    <button class="matrix-btn" data-action="openTutorialGuide"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Open Full Guide</button>
                 </div>
 
                 <!-- Tutorial Hero -->
                 <div class="tutorial-hero"
                     style="background: linear-gradient(135deg, rgba(124, 109, 240, 0.1) 0%, rgba(124, 109, 240, 0.05) 100%); border: 1px solid rgba(124, 109, 240, 0.2); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; text-align: center;">
-                    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">🎓
+                    <div style="width:36px;height:36px;margin:0 auto 10px;color:var(--accent-1);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg></div>
+                    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">
                         Interactive Tutorials</h2>
-                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Click any section below to
-                        start an interactive walkthrough. We'll guide you through each feature step-by-step!</p>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">Pick a section below —
+                        it'll jump you there and highlight each part of the page one at a time, explaining what it
+                        does as you go.</p>
                 </div>
 
                 <!-- Tutorial Cards Grid (generated by JS) -->
@@ -1022,13 +1030,15 @@
                 <div class="dash-card" style="margin-top: 24px; grid-column: span 2;">
                     <div class="card-inner" style="padding: 24px;">
                         <h3
-                            style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">
-                            📖 Full Documentation</h3>
+                            style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary); display:flex; align-items:center; gap:8px;">
+                            <svg class="wh-icon" style="margin-right:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H2z"/><path d="M22 6a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h8z"/></svg>
+                            Full Documentation</h3>
                         <p style="margin: 0 0 16px 0; color: var(--text-secondary); font-size: 0.9rem;">For
                             comprehensive documentation, tips, and advanced features, check out the complete guide.</p>
                         <button class="matrix-btn" data-action="openTutorialGuide"
                             style="background: var(--accent-gradient); color: #fff; border: none; padding: 12px 24px; font-size: 0.95rem;">
-                            📄 Open Full Guide in New Tab
+                            <svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            Open Full Guide in New Tab
                         </button>
                     </div>
                 </div>
@@ -2158,8 +2168,6 @@
             }
         })();
     </script>
-    <script src="auto-sync.js"></script>
-    <script src="mobile-nav.js"></script>
 </body>
 
 </html>

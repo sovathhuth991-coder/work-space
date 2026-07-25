@@ -114,12 +114,15 @@ body {
     /* Actions dropdown - reposition on mobile */
     #headerToggleDropdown {
         right: 0;
+        left: auto;
         top: calc(100% + 8px);
         transform: none;
         flex-direction: column;
         border-radius: var(--radius-md);
         padding: 8px;
         gap: 4px;
+        min-width: 180px;
+        max-width: calc(100vw - 20px);
     }
 
     #headerToggleMain {
