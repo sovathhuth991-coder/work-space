@@ -452,7 +452,7 @@
                                     <h3 style="margin:0;"><span class="pulse-dot"></span> Today's Focus</h3>
                                     <div class="card-controls">
                                         <button class="matrix-btn" data-action="showSessionDetailsModal" data-nav-expand
-                                            style="padding:4px 12px;font-size:0.75rem;">📊 View Sessions</button>
+                                            style="padding:4px 12px;font-size:0.75rem;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg>View Sessions</button>
                                         <span class="card-drag-handle" title="Drag to move">⠿</span>
                                     </div>
                                 </div>
@@ -606,7 +606,7 @@
                         <div class="card-inner">
                             <div class="card-header-drag"
                                 style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                                <h3 style="margin:0;">📊 Stats <span id="statsCount" class="widget-count-badge"></span></h3>
+                                <h3 style="margin:0;display:flex;align-items:center;gap:6px;"><svg class="wh-icon" style="margin-right:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="4" height="10" rx="0.5"/><rect x="10" y="4" width="4" height="16" rx="0.5"/><rect x="16" y="13" width="4" height="7" rx="0.5"/></svg>Stats <span id="statsCount" class="widget-count-badge"></span></h3>
                                 <div class="card-controls">
                                     <button class="matrix-btn" onclick="addWidget('stats')"
                                         title="Add a stats block"
@@ -1122,7 +1122,7 @@
                         <div id="sessionHistoryCard" class="session-tracker-enhanced"
                             style="background: var(--bg-card); padding: 16px; border-radius: 10px;">
                             <div class="session-tracker-header">
-                                <div class="session-tracker-title">📊 Today's Sessions</div>
+                                <div class="session-tracker-title"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg>Today's Sessions</div>
                             </div>
                             <div id="sessionHistoryList" class="session-history-list"></div>
                         </div>
@@ -1464,7 +1464,7 @@
             <div id="sessionDetailsModal" class="diagram-modal">
                 <div class="modal-content" style="max-width: 800px;">
                     <div class="modal-header-bar">
-                        <h2 class="modal-header-title">📊 Session Details</h2>
+                        <h2 class="modal-header-title" style="display:flex;align-items:center;gap:8px;"><svg class="wh-icon" style="margin-right:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg>Session Details</h2>
                         <button class="close-btn" data-action="closeSessionDetailsModal">✕</button>
                     </div>
                     <div id="sessionDetailsContent"></div>

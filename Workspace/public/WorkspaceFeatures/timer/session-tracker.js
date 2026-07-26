@@ -643,6 +643,7 @@
             stopAccumulation();
             saveAccumulatedTime();
             updateUI();
+            if (typeof updateTotalTimerFromHistory === 'function') updateTotalTimerFromHistory();
             // Reset current session
             if (sessionInterval) {
                 clearInterval(sessionInterval);
@@ -654,6 +655,8 @@
             sessionFocusStartTime = null;
             sessionBreakStartTime = null;
             sessionIdleStartTime = null;
+            previousTaskId = null;
+            saveSessionState();
             updateCurrentSessionDisplay();
             console.log('🕛 Daily reset at midnight - today\'s totals cleared (session history persists for the week)');
         }
@@ -824,7 +827,7 @@
         if (typeof showToast === 'function') {
             showToast(`✅ ${label} logged — ${formatTime(focusSeconds)} focus (${efficiency}% of scheduled)`, 'success', 6000);
         } else {
-            alert(`📊 SESSION COMPLETE: ${label}\nFocus: ${formatTime(focusSeconds)} · Break: ${formatTime(breakSeconds)} · Idle: ${formatTime(idleSeconds)}\nEfficiency: ${efficiency}%`);
+            alert(`SESSION COMPLETE: ${label}\nFocus: ${formatTime(focusSeconds)} · Break: ${formatTime(breakSeconds)} · Idle: ${formatTime(idleSeconds)}\nEfficiency: ${efficiency}%`);
         }
 
         const history = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
@@ -1073,7 +1076,8 @@
             viewHistoryBtn.addEventListener('click', function() {
                 const isHidden = sessionHistoryCard.style.display === 'none';
                 sessionHistoryCard.style.display = isHidden ? 'block' : 'none';
-                viewHistoryBtn.textContent = isHidden ? '📊 Hide History' : '📊 View History';
+                viewHistoryBtn.innerHTML = (isHidden ? 'Hide History' : 'View History') +
+                    ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;display:inline;"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg>';
                 if (isHidden && typeof renderSessionHistory === 'function') renderSessionHistory();
             });
         }

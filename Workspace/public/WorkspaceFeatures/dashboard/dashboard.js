@@ -217,7 +217,7 @@ function updateHubSessionsWidget(current, next, todayEvents) {
     if (!current && recentSessions.length === 0) {
         html = `
             <div class="session-history-empty" style="padding: 16px 8px;">
-                <div style="font-size: 1.2rem; margin-bottom: 4px;">📊</div>
+                <div style="margin-bottom: 4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;margin:0 auto;"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg></div>
                 <div style="color: var(--text-muted); font-size: 0.75rem;">No sessions yet</div>
             </div>
         `;
@@ -324,7 +324,7 @@ function renderAllSessions(current, next, todayEvents) {
     if (!current && todaySessions.length === 0) {
         html = `
             <div class="session-history-empty">
-                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                <div style="margin-bottom: 8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;margin:0 auto;"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg></div>
                 <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your progress</div>
             </div>
@@ -434,7 +434,7 @@ function renderSessionHistory() {
     if (todaySessions.length === 0 && !liveHtml) {
         container.innerHTML = `
             <div class="session-history-empty">
-                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                <div style="margin-bottom: 8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;margin:0 auto;"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg></div>
                 <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
                 <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your history</div>
             </div>
@@ -625,7 +625,7 @@ window.showSessionDetailsModal = function(sessionTimestamp) {
         }
         html += `</div>`;
     } else {
-        html += `<div style="text-align: center; padding: 48px 16px; color: var(--text-muted);"><div style="font-size: 3rem; margin-bottom: 16px;">📊</div><div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No sessions yet today</div><div style="font-size: 0.9rem;">Start a focus session to see your progress here</div></div>`;
+        html += `<div style="text-align: center; padding: 48px 16px; color: var(--text-muted);"><div style="margin-bottom: 16px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:44px;height:44px;margin:0 auto;"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg></div><div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No sessions yet today</div><div style="font-size: 0.9rem;">Start a focus session to see your progress here</div></div>`;
     }
     content.innerHTML = html;
     modal.style.display = 'flex';
