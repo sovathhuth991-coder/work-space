@@ -620,11 +620,12 @@
 }
 
 .time-value {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
     line-height: 1;
+    white-space: nowrap;
 }
 
 .time-block.focus-block .time-value {
