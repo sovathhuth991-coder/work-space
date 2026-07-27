@@ -10,6 +10,74 @@ const DEFAULT_EVENT_COLOR = 'default';
 // linked/mirrored). Uses the shared undo-redo.js system (already
 // registers a 'schedule' store) rather than a separate one.
 // ============================================================
+// Copies sourceDay onto several target days in one action (e.g. "copy
+// Sunday to the rest of the week") — same conflict-aware logic as
+// copyDayTo, but pushes a SINGLE undo snapshot for the whole operation
+// rather than one per day, so Ctrl+Z reverts all of it in one step.
+function copyDayToMultiple(sourceDay, targetDays) {
+    const sourceEvents = events.filter(e => e.day === sourceDay);
+    if (sourceEvents.length === 0) {
+        if (typeof showToast === 'function') showToast(`${sourceDay} has no tasks to copy`, 'warning');
+        return;
+    }
+    const validTargets = targetDays.filter(d => d !== sourceDay);
+    if (validTargets.length === 0) {
+        if (typeof showToast === 'function') showToast('No other days to copy to', 'warning');
+        return;
+    }
+    if (typeof saveStateForUndo === 'function') saveStateForUndo('schedule');
+    const currentWeekId = getWeekId(new Date());
+    let totalCopied = 0;
+    let totalSkipped = 0;
+    let idCounter = 0;
+
+    validTargets.forEach(targetDay => {
+        const targetExisting = events.filter(e => e.day === targetDay);
+        sourceEvents.forEach(ev => {
+            const overlapsExisting = targetExisting.some(existing =>
+                ev.start < existing.end && ev.end > existing.start
+            );
+            if (overlapsExisting) {
+                totalSkipped++;
+                return;
+            }
+            const newEvent = {
+                ...ev,
+                id: Date.now() + (idCounter++),
+                day: targetDay,
+                completed: false,
+                userToggled: false,
+                weekId: currentWeekId,
+                recurrence: null
+            };
+            events.push(newEvent);
+            targetExisting.push(newEvent);
+            totalCopied++;
+        });
+    });
+
+    saveEvents();
+    renderSchedule();
+
+    const dayLabel = validTargets.length === 1 ? validTargets[0] : `${validTargets.length} days`;
+    let message;
+    if (totalCopied === 0) {
+        message = `Nothing copied — every task on ${sourceDay} conflicts on all target days`;
+    } else if (totalSkipped > 0) {
+        message = `Copied ${totalCopied} task${totalCopied !== 1 ? 's' : ''} to ${dayLabel} — skipped ${totalSkipped} that would've conflicted`;
+    } else {
+        message = `Copied ${totalCopied} task${totalCopied !== 1 ? 's' : ''} from ${sourceDay} to ${dayLabel}`;
+    }
+
+    if (totalCopied > 0 && typeof showUndoToast === 'function' && typeof undo === 'function') {
+        showUndoToast(message, undo);
+    } else if (typeof showToast === 'function') {
+        showToast(message, totalCopied === 0 ? 'warning' : 'success');
+    }
+    if (validTargets.length === 1) openDayDiagram(validTargets[0]);
+}
+window.copyDayToMultiple = copyDayToMultiple;
+
 function copyDayTo(sourceDay, targetDay) {
     if (sourceDay === targetDay) {
         if (typeof showToast === 'function') showToast("Pick a different day to copy to", 'warning');
