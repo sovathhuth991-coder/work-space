@@ -1183,7 +1183,17 @@
                             <button id="addCustomTimerBtn">+ Add Timer</button>
                         </div>
 
-                        <p style="font-size: 0.75rem; color: var(--text-muted);">Simple countdown timer</p>
+                        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;">
+                            <span style="font-size:0.75rem;color:var(--text-muted);">🔔</span>
+                            <select id="timerSoundSelector" onchange="localStorage.setItem('timerSound',this.value)" style="font-size:0.7rem;padding:2px 6px;border-radius:4px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);cursor:pointer;">
+                                <option value="chime">Chime</option>
+                                <option value="bell">Bell</option>
+                                <option value="digital">Digital</option>
+                                <option value="gentle">Gentle</option>
+                                <option value="alarm">Alarm</option>
+                            </select>
+                        </div>
+                        <p style="font-size: 0.7rem; color: var(--text-muted);">Simple countdown timer</p>
                     </div>
 
                     <!-- MODE TOGGLE (always visible) -->

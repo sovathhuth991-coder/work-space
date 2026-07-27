@@ -921,6 +921,23 @@
         if (typeof renderSessionHistory === 'function') renderSessionHistory();
         updateTotalTimerFromHistory();
         document.dispatchEvent(new CustomEvent('sessionCompleted', { detail: { taskName } }));
+
+        // Stop the session interval so it doesn't keep counting after
+        // the timer has finished — the time was just moved to history.
+        if (sessionInterval) {
+            clearInterval(sessionInterval);
+            sessionInterval = null;
+        }
+        sessionFocusSeconds = 0;
+        sessionBreakSeconds = 0;
+        sessionIdleSeconds = 0;
+        sessionFocusStartTime = null;
+        sessionBreakStartTime = null;
+        sessionIdleStartTime = null;
+        sessionFocusTimeAtStart = 0;
+        sessionBreakTimeAtStart = 0;
+        sessionIdleTimeAtStart = 0;
+        updateCurrentSessionDisplay();
     };
 
     // ===== Recompute the Total Timer card (Focus/Break/Idle/Total) on demand —
