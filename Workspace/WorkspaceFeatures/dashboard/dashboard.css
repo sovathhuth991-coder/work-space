@@ -1347,6 +1347,8 @@ body {
 
 .session-history-item {
     display: flex;
+    padding: 6px 10px;
+    gap: 8px;
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
@@ -1442,28 +1444,35 @@ body {
     min-width: 0;
 }
 
+.session-history-primary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
 .session-history-task-name {
     font-weight: 600;
     color: var(--text-primary);
-    font-size: 0.95rem;
-    margin-bottom: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .session-history-duration {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    display: inline-flex;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
 .session-history-duration span {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
 }
 
 .session-history-duration .focus-time {
@@ -1475,22 +1484,22 @@ body {
 }
 
 .session-history-arrow {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: var(--text-muted);
     transition: all 0.3s ease;
     flex-shrink: 0;
 }
 
 .session-history-duration .wh-icon {
-    width: 13px;
-    height: 13px;
+    width: 11px;
+    height: 11px;
     margin-right: 0;
     vertical-align: middle;
 }
 
 .session-history-arrow .wh-icon-chevron {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     display: block;
 }
 
@@ -1501,19 +1510,20 @@ body {
 
 .session-history-delete-btn {
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     cursor: pointer;
     opacity: 0;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
 }
 
 .session-history-item:hover .session-history-delete-btn {
