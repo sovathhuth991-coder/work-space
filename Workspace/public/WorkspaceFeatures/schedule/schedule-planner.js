@@ -25,7 +25,7 @@ function renderSchedule() {
         const hasOverlaps = dayHasTimeOverlaps(dayEvents);
         dayBox.innerHTML = `
             <h3>${day.slice(0, 3)}${day === todayName ? ' &middot; TODAY' : ''}</h3>
-            ${hasOverlaps ? '<span class="day-overlap-flag">⚠ CONFLICT</span>' : ''}
+            ${hasOverlaps ? '<span class="day-overlap-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>CONFLICT</span>' : ''}
             <div class="mini-preview-list">
                 ${dayEvents.slice(0, 3).map(ev => `
                     <div class="mini-dot ${ev.completed ? 'mini-done' : ''}">
@@ -78,7 +78,7 @@ function jumpToTodaySchedule() {
         void todayBox.offsetWidth; // reflow to restart animation
         todayBox.classList.add('day-flash');
     }
-    if (typeof showToast === 'function') showToast(`📍 ${todayName}`, 'info');
+    if (typeof showToast === 'function') showToast(todayName, 'info');
 }
 
 // Add a task directly to today
@@ -133,6 +133,7 @@ function openDayDiagram(day) {
     }, 100);
 
     if (typeof addTemplateUI === 'function') addTemplateUI(day);
+    if (typeof updateUndoRedoButtons === 'function') updateUndoRedoButtons();
 }
 
 function getDayEvents(day) {
@@ -161,9 +162,9 @@ function buildModalHeader(day, dayEvents) {
     const conflictCount = getOverlapMap(dayEvents).size;
     return `
         <div class="modal-header-bar">
-            <button class="modal-close-btn" onclick="closeDayDiagram()">✕</button>
+            <button class="modal-close-btn" onclick="closeDayDiagram()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             <span class="modal-header-title">${day}</span>
-            ${conflictCount > 0 ? `<span class="modal-conflict-badge">⚠ ${conflictCount} conflict${conflictCount > 1 ? 's' : ''}</span>` : ''}
+            ${conflictCount > 0 ? `<span class="modal-conflict-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>${conflictCount} conflict${conflictCount > 1 ? 's' : ''}</span>` : ''}
         </div>
     `;
 }
@@ -214,58 +215,121 @@ function buildFormZone(day, defaults) {
                         <option value="other">Other</option>
                     </select>
                 </div>
-                <div class="form-row">
-                    <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">🔗 Link to Lesson Page</label>
-                    <select id="linked-lesson-page" class="form-select">
-                        ${getLessonPageOptions('')}
-                    </select>
-                </div>
-                <!-- ===== RECURRENCE DROPDOWN ===== -->
-                <div class="form-row" id="recurrenceRow">
-                    <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">🔄 Repeat</label>
-                    <select id="recurrence" class="form-select" onchange="toggleRecurrenceCountUI(this.value)">
-                        <option value="none">No Repeat</option>
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                    </select>
-                </div>
 
-                <!-- ===== RECURRENCE OCCURRENCE COUNT (inline) ===== -->
-                <div class="form-row" id="recurrenceCountRow" style="display:none;">
-                    <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">🔁 How many occurrences?</label>
-                    <input type="number" id="recurrenceCount" class="form-input" min="2" value="4" />
-                </div>
-
-                <!-- ===== NEW: DAY SELECTION ===== -->
+                <!-- ===== TASK TYPE TOGGLE: fixed clock time vs. flexible duration ===== -->
                 <div class="form-row">
-                    <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">📅 Add to Days</label>
-                    <div id="daySelection" style="display:flex;flex-wrap:wrap;gap:6px;">
-                        ${DAYS.map(d => `
-                            <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer;background:var(--bg-primary);padding:4px 10px;border-radius:99px;border:1px solid var(--border-color);">
-                                <input type="checkbox" class="day-select" value="${d}" ${d === day ? 'checked' : ''}>
-                                ${d.slice(0,3)}
-                            </label>
-                        `).join('')}
+                    <div class="task-type-toggle" id="taskTypeToggle">
+                        <button type="button" class="task-type-btn active" data-task-type="fixed" onclick="setTaskType('fixed')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Fixed Time
+                        </button>
+                        <button type="button" class="task-type-btn" data-task-type="flexible" onclick="setTaskType('flexible')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+                            Flexible Duration
+                        </button>
                     </div>
-                    <span style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">Select one or multiple days</span>
                 </div>
 
-                <div class="form-row time-picker-row">
-                    ${buildTimePickerGroup('start', 'Start', to12Hour(defaults.startHour), defaults.startMin, parseInt(defaults.startHour) >= 12 ? 'PM' : 'AM')}
-                    ${buildTimePickerGroup('end', 'End', to12Hour(defaults.endHour), defaults.endMin, parseInt(defaults.endHour) >= 12 ? 'PM' : 'AM')}
+                <div id="fixedTimeFields">
+                    <div class="form-row">
+                        <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">Link to Lesson Page</label>
+                        <select id="linked-lesson-page" class="form-select">
+                            ${getLessonPageOptions('')}
+                        </select>
+                    </div>
+                    <!-- ===== RECURRENCE DROPDOWN ===== -->
+                    <div class="form-row" id="recurrenceRow">
+                        <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">Repeat</label>
+                        <select id="recurrence" class="form-select" onchange="toggleRecurrenceCountUI(this.value)">
+                            <option value="none">No Repeat</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+
+                    <!-- ===== RECURRENCE OCCURRENCE COUNT (inline) ===== -->
+                    <div class="form-row" id="recurrenceCountRow" style="display:none;">
+                        <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">How many occurrences?</label>
+                        <input type="number" id="recurrenceCount" class="form-input" min="2" value="4" />
+                    </div>
+
+                    <!-- ===== DAY SELECTION ===== -->
+                    <div class="form-row">
+                        <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">Add to Days</label>
+                        <div id="daySelection" style="display:flex;flex-wrap:wrap;gap:6px;">
+                            ${DAYS.map(d => `
+                                <label style="display:flex;align-items:center;gap:4px;font-size:0.8rem;cursor:pointer;background:var(--bg-primary);padding:4px 10px;border-radius:99px;border:1px solid var(--border-color);">
+                                    <input type="checkbox" class="day-select" value="${d}" ${d === day ? 'checked' : ''}>
+                                    ${d.slice(0,3)}
+                                </label>
+                            `).join('')}
+                        </div>
+                        <span style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">Select one or multiple days</span>
+                    </div>
+
+                    <div class="form-row time-picker-row">
+                        ${buildTimePickerGroup('start', 'Start', to12Hour(defaults.startHour), defaults.startMin, parseInt(defaults.startHour) >= 12 ? 'PM' : 'AM')}
+                        ${buildTimePickerGroup('end', 'End', to12Hour(defaults.endHour), defaults.endMin, parseInt(defaults.endHour) >= 12 ? 'PM' : 'AM')}
+                    </div>
+
+                    <!-- ===== DURATION QUICK-SET: sets End from Start + N minutes ===== -->
+                    <div class="form-row duration-quickset">
+                        <span class="duration-quickset-label">Quick duration:</span>
+                        <button type="button" class="duration-quickset-btn" onclick="setDurationFromStart(30)">30m</button>
+                        <button type="button" class="duration-quickset-btn" onclick="setDurationFromStart(60)">1h</button>
+                        <button type="button" class="duration-quickset-btn" onclick="setDurationFromStart(90)">1h30</button>
+                        <button type="button" class="duration-quickset-btn" onclick="setDurationFromStart(120)">2h</button>
+                    </div>
                 </div>
+
+                <div id="flexibleDurationFields" style="display:none;">
+                    <div class="form-row">
+                        <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-muted);">How long does it need?</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="number" id="flexDurationHours" class="form-input" placeholder="Hours" min="0" max="23">
+                            <input type="number" id="flexDurationMinutes" class="form-input" placeholder="Minutes" min="0" max="59">
+                        </div>
+                        <span style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;display:block;">No fixed clock time — pick it up anytime from the Flexible Tasks card or the Timer page.</span>
+                    </div>
+                </div>
+
                 <div id="modal-form-feedback" class="modal-form-feedback"></div>
                 <div class="form-row form-actions">
-                    <button type="submit" id="submitTaskBtn" class="btn-primary">➕ Add Task</button>
-                    <button type="button" id="cancelEditBtn" class="btn-preset" style="display:none;" onclick="exitEditMode()">✕ Cancel</button>
-                    <button type="button" class="btn-preset" onclick="injectPreset('study')">🧠 Study</button>
-                    <button type="button" class="btn-preset" onclick="injectPreset('break')">☕ Break</button>
+                    <button type="submit" id="submitTaskBtn" class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Task</button>
+                    <button type="button" id="cancelEditBtn" class="btn-preset" style="display:none;" onclick="exitEditMode()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Cancel</button>
+                    <button type="button" class="btn-preset" onclick="injectPreset('study')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><path d="M12 3 2 9l10 6 10-6-10-6z"/><path d="M2 15l10 6 10-6"/></svg>Study</button>
+                    <button type="button" class="btn-preset" onclick="injectPreset('break')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><path d="M4 9h12a3 3 0 0 1 0 6h-1"/><path d="M4 9v6a3 3 0 0 0 3 3h5a3 3 0 0 0 3-3V9"/></svg>Break</button>
                 </div>
             </form>
         </div>
     `;
 }
+
+// Toggles between "Fixed Time" (a normal scheduleEvents entry) and
+// "Flexible Duration" (a flexibleTasks entry, no clock time) — swaps which
+// field group is visible and which button reads active.
+function setTaskType(type) {
+    const toggle = document.getElementById('taskTypeToggle');
+    if (toggle) {
+        toggle.querySelectorAll('.task-type-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.taskType === type);
+        });
+    }
+    const fixedFields = document.getElementById('fixedTimeFields');
+    const flexFields = document.getElementById('flexibleDurationFields');
+    if (fixedFields) fixedFields.style.display = type === 'fixed' ? 'block' : 'none';
+    if (flexFields) flexFields.style.display = type === 'flexible' ? 'block' : 'none';
+    const submitBtn = document.getElementById('submitTaskBtn');
+    if (submitBtn) {
+        submitBtn.innerHTML = type === 'flexible'
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Flexible Task'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Task';
+    }
+    const feedback = document.getElementById('modal-form-feedback');
+    if (feedback) feedback.innerHTML = '';
+}
+window.setTaskType = setTaskType;
 
 function buildTimelineZone(dayEvents, todayName, currentHHMM, overlapMap) {
     return `
@@ -282,6 +346,48 @@ function buildTimelineZone(dayEvents, todayName, currentHHMM, overlapMap) {
     `;
 }
 
+// ============================================================
+// PLANNED VS ACTUAL — cross-references this task's scheduled duration
+// against real elapsed time already logged by the Timer feature
+// (completedSessions, from Simple Timer / Pomodoro / Task Focus), matched
+// by title + same day. Purely additive: reads data the Timer feature
+// already writes for its own purposes, writes nothing new.
+// ============================================================
+function getScheduledMinutes(ev) {
+    const [sh, sm] = ev.start.split(':').map(Number);
+    const [eh, em] = ev.end.split(':').map(Number);
+    let mins = (eh * 60 + em) - (sh * 60 + sm);
+    if (mins < 0) mins += 1440;
+    return mins;
+}
+
+function getTodayActualMinutesForTitle(title) {
+    try {
+        const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+        const today = new Date().toDateString();
+        let totalSec = 0;
+        let found = false;
+        completedSessions.forEach(s => {
+            if (s.taskName === title && new Date(s.timestamp).toDateString() === today) {
+                totalSec += s.totalSeconds || 0;
+                found = true;
+            }
+        });
+        return found ? Math.round(totalSec / 60) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function formatMinutesShort(mins) {
+    mins = Math.max(0, Math.round(mins));
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h`;
+    return `${m}m`;
+}
+
 function buildTimelineItem(ev, todayName, currentHHMM, overlaps) {
     const isPast = ev.day === todayName && ev.end < currentHHMM;
     const isNow = ev.day === todayName && ev.start <= currentHHMM && ev.end >= currentHHMM;
@@ -290,17 +396,26 @@ function buildTimelineItem(ev, todayName, currentHHMM, overlaps) {
     const safeCategory = escapeHtml(ev.category || 'study');
     const safeOverlaps = overlaps.map(o => escapeHtml(o)).join(', ');
     const safeLinkedTitle = linkedPage ? escapeHtml(linkedPage.title) : '';
+    const actualMinutes = ev.completed ? getTodayActualMinutesForTitle(ev.title) : null;
+    const plannedVsActualHtml = actualMinutes !== null ? `
+        <div class="timeline-item-actual" title="Time actually logged for this task today, from the Timer feature">
+            Planned ${formatMinutesShort(getScheduledMinutes(ev))} · Actual ${formatMinutesShort(actualMinutes)}
+        </div>` : '';
     return `
         <div class="timeline-item ${ev.completed ? 'completed' : ''} ${isNow ? 'active' : ''} ${isPast ? 'past' : ''}" data-event-id="${ev.id}" onclick="enterEditMode(${ev.id})" draggable="true">
             <div class="timeline-item-time">${escapeHtml(ev.start)} – ${escapeHtml(ev.end)}</div>
-            <div class="timeline-item-title">${ev.completed ? '✅ ' : ''}${safeTitle}</div>
+            <div class="timeline-item-title-wrap">
+                <div class="timeline-item-title">${ev.completed ? '<svg class="wh-icon" style="margin-right:3px;width:13px;height:13px;color:var(--status-online,#10b981);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}${safeTitle}</div>
+                ${plannedVsActualHtml}
+            </div>
             <span class="timeline-item-cat badge-${safeCategory}">${safeCategory.toUpperCase()}</span>
-            ${overlaps.length > 0 ? `<span class="timeline-overlap-badge" title="Overlaps with: ${safeOverlaps}">⚠</span>` : ''}
-            ${linkedPage ? `<button class="timeline-btn lesson-link" onclick="event.stopPropagation(); openLinkedLesson('${ev.linkedPageId}')" title="Open linked lesson: ${safeLinkedTitle}">📄</button>` : ''}
+            ${overlaps.length > 0 ? `<span class="timeline-overlap-badge" title="Overlaps with: ${safeOverlaps}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>` : ''}
+            ${linkedPage ? `<button class="timeline-btn lesson-link" onclick="event.stopPropagation(); openLinkedLesson('${ev.linkedPageId}')" title="Open linked lesson: ${safeLinkedTitle}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>` : ''}
             <div class="timeline-item-actions" onclick="event.stopPropagation();">
-                <!-- ===== TIMER BUTTON (uses startTimerWithTask) ===== -->
-                <button class="timeline-btn timer-link" onclick="event.stopPropagation(); startTimerWithTask('${safeTitle.replace(/'/g, "\\'")}', '${ev.start}', '${ev.end}')" title="Start Focus Timer">⏱</button>
-                <button class="timeline-btn complete" onclick="event.stopPropagation(); toggleTaskComplete('${ev.id}', '${ev.day}')" title="${ev.completed ? 'Undo' : 'Complete'}">${ev.completed ? '↩' : '✓'}</button>
+                <!-- Start Focus: launches Task Focus (Timer page) pre-loaded
+                     with this exact schedule task and its remaining duration. -->
+                <button class="timeline-btn timer-link" onclick="event.stopPropagation(); window.startFocusForTask(${ev.id}, 'schedule')" title="Start Focus Timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></button>
+                <button class="timeline-btn complete" onclick="event.stopPropagation(); toggleTaskComplete('${ev.id}', '${ev.day}')" title="${ev.completed ? 'Undo' : 'Complete'}">${ev.completed ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polyline points="20 6 9 17 4 12"/></svg>'}</button>
                 <button class="node-del-btn" onclick="event.stopPropagation(); deleteEvent(${ev.id})">Remove</button>
             </div>
         </div>
@@ -330,7 +445,7 @@ function selectTimelineTask(eventId, day) {
         // Find the event data
         const event = events.find(e => e.id === eventId);
         if (event) {
-            console.log('📋 Selected task:', event.title);
+            console.log('Selected task:', event.title);
 
             // Scroll to the form and populate it with the task data
             const form = document.getElementById('modalScheduleForm');
@@ -374,7 +489,7 @@ function selectTimelineTask(eventId, day) {
                 // Scroll to form
                 form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                showToast(`✏️ Editing: ${event.title}`, 'info');
+                showToast(`Editing: ${event.title}`, 'info');
             }
         }
     }
@@ -408,7 +523,7 @@ function enterEditMode(id) {
 
     // Switch UI into edit mode
     const submitBtn = document.getElementById('submitTaskBtn');
-    if (submitBtn) submitBtn.textContent = '✏️ Update Task';
+    if (submitBtn) submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Update Task';
     const cancelBtn = document.getElementById('cancelEditBtn');
     if (cancelBtn) cancelBtn.style.display = '';
     // Recurrence is a single-occurrence concept while editing — hide it
@@ -502,6 +617,31 @@ function attachPlannerSwipeHandlers(modal) {
     }, { passive: true });
 }
 
+// Total scheduled minutes for a day — used for the density bar on each
+// nav pill, a quick visual read on how packed a day already is before
+// opening it.
+function getDayScheduledMinutes(day) {
+    return events.filter(e => e.day === day).reduce((sum, e) => {
+        const [sh, sm] = e.start.split(':').map(Number);
+        const [eh, em] = e.end.split(':').map(Number);
+        let mins = (eh * 60 + em) - (sh * 60 + sm);
+        if (mins < 0) mins += 1440;
+        return sum + mins;
+    }, 0);
+}
+
+function handleCopyDayClick(sourceDay) {
+    const select = document.getElementById('copyDayTarget');
+    const target = select?.value;
+    if (!target) {
+        showToast('Pick a day to copy to first', 'warning');
+        return;
+    }
+    copyDayTo(sourceDay, target);
+    if (select) select.value = '';
+}
+window.handleCopyDayClick = handleCopyDayClick;
+
 function buildPlannerDayNav(day) {
     const { todayName } = getTimeMetrics();
     const prev = getAdjacentDay(day, -1);
@@ -510,14 +650,32 @@ function buildPlannerDayNav(day) {
         const count = getDayEventCount(d);
         const active = d === day;
         const today = d === todayName;
-        return `<button class="day-nav-pill ${active ? 'active' : ''} ${today ? 'today' : ''}" onclick="openDayDiagram('${d}')"><span class="pill-name">${d.slice(0,3)}</span>${count > 0 ? `<span class="pill-count">${count}</span>` : ''}</button>`;
+        // 12h (720min) reads as "fully packed" for the density bar — an
+        // approximation, not a hard cap.
+        const densityPct = Math.min(100, Math.round((getDayScheduledMinutes(d) / 720) * 100));
+        return `<button class="day-nav-pill ${active ? 'active' : ''} ${today ? 'today' : ''}" onclick="openDayDiagram('${d}')"><span class="pill-name">${d.slice(0,3)}</span>${count > 0 ? `<span class="pill-count">${count}</span>` : ''}${densityPct > 0 ? `<span class="pill-density" style="width:${densityPct}%"></span>` : ''}</button>`;
     }).join('');
     return `
         <div class="planner-nav-bar">
             <div class="planner-nav-controls">
-                <button class="day-nav-arrow" onclick="openDayDiagram('${prev}')"><span class="arrow-icon">←</span><span class="arrow-label">${prev}</span></button>
+                <button class="day-nav-arrow" onclick="openDayDiagram('${prev}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="15 18 9 12 15 6"/></svg><span class="arrow-label">${prev}</span></button>
                 <button class="day-nav-today" onclick="openDayDiagram('${todayName}')" ${day === todayName ? 'disabled' : ''}>Jump to Today</button>
-                <button class="day-nav-arrow" onclick="openDayDiagram('${next}')"><span class="arrow-label">${next}</span><span class="arrow-icon">→</span></button>
+                <button class="day-nav-arrow" onclick="openDayDiagram('${next}')"><span class="arrow-label">${next}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="9 18 15 12 9 6"/></svg></button>
+                <div class="planner-copy-day">
+                    <select id="copyDayTarget" title="Copy ${day}'s tasks to another day">
+                        <option value="">Copy to…</option>
+                        ${DAYS.filter(d => d !== day).map(d => `<option value="${d}">${d}</option>`).join('')}
+                    </select>
+                    <button type="button" class="day-nav-copy-btn" onclick="handleCopyDayClick('${day}')" title="Copy this day's tasks">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                    <button type="button" id="undo-btn" class="day-nav-copy-btn" onclick="undo()" title="Undo last change" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+                    </button>
+                    <button type="button" id="redo-btn" class="day-nav-copy-btn" onclick="redo()" title="Redo" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5 5.5 5.5 0 0 0 9.5 20H13"/></svg>
+                    </button>
+                </div>
             </div>
             <div class="day-nav-strip">${pills}</div>
             <p class="planner-nav-hint">Use ← → arrow keys · Esc to close</p>
@@ -531,6 +689,33 @@ function buildPlannerDayNav(day) {
 
 function handleModalSubmit(e, day) {
     e.preventDefault();
+
+    // ─── Flexible Duration branch: skip all fixed-time/day logic below,
+    // this is a duration-only task with no clock slot ──────────────────
+    const activeType = document.querySelector('#taskTypeToggle .task-type-btn.active')?.dataset.taskType;
+    if (activeType === 'flexible') {
+        const titleEl = document.getElementById('title');
+        const title = (titleEl?.value || '').trim();
+        const hours = parseInt(document.getElementById('flexDurationHours')?.value, 10) || 0;
+        const minutes = parseInt(document.getElementById('flexDurationMinutes')?.value, 10) || 0;
+        const totalMinutes = hours * 60 + minutes;
+        if (!title) {
+            showToast('Give the task a name first', 'error');
+            return;
+        }
+        if (totalMinutes <= 0) {
+            showToast('Set how long it needs', 'error');
+            return;
+        }
+        if (typeof createFlexibleTask !== 'function') {
+            showToast('Flexible tasks are not available right now', 'error');
+            return;
+        }
+        createFlexibleTask(title, totalMinutes);
+        showToast('Flexible task added — find it on the Schedule page or Timer page', 'success');
+        closeDayDiagram();
+        return;
+    }
 
     // ─── Get selected days ──────────────────────────────
     const dayCheckboxes = document.querySelectorAll('.day-select:checked');
@@ -677,7 +862,7 @@ function handleModalSubmit(e, day) {
 
     // Re‑open the diagram on the first selected day to refresh the timeline
     openDayDiagram(selectedDays[0]);
-    showToast(`✅ Task added to ${selectedDays.length} day${selectedDays.length > 1 ? 's' : ''}!`, 'success');
+    showToast(`Task added to ${selectedDays.length} day${selectedDays.length > 1 ? 's' : ''}!`, 'success');
 }
 
 // ============================================================
@@ -781,7 +966,7 @@ function injectPreset(type) {
     refreshWheelDisplay('start');
 
     if (type === 'study') {
-        document.getElementById('title').value = 'Subject Core Review 🧠';
+        document.getElementById('title').value = 'Subject Core Review';
         document.getElementById('category').value = 'study';
         const endH = (h + 1) % 24;
         const endAmpm = endH >= 12 ? 'PM' : 'AM';
@@ -791,7 +976,7 @@ function injectPreset(type) {
         document.getElementById('endAmPm').value = endAmpm;
         refreshWheelDisplay('end');
     } else if (type === 'break') {
-        document.getElementById('title').value = '☕ Break Time';
+        document.getElementById('title').value = 'Break Time';
         document.getElementById('category').value = 'personal';
         let endM = now.getMinutes() + 15;
         let endH = h;
@@ -812,6 +997,75 @@ function injectPreset(type) {
     const day = form?.dataset.plannerDay || currentOpenDay;
     if (day) updateModalFormFeedback(day);
 }
+
+// Sets one wheel (start or end) from a raw minutes-since-midnight value,
+// wrapping across midnight, then refreshes both the wheel display and the
+// conflict-check feedback — the shared plumbing behind the duration
+// quick-set buttons and the one-click conflict resolution buttons below.
+function applyWheelMinutes(prefix, totalMinRaw) {
+    const totalMin = ((totalMinRaw % 1440) + 1440) % 1440;
+    const h24 = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    const ampm = h24 >= 12 ? 'PM' : 'AM';
+    const h12 = String(h24 % 12 || 12).padStart(2, '0');
+    const hourEl = document.getElementById(`${prefix}Hour`);
+    const minEl = document.getElementById(`${prefix}Min`);
+    const ampmEl = document.getElementById(`${prefix}AmPm`);
+    if (!hourEl || !minEl || !ampmEl) return;
+    hourEl.value = h12;
+    minEl.value = String(m).padStart(2, '0');
+    ampmEl.value = ampm;
+    refreshWheelDisplay(prefix);
+    const form = document.getElementById('modalScheduleForm');
+    const day = form?.dataset.plannerDay || currentOpenDay;
+    if (day) updateModalFormFeedback(day);
+}
+
+// Reads a wheel's current value as minutes-since-midnight, or null if
+// nothing's set yet.
+function readWheelMinutes(prefix) {
+    const h = document.getElementById(`${prefix}Hour`)?.value;
+    const m = document.getElementById(`${prefix}Min`)?.value;
+    const ampm = document.getElementById(`${prefix}AmPm`)?.value;
+    if (!h || !m || !ampm) return null;
+    let h24 = parseInt(h, 10) % 12;
+    if (ampm === 'PM') h24 += 12;
+    return h24 * 60 + parseInt(m, 10);
+}
+
+// Duration-first entry: set just the start time, then click "+1h" etc.
+// instead of dialing in the end wheel separately.
+function setDurationFromStart(minutesToAdd) {
+    const startMin = readWheelMinutes('start');
+    if (startMin === null) {
+        if (typeof showToast === 'function') showToast('Set a start time first', 'warning');
+        return;
+    }
+    applyWheelMinutes('end', startMin + minutesToAdd);
+}
+window.setDurationFromStart = setDurationFromStart;
+
+// One-click conflict resolution — called from the buttons
+// updateModalFormFeedback() renders next to an overlap warning.
+function resolveConflictShift(conflictEndTime24) {
+    const startMin = readWheelMinutes('start');
+    const endMin = readWheelMinutes('end');
+    if (startMin === null || endMin === null) return;
+    const duration = ((endMin - startMin) % 1440 + 1440) % 1440;
+    const [ceH, ceM] = conflictEndTime24.split(':').map(Number);
+    const newStart = ceH * 60 + ceM;
+    applyWheelMinutes('start', newStart);
+    applyWheelMinutes('end', newStart + duration);
+    if (typeof showToast === 'function') showToast('Shifted to start right after the conflict', 'info');
+}
+window.resolveConflictShift = resolveConflictShift;
+
+function resolveConflictShrink(conflictStartTime24) {
+    const [csH, csM] = conflictStartTime24.split(':').map(Number);
+    applyWheelMinutes('end', csH * 60 + csM);
+    if (typeof showToast === 'function') showToast('Shortened to end before the conflict', 'info');
+}
+window.resolveConflictShrink = resolveConflictShrink;
 
 function refreshWheelDisplay(prefix) {
     const hourVal = document.getElementById(`${prefix}Hour`).value;

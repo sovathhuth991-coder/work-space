@@ -331,6 +331,173 @@
     background: rgba(255, 255, 255, 0.3);
 }
 
+/* How packed a day already is, before you even open it */
+.pill-density {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent-1);
+    border-radius: 0 0 8px 8px;
+    transition: width 0.3s ease;
+    z-index: 1;
+}
+
+.day-nav-pill.active .pill-density {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* ---- Copy Day control ---- */
+.planner-copy-day {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid var(--border-color);
+}
+
+.planner-copy-day select {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    border-radius: 99px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+}
+
+.day-nav-copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.day-nav-copy-btn:hover {
+    border-color: var(--accent-1);
+    color: var(--accent-1);
+    background: rgba(124, 109, 240, 0.1);
+}
+
+.day-nav-copy-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.day-nav-copy-btn:disabled:hover {
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* ---- Fixed / Flexible task-type toggle ---- */
+.task-type-toggle {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.task-type-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.task-type-btn svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.task-type-btn.active {
+    background: var(--accent-gradient);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(124, 109, 240, 0.35);
+}
+
+.task-type-btn:hover:not(.active) {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ---- Duration quick-set ---- */
+.duration-quickset {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: -4px;
+}
+
+.duration-quickset-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-right: 2px;
+}
+
+.duration-quickset-btn {
+    padding: 4px 11px;
+    border-radius: 99px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.duration-quickset-btn:hover {
+    border-color: var(--accent-1);
+    color: var(--accent-1);
+    background: rgba(124, 109, 240, 0.1);
+}
+
+/* ---- One-click conflict resolution ---- */
+.conflict-resolve-actions {
+    display: flex;
+    gap: 6px;
+    margin: 4px 0 8px;
+    flex-wrap: wrap;
+}
+
+.conflict-resolve-btn {
+    padding: 5px 12px;
+    border-radius: 99px;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.conflict-resolve-btn:hover {
+    background: rgba(245, 158, 11, 0.2);
+}
+
 .planner-nav-hint {
     text-align: center;
     font-size: 0.7rem;
@@ -639,11 +806,23 @@
     letter-spacing: 0.02em;
 }
 
-.timeline-item-title {
+.timeline-item-title-wrap {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.timeline-item-title {
     font-size: 0.95rem;
     color: var(--text-primary);
     font-weight: 500;
+}
+
+.timeline-item-actual {
+    font-size: 0.72rem;
+    color: var(--text-muted);
 }
 
 .timeline-item-cat {

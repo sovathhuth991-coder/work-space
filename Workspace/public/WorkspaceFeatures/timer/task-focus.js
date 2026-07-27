@@ -493,11 +493,12 @@
 
     // Switches to the Timer view's Task Focus mode and lands directly on a
     // given task's session screen — used by the "▶ Focus" button on the
-    // Schedule page's Flexible Tasks card.
-    window.startFocusForTask = function(id) {
+    // Schedule page's Flexible Tasks card, and by the per-task Focus
+    // button on the Schedule modal's timeline (kind: 'schedule').
+    window.startFocusForTask = function(id, kind) {
         if (typeof switchView === 'function') switchView('timer-view');
         if (typeof window.switchPomodoroMode === 'function') window.switchPomodoroMode('taskFocus');
-        setTimeout(() => selectTaskForFocus(id), 320);
+        setTimeout(() => selectTaskForFocus(id, kind), 320);
     };
 
     if (document.readyState === 'loading') {

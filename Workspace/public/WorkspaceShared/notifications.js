@@ -70,6 +70,48 @@ function showToast(message, type = 'info', duration = 3000) {
     }, duration);
 }
 
+// Same shape as showToast, but with a real "Undo" button that calls back
+// into whatever the action needs to reverse itself — used after deletes
+// and other actions worth a second chance rather than a silent success.
+function showUndoToast(message, onUndo, duration = 5000) {
+    const sanitized = String(message).replace(/[<>]/g, '');
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification toast-info toast-undo';
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'toast-icon';
+    iconSpan.textContent = 'ℹ';
+
+    const msgSpan = document.createElement('span');
+    msgSpan.textContent = sanitized;
+    msgSpan.style.flex = '1';
+
+    const undoBtn = document.createElement('button');
+    undoBtn.className = 'toast-undo-btn';
+    undoBtn.textContent = 'Undo';
+
+    let dismissed = false;
+    function dismiss() {
+        if (dismissed) return;
+        dismissed = true;
+        toast.classList.add('toast-hide');
+        setTimeout(() => toast.remove(), 300);
+    }
+
+    undoBtn.addEventListener('click', () => {
+        dismiss();
+        if (typeof onUndo === 'function') onUndo();
+    });
+
+    toast.appendChild(iconSpan);
+    toast.appendChild(msgSpan);
+    toast.appendChild(undoBtn);
+    document.body.appendChild(toast);
+
+    setTimeout(dismiss, duration);
+}
+window.showUndoToast = showUndoToast;
+
 function checkUpcomingEvents() {
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
