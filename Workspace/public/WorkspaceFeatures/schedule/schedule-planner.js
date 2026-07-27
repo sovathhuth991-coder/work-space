@@ -630,6 +630,19 @@ function handlePlannerKeydown(e) {
     if (editing) return;
     if (e.key === 'ArrowLeft') { e.preventDefault(); openDayDiagram(getAdjacentDay(currentOpenDay, -1)); }
     if (e.key === 'ArrowRight') { e.preventDefault(); openDayDiagram(getAdjacentDay(currentOpenDay, 1)); }
+
+    // Undo/Redo — the buttons work standalone, but Ctrl+Z is what people
+    // reach for first. Ctrl+Y as an alternate redo binding since that's
+    // the Windows-convention muscle memory some people have instead of
+    // Ctrl+Shift+Z.
+    const cmd = e.ctrlKey || e.metaKey;
+    if (cmd && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (typeof undo === 'function') undo();
+    } else if (cmd && ((e.key.toLowerCase() === 'z' && e.shiftKey) || e.key.toLowerCase() === 'y')) {
+        e.preventDefault();
+        if (typeof redo === 'function') redo();
+    }
 }
 
 function attachPlannerSwipeHandlers(modal) {
@@ -673,7 +686,13 @@ function handleCopyDayClick(sourceDay) {
         showToast('Pick a day to copy to first', 'warning');
         return;
     }
-    copyDayTo(sourceDay, target);
+    if (target === '__ALL__') {
+        if (typeof copyDayToMultiple === 'function') {
+            copyDayToMultiple(sourceDay, DAYS.filter(d => d !== sourceDay));
+        }
+    } else {
+        copyDayTo(sourceDay, target);
+    }
     if (select) select.value = '';
 }
 window.handleCopyDayClick = handleCopyDayClick;
@@ -701,6 +720,7 @@ function buildPlannerDayNav(day) {
                     <select id="copyDayTarget" title="Copy ${day}'s tasks to another day">
                         <option value="">Copy to…</option>
                         ${DAYS.filter(d => d !== day).map(d => `<option value="${d}">${d}</option>`).join('')}
+                        <option value="__ALL__">— All other days —</option>
                     </select>
                     <button type="button" class="day-nav-copy-btn" onclick="handleCopyDayClick('${day}')" title="Copy this day's tasks">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -714,7 +734,7 @@ function buildPlannerDayNav(day) {
                 </div>
             </div>
             <div class="day-nav-strip">${pills}</div>
-            <p class="planner-nav-hint">Use ← → arrow keys · Esc to close</p>
+            <p class="planner-nav-hint">Use ← → arrow keys · Ctrl+Z to undo · Esc to close</p>
         </div>
     `;
 }

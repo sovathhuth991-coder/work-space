@@ -1213,7 +1213,7 @@ function getSparklineData(dataKey, days = 7) {
         if (dataKey === 'focus') value = daySessions.reduce((sum, s) => sum + (s.focusSeconds || 0), 0);
         else if (dataKey === 'sessions') value = daySessions.length;
         else if (dataKey === 'streak') value = daySessions.length > 0 ? 1 : 0;
-        else if (dataKey === 'lessons') value = (hubState.folders || []).filter(f => new Date(f.createdAt).toDateString() === dateStr).length;
+        else if (dataKey === 'lessons') value = Object.values(hubState.folders || {}).filter(f => new Date(f.createdAt).toDateString() === dateStr).length;
         data.push(value);
     }
     return data;
