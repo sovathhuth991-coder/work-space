@@ -21,31 +21,71 @@ function sendNotification(title, body, icon = '📅', tag = 'schedule-notificati
     }
 }
 
-// Short two-tone chime (C5 then G5) via Web Audio API. No audio file
-// needed — the app's only existing audio asset is a 5.8MB ambience
-// track, the wrong tool for a short completion cue — so this works
-// immediately with no extra download.
+// Customizable timer completion sounds via Web Audio API.
+// Reads 'timerSound' from localStorage — set by #timerSoundSelector in the timer view.
+// No audio files needed; all sounds are synthesized.
 function playChime() {
     try {
+        const sound = localStorage.getItem('timerSound') || 'chime';
         const Ctx = window.AudioContext || window.webkitAudioContext;
         if (!Ctx) return;
         const ctx = new Ctx();
         const now = ctx.currentTime;
-        [523.25, 783.99].forEach((freq, i) => {
+
+        function playTone(freq, type, start, duration, volume, endFreq) {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = freq;
-            const start = now + i * 0.15;
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, start);
+            if (endFreq) osc.frequency.linearRampToValueAtTime(endFreq, start + duration);
             gain.gain.setValueAtTime(0, start);
-            gain.gain.linearRampToValueAtTime(0.2, start + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+            gain.gain.linearRampToValueAtTime(volume || 0.2, start + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + duration - 0.05);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start(start);
-            osc.stop(start + 0.4);
-        });
-        setTimeout(() => ctx.close(), 800);
+            osc.stop(start + duration);
+        }
+
+        switch (sound) {
+            case 'bell': {
+                // Long sustained bell-like tone
+                playTone(880, 'sine', now, 0.8, 0.25);
+                playTone(1320, 'sine', now + 0.05, 0.6, 0.1);
+                playTone(1760, 'sine', now + 0.1, 0.4, 0.05);
+                break;
+            }
+            case 'digital': {
+                // Three short rapid beeps
+                for (let i = 0; i < 3; i++) {
+                    playTone(800, 'square', now + i * 0.25, 0.15, 0.15);
+                }
+                break;
+            }
+            case 'gentle': {
+                // Soft ascending tones
+                playTone(392, 'sine', now, 0.5, 0.15);
+                playTone(523.25, 'sine', now + 0.15, 0.5, 0.12);
+                playTone(659.25, 'sine', now + 0.3, 0.5, 0.1);
+                break;
+            }
+            case 'alarm': {
+                // Aggressive alternating tones
+                for (let i = 0; i < 4; i++) {
+                    playTone(880, 'sawtooth', now + i * 0.3, 0.25, 0.2);
+                    playTone(440, 'sawtooth', now + i * 0.3 + 0.15, 0.25, 0.2);
+                }
+                break;
+            }
+            default: {
+                // Classic chime (C5 then G5) — the original sound
+                [523.25, 783.99].forEach((freq, i) => {
+                    playTone(freq, 'sine', now + i * 0.15, 0.35, 0.2);
+                });
+                break;
+            }
+        }
+        setTimeout(() => ctx.close(), 1500);
     } catch (e) {
         console.warn('playChime failed:', e);
     }
