@@ -562,10 +562,16 @@
         const totalFocus = history.focus + (focusSeconds || 0);
         const totalBreak = history.break + (breakSeconds || 0);
         const totalIdle = history.idle + getLiveIdleSeconds();
+        const totalAll = totalFocus + totalBreak + totalIdle;
         if (focusDisplay) focusDisplay.textContent = formatTime(totalFocus);
         if (breakDisplay) breakDisplay.textContent = formatTime(totalBreak);
         if (idleDisplay) idleDisplay.textContent = formatTime(totalIdle);
-        if (totalDisplay) totalDisplay.textContent = formatTime(totalFocus + totalBreak + totalIdle);
+        if (totalDisplay) totalDisplay.textContent = formatTime(totalAll);
+        // Header stats must also use history+live (was live-only, which caused
+        // the header to drop to ~0 after a session was logged)
+        if (headerFocusTime) headerFocusTime.textContent = formatTime(totalFocus);
+        if (headerBreakTime) headerBreakTime.textContent = formatTime(totalBreak);
+        if (headerIdleTime) headerIdleTime.textContent = formatTime(totalIdle);
     }
 
     // ----- Update UI (Daily Totals) -----
@@ -580,12 +586,8 @@
 
     function updateUI() {
         const liveIdleSeconds = getLiveIdleSeconds();
-        if (focusDisplay) focusDisplay.textContent = formatTime(focusSeconds);
-        if (breakDisplay) breakDisplay.textContent = formatTime(breakSeconds);
-        if (idleDisplay) idleDisplay.textContent = formatTime(liveIdleSeconds);
 
         const totalSeconds = focusSeconds + breakSeconds + liveIdleSeconds;
-        if (totalDisplay) totalDisplay.textContent = formatTime(totalSeconds);
 
         const focusPct = totalSeconds > 0 ? (focusSeconds / totalSeconds) * 100 : 0;
         const breakPct = totalSeconds > 0 ? (breakSeconds / totalSeconds) * 100 : 0;
@@ -596,17 +598,14 @@
 
         const scheduled = scheduledInput ? (parseInt(scheduledInput.value) || 120) : 120;
 
-        // Update header stats
-        if (headerFocusTime) headerFocusTime.textContent = formatTime(focusSeconds);
-        if (headerBreakTime) headerBreakTime.textContent = formatTime(breakSeconds);
-        if (headerIdleTime) headerIdleTime.textContent = formatTime(liveIdleSeconds);
-
         // Update current session display as well
         updateCurrentSessionDisplay();
 
         // Update session tracker visual state
         updateSessionTrackerState();
 
+        // This is the single source of truth for Focus/Break/Idle/Total displays
+        // and header stats — uses history + live values for consistency.
         updateTotalTimerFromHistory();
     }
 

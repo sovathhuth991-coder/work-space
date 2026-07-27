@@ -87,7 +87,7 @@ function showCalendarDayEvents(dayName, dateStr) {
     eventsList.innerHTML = dayEvents.map(ev => `
         <div class="calendar-event-item">
             <span class="event-time">${ev.start} - ${ev.end}</span>
-            <span class="event-title">${ev.completed ? '✅ ' : ''}${escapeHtml(ev.title)}</span>
+            <span class="event-title">${ev.completed ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>' : ''}${escapeHtml(ev.title)}</span>
             <span class="event-cat badge-${ev.category || 'study'}">${(ev.category || 'study').toUpperCase()}</span>
         </div>
     `).join('');

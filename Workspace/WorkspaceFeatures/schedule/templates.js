@@ -137,7 +137,7 @@ function renderTemplateDropdown() {
         <div class="template-saved-list">
             ${taskTemplates.map(t => `
                 <div class="template-badge">
-                    <span>📋 ${t.name} (${t.tasks.length})</span>
+                    <span style="display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>${t.name} (${t.tasks.length})</span>
                     <button class="template-delete-btn" onclick="deleteTemplate('${t.id}')">×</button>
                 </div>
             `).join('')}
@@ -180,8 +180,8 @@ function addTemplateUI(day) {
 
     section.innerHTML = `
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
-            <span style="font-size:0.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">📋 Templates</span>
-            <button class="template-save-btn" onclick="handleSaveTemplate('${day}')">💾 Save as Template</button>
+            <span style="font-size:0.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:inline-flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Templates</span>
+            <button class="template-save-btn" onclick="handleSaveTemplate('${day}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save as Template</button>
         </div>
         <div id="templateDropdownContainer"></div>
     `;
@@ -201,4 +201,4 @@ window.handleLoadTemplate = handleLoadTemplate;
 window.handleSaveTemplate = handleSaveTemplate;
 window.addTemplateUI = addTemplateUI;
 
-console.log('📋 Task Templates module loaded');
+console.log('Task Templates module loaded');

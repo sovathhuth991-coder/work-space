@@ -4,6 +4,46 @@
 
 const DEFAULT_EVENT_COLOR = 'default';
 
+// ============================================================
+// COPY DAY — duplicates every event on sourceDay onto targetDay,
+// each with a fresh id (so they're independent afterward, not
+// linked/mirrored). Uses the shared undo-redo.js system (already
+// registers a 'schedule' store) rather than a separate one.
+// ============================================================
+function copyDayTo(sourceDay, targetDay) {
+    if (sourceDay === targetDay) {
+        if (typeof showToast === 'function') showToast("Pick a different day to copy to", 'warning');
+        return;
+    }
+    const sourceEvents = events.filter(e => e.day === sourceDay);
+    if (sourceEvents.length === 0) {
+        if (typeof showToast === 'function') showToast(`${sourceDay} has no tasks to copy`, 'warning');
+        return;
+    }
+    if (typeof saveStateForUndo === 'function') saveStateForUndo('schedule');
+    const currentWeekId = getWeekId(new Date());
+    sourceEvents.forEach((ev, i) => {
+        events.push({
+            ...ev,
+            id: Date.now() + i,
+            day: targetDay,
+            completed: false,
+            userToggled: false,
+            weekId: currentWeekId,
+            recurrence: null // a copy is independent, not part of the original's recurring series
+        });
+    });
+    saveEvents();
+    renderSchedule();
+    if (typeof showUndoToast === 'function' && typeof undo === 'function') {
+        showUndoToast(`Copied ${sourceEvents.length} task${sourceEvents.length > 1 ? 's' : ''} from ${sourceDay} to ${targetDay}`, undo);
+    } else if (typeof showToast === 'function') {
+        showToast(`Copied to ${targetDay}`, 'success');
+    }
+    openDayDiagram(targetDay);
+}
+window.copyDayTo = copyDayTo;
+
 function saveEvents() {
     localStorage.setItem("scheduleEvents", JSON.stringify(events));
     if (typeof updateDashboardLiveSession === 'function') updateDashboardLiveSession();
@@ -53,10 +93,15 @@ function getWeekId(date) {
 }
 
 function deleteEvent(id) {
+    if (typeof saveStateForUndo === 'function') saveStateForUndo('schedule');
     events = events.filter(event => event.id !== id);
     saveEvents();
     renderSchedule();
-    showToast('Task deleted', 'info');
+    if (typeof showUndoToast === 'function' && typeof undo === 'function') {
+        showUndoToast('Task deleted', undo);
+    } else {
+        showToast('Task deleted', 'info');
+    }
     if (currentOpenDay) {
         openDayDiagram(currentOpenDay);
     }
@@ -82,7 +127,7 @@ function toggleTaskComplete(id, day) {
     renderSchedule();
     openDayDiagram(day);
     const task = events.find(ev => ev.id === id);
-    showToast(task.completed ? 'Task completed! 🎉' : 'Task marked as active', 'info');
+    showToast(task.completed ? 'Task completed!' : 'Task marked as active', 'info');
 }
 
 // Migrate existing events to add weekId if missing
@@ -103,7 +148,7 @@ function migrateEventsWithWeekId() {
 }
 
 // ------------------------------------------------------------
-// 🛞  WHEEL TIME PICKER – FULL 0-59 MINUTES
+// WHEEL TIME PICKER – FULL 0-59 MINUTES
 // ------------------------------------------------------------
 function buildTimePickerGroup(prefix, label, defaultHour = '09', defaultMinute = '00', defaultAmPm = 'AM') {
     return `
@@ -160,10 +205,10 @@ function buildTimePickerGroup(prefix, label, defaultHour = '09', defaultMinute =
 }
 
 // ------------------------------------------------------------
-// 🛞  WHEEL INITIALISATION – attaches scroll & click events
+// WHEEL INITIALISATION – attaches scroll & click events
 // ------------------------------------------------------------
 function initWheelPickers() {
-    console.log('🛞 initWheelPickers called');
+    console.log('initWheelPickers called');
     const wheels = document.querySelectorAll('.time-picker-wheel');
     if (wheels.length === 0) {
         console.warn('No wheel pickers found, retrying...');

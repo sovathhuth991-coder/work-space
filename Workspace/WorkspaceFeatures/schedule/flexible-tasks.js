@@ -93,7 +93,7 @@ function toggleFlexibleTaskManual(id) {
     saveFlexibleTasks();
     renderFlexibleTasksPanel();
     if (typeof renderTaskFocusPicker === 'function') renderTaskFocusPicker();
-    if (typeof showToast === 'function') showToast(task.completed ? 'Task completed! 🎉' : 'Task reopened', 'info');
+    if (typeof showToast === 'function') showToast(task.completed ? 'Task completed!' : 'Task reopened', 'info');
 }
 
 // ============================================================
@@ -116,13 +116,13 @@ function renderFlexibleTasksPanel() {
         const durLabel = formatDurationShort(t.durationMinutes);
         return `
         <div class="flex-task-item ${t.completed ? 'flex-task-done' : ''}">
-            <button class="flex-task-check" data-action="toggleFlexTask" data-id="${t.id}" title="${t.completed ? 'Reopen' : 'Mark complete'}">${t.completed ? '✓' : ''}</button>
+            <button class="flex-task-check" data-action="toggleFlexTask" data-id="${t.id}" title="${t.completed ? 'Reopen' : 'Mark complete'}">${t.completed ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</button>
             <div class="flex-task-info">
                 <span class="flex-task-title">${escapeHtml(t.title)}</span>
                 <span class="flex-task-meta">${durLabel}${inProgress ? ' · in progress' : ''}</span>
             </div>
             ${!t.completed ? `<button class="flex-task-start-btn" data-action="startFlexTaskFocus" data-id="${t.id}">▶ Focus</button>` : ''}
-            <button class="flex-task-delete" data-action="deleteFlexTask" data-id="${t.id}" title="Delete">🗑</button>
+            <button class="flex-task-delete" data-action="deleteFlexTask" data-id="${t.id}" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
         </div>`;
     }).join('');
 }

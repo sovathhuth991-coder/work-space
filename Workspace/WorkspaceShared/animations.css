@@ -118,6 +118,28 @@
     animation: slideOutRight 0.3s ease forwards;
 }
 
+.toast-notification.toast-undo {
+    min-width: 260px;
+}
+
+.toast-undo-btn {
+    flex-shrink: 0;
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--accent-1, #7c6df0);
+    background: rgba(124, 109, 240, 0.15);
+    color: var(--accent-1, #7c6df0);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toast-undo-btn:hover {
+    background: var(--accent-1, #7c6df0);
+    color: #fff;
+}
+
 /* ============================================================
    SPARKLE CANVAS – Background Glitter
    ============================================================ */
