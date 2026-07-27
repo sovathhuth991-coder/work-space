@@ -559,16 +559,18 @@
 
     function updateTotalTimerFromHistory() {
         const history = getTodayHistoryTotals();
-        const totalFocus = history.focus + (focusSeconds || 0);
-        const totalBreak = history.break + (breakSeconds || 0);
-        const totalIdle = history.idle + getLiveIdleSeconds();
+        // Use session* values (same as Current Session) so the Total Timer
+        // ticks up in real-time together with Current Session, and when a
+        // session finishes the accumulated time moves to history preserving
+        // the total.
+        const totalFocus = history.focus + (sessionFocusSeconds || 0);
+        const totalBreak = history.break + (sessionBreakSeconds || 0);
+        const totalIdle = history.idle + (sessionIdleSeconds || 0);
         const totalAll = totalFocus + totalBreak + totalIdle;
         if (focusDisplay) focusDisplay.textContent = formatTime(totalFocus);
         if (breakDisplay) breakDisplay.textContent = formatTime(totalBreak);
         if (idleDisplay) idleDisplay.textContent = formatTime(totalIdle);
         if (totalDisplay) totalDisplay.textContent = formatTime(totalAll);
-        // Header stats must also use history+live (was live-only, which caused
-        // the header to drop to ~0 after a session was logged)
         if (headerFocusTime) headerFocusTime.textContent = formatTime(totalFocus);
         if (headerBreakTime) headerBreakTime.textContent = formatTime(totalBreak);
         if (headerIdleTime) headerIdleTime.textContent = formatTime(totalIdle);
