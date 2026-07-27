@@ -423,6 +423,15 @@
     // Expose pause function so other timer modes can pause this one when switching (Bug 6 fix)
     window.pauseSimpleTimer = pauseTimer;
 
+    window.getSimpleTimerLabel = function() {
+        const minutes = Math.round(totalSeconds / 60);
+        const customMatch = customTimers.find(t => t.minutes === minutes);
+        if (customMatch) return customMatch.label;
+        const presetLabels = { 5: '5 min', 25: '25 min', 50: '50 min' };
+        if (presetLabels[minutes]) return presetLabels[minutes];
+        return 'Focus Timer';
+    };
+
     // ----- INITIALIZE -----
     loadCustomTimers();
     initProgressRing();

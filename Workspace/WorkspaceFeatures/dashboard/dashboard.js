@@ -53,12 +53,16 @@ function toggleDashTodo(id) {
 }
 
 function deleteDashTodo(id) {
-    if (!confirm('Delete this task?')) return;
     if (typeof saveStateForUndo === 'function') saveStateForUndo('dashboard-todos');
     dashTodos = dashTodos.filter(t => t.id !== id);
     saveDashTodos();
     renderDashTodos();
     updateDashProgress();
+    if (typeof showUndoToast === 'function') {
+        showUndoToast('Task deleted', () => {
+            if (typeof undo === 'function') undo('dashboard-todos');
+        }, 5000);
+    }
 }
 
 if (typeof registerUndoStore === 'function') {
@@ -146,6 +150,7 @@ function updateDashProgress(saveFromDom = true) {
 }
 
 function updateDashboardLiveSession() {
+    updateGreetingDate();
     const { current, next, todayEvents } = getSessionSnapshot();
     renderAllSessions(current, next, todayEvents);
     updateHubSessionsWidget(current, next, todayEvents);
@@ -309,6 +314,16 @@ function renderAllSessions(current, next, todayEvents) {
             `;
         });
     }
+    if (!current && todaySessions.length === 0) {
+        html = `
+            <div class="session-history-empty">
+                <div style="margin-bottom: 8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;margin:0 auto;"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg></div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your progress</div>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
     container.querySelectorAll('.session-delete-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -321,16 +336,6 @@ function renderAllSessions(current, next, todayEvents) {
             if (typeof window.refreshSessionTrackerTotals === 'function') window.refreshSessionTrackerTotals();
         });
     });
-    if (!current && todaySessions.length === 0) {
-        html = `
-            <div class="session-history-empty">
-                <div style="margin-bottom: 8px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;margin:0 auto;"><polyline points="2 12 7 12 10 20 14 4 17 12 22 12"/></svg></div>
-                <div style="color: var(--text-muted); font-size: 0.9rem;">No sessions yet today</div>
-                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Start a focus session to see your progress</div>
-            </div>
-        `;
-    }
-    container.innerHTML = html;
     container.querySelectorAll('.session-item').forEach(item => {
         item.addEventListener('click', function() {
             const timestamp = this.dataset.sessionTimestamp;
@@ -833,7 +838,18 @@ function renderLessonFoldersModal() {
 window.closeGenericDetailModal = closeGenericDetailModal;
 window.showTasksDoneTodayModal = showTasksDoneTodayModal;
 window.showLessonFoldersModal = showLessonFoldersModal;
+window.showQuickNotesModal = showQuickNotesModal;
 let quickNotes = JSON.parse(localStorage.getItem('quickNotes') || 'null') || DEFAULT_QUICK_NOTES;
+if (typeof registerUndoStore === 'function') {
+    registerUndoStore('quick-notes', {
+        get: () => quickNotes,
+        set: (value) => {
+            quickNotes = Array.isArray(value) ? value : [];
+            saveQuickNotes();
+            renderQuickNotes();
+        }
+    });
+}
 function saveQuickNotes() { localStorage.setItem('quickNotes', JSON.stringify(quickNotes)); }
 function renderQuickNotes() {
     const container = document.getElementById('quickNotesList');
@@ -848,7 +864,7 @@ function renderQuickNotes() {
             <div class="quick-note-text">${escapeHtml(note.text)}</div>
             <div class="quick-note-time">${note.time}</div>
         </div>
-    `).join('');
+    `).join('') + `<div style="margin-top:8px; text-align:right;"><a href="#" onclick="event.preventDefault(); if (typeof showQuickNotesModal === 'function') showQuickNotesModal();" style="font-size:0.75rem; color:var(--accent-1); text-decoration:none; opacity:0.9;">View all ${quickNotes.length} notes</a></div>`;
 }
 function addQuickNote(text) {
     if (!text || !text.trim()) return;
@@ -860,16 +876,38 @@ function addQuickNote(text) {
     renderQuickNotes();
 }
 function clearQuickNotes() {
-    if (confirm('Clear all notes? This cannot be undone.')) {
-        quickNotes = [];
-        saveQuickNotes();
-        renderQuickNotes();
-        const input = document.getElementById('quickNotesInput');
-        if (input) input.value = '';
+    if (typeof saveStateForUndo === 'function') saveStateForUndo('quick-notes');
+    quickNotes = [];
+    saveQuickNotes();
+    renderQuickNotes();
+    const input = document.getElementById('quickNotesInput');
+    if (input) input.value = '';
+    if (typeof showUndoToast === 'function') {
+        showUndoToast('Notes cleared', () => {
+            if (typeof undo === 'function') undo('quick-notes');
+        }, 5000);
     }
 }
 
-function initDashboardEngine() {
+function showQuickNotesModal() {
+    const modal = document.getElementById('genericDetailModal');
+    const titleEl = document.getElementById('genericDetailTitle');
+    const content = document.getElementById('genericDetailContent');
+    if (!modal || !content) return;
+    if (titleEl) titleEl.textContent = 'All Quick Notes';
+    const listHtml = quickNotes.length === 0
+        ? '<div style="padding:32px 16px; text-align:center; color:var(--text-muted);">No notes yet.</div>'
+        : `<div style="display:flex; flex-direction:column; gap:10px; max-height:60vh; overflow-y:auto;">${[...quickNotes].reverse().map(note => `
+            <div style="display:flex; align-items:flex-start; gap:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:12px 14px;">
+                <span style="flex:1; color:var(--text-primary);">${escapeHtml(note.text)}</span>
+                <span style="color:var(--text-muted); font-size:0.75rem; white-space:nowrap;">${escapeHtml(note.time)}</span>
+            </div>
+        `).join('')}</div>`;
+    content.innerHTML = listHtml;
+    modal.style.display = 'flex';
+}
+
+function updateGreetingDate() {
     const dateDisplay = document.getElementById("dashGreetingDate");
     if (dateDisplay) {
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -877,6 +915,10 @@ function initDashboardEngine() {
         const greeting = (() => { const h = new Date().getHours(); if (h < 12) return "Good morning"; if (h < 17) return "Good afternoon"; if (h < 21) return "Good evening"; return "Good night"; })();
         dateDisplay.textContent = `${greeting}! Today is ${systemDate}.`;
     }
+}
+
+function initDashboardEngine() {
+    updateGreetingDate();
     renderDashTodos();
     updateDashboardLiveSession();
     renderAnalytics();
@@ -929,7 +971,7 @@ function initDashboardEngine() {
     clearInterval(window.__focusGoalInterval);
     window.__focusGoalInterval = setInterval(() => {
         if (document.getElementById('dashboard-view')?.classList.contains('active')) updateFocusGoalDisplay();
-    }, 30000);
+    }, 5000);
 }
 
 function calculateStreak() {
@@ -1171,6 +1213,7 @@ function getSparklineData(dataKey, days = 7) {
         if (dataKey === 'focus') value = daySessions.reduce((sum, s) => sum + (s.focusSeconds || 0), 0);
         else if (dataKey === 'sessions') value = daySessions.length;
         else if (dataKey === 'streak') value = daySessions.length > 0 ? 1 : 0;
+        else if (dataKey === 'lessons') value = (hubState.folders || []).filter(f => new Date(f.createdAt).toDateString() === dateStr).length;
         data.push(value);
     }
     return data;
@@ -1191,7 +1234,7 @@ function initSparklines() {
     const sparklineConfigs = [
         { svgId: 'sparkline-tasks', dataKey: 'sessions', color: '#34d399', cardId: 'stat-tasks' },
         { svgId: 'sparkline-schedule', dataKey: 'focus', color: '#38bdf8', cardId: 'stat-schedule' },
-        { svgId: 'sparkline-lessons', dataKey: 'sessions', color: '#fbbf24', cardId: 'stat-lessons' },
+        { svgId: 'sparkline-lessons', dataKey: 'lessons', color: '#fbbf24', cardId: 'stat-lessons' },
         { svgId: 'sparkline-streak', dataKey: 'streak', color: '#a855f7', cardId: 'stat-streak' },
     ];
     sparklineConfigs.forEach(config => {

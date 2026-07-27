@@ -81,6 +81,10 @@ function ensureLiveWidgetStyles() {
         .schedule-mini-item { display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid var(--border-color); font-size:0.85rem; }
         .schedule-mini-item:last-child { border-bottom:none; }
         .schedule-mini-item.completed { opacity:0.5; text-decoration:line-through; }
+        .schedule-mini-item.active-now { background:var(--accent-1); color:#fff; border-radius:6px; padding:8px 10px; }
+        .schedule-mini-item.active-now .schedule-mini-time { color:rgba(255,255,255,0.85); }
+        .schedule-mini-item.active-now .schedule-mini-title { color:#fff; }
+        .schedule-mini-item.active-now .schedule-mini-check { border-color:rgba(255,255,255,0.4); color:#fff; }
         .schedule-mini-time { color:var(--text-muted); font-size:0.75rem; min-width:44px; }
         .schedule-mini-title { flex:1; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .schedule-mini-check { background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); border-radius:6px; width:22px; height:22px; cursor:pointer; flex-shrink:0; }
@@ -152,14 +156,18 @@ function renderAgendaItemsHtml(items) {
     if (!items.length) {
         return `<div class="live-widget-empty">Nothing left on today's schedule 🎉</div>`;
     }
-    return items.map(ev => `
-        <div class="schedule-mini-item ${ev.completed ? 'completed' : ''}">
-            <span class="schedule-mini-time">${escapeHtml(ev.start)}</span>
-            <span class="schedule-mini-title" title="${escapeHtml(ev.title)}">${escapeHtml(ev.title)}</span>
-            <button class="schedule-mini-check" title="${ev.completed ? 'Mark incomplete' : 'Mark complete'}"
-                onclick="event.stopPropagation(); toggleTaskComplete('${ev.id}', '${ev.day}'); renderScheduleMini();">${ev.completed ? '↩' : '✓'}</button>
-        </div>
-    `).join('');
+    const { currentHHMM } = getTimeMetrics();
+    return items.map(ev => {
+        const isActive = !ev.completed && ev.start <= currentHHMM && ev.end >= currentHHMM;
+        return `
+            <div class="schedule-mini-item ${ev.completed ? 'completed' : ''} ${isActive ? 'active-now' : ''}">
+                <span class="schedule-mini-time">${escapeHtml(ev.start)}</span>
+                <span class="schedule-mini-title" title="${escapeHtml(ev.title)}">${escapeHtml(ev.title)}</span>
+                <button class="schedule-mini-check" title="${ev.completed ? 'Mark incomplete' : 'Mark complete'}"
+                    onclick="event.stopPropagation(); toggleTaskComplete('${ev.id}', '${ev.day}'); renderScheduleMini();">${ev.completed ? '↩' : '✓'}</button>
+            </div>
+        `;
+    }).join('');
 }
 
 function renderScheduleMini() {
@@ -178,6 +186,7 @@ function renderScheduleMiniExpanded() {
 function initTimerMiniCard() {
     const card = buildLiveWidgetCard('timer-mini', '⏱', 'Focus Timer', `
         <div class="timer-mini-display" id="timerMiniDisplay">--:--</div>
+        <div class="timer-mini-phase" id="timerMiniPhase"></div>
         <div class="timer-mini-controls">
             <button id="timerMiniStart" class="timer-mini-btn" title="Start">▶ Start</button>
             <button id="timerMiniPause" class="timer-mini-btn" title="Pause">⏸ Pause</button>
@@ -210,7 +219,8 @@ function initTimerMiniCard() {
 // Timer view. Clicking a hidden button still fires its real handler,
 // so we simply forward the click to whichever mode is selected.
 function isPomodoroModeActive() {
-    return !!document.getElementById('pomodoroShell')?.classList.contains('active');
+    const el = document.getElementById('pomodoroShell');
+    return !!el && el.style.display !== 'none';
 }
 
 function proxyTimerClick(action) {
@@ -231,6 +241,16 @@ function renderTimerMini() {
     if (!displayEl) return;
     const source = document.getElementById(isPomodoroModeActive() ? 'pomodoroDisplay' : 'countdownDisplay');
     displayEl.textContent = source ? source.textContent : '--:--';
+    const phaseEl = document.getElementById('timerMiniPhase');
+    if (!phaseEl) return;
+    if (isPomodoroModeActive()) {
+        const pomodoroPhaseEl = document.getElementById('pomodoroPhase');
+        phaseEl.textContent = pomodoroPhaseEl ? pomodoroPhaseEl.textContent.trim() : '';
+    } else if (typeof window.getSimpleTimerLabel === 'function') {
+        phaseEl.textContent = window.getSimpleTimerLabel();
+    } else {
+        phaseEl.textContent = 'Focus Timer';
+    }
 }
 
 // ------------------------------------------------------------
