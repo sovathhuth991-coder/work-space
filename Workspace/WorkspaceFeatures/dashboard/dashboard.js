@@ -368,7 +368,7 @@ function updateDashboardStats() {
     const libStat = document.getElementById("statLibraryItems");
     const todayEvents = (events || []).filter(e => e.day === getTimeMetrics().todayName);
     if (folderStat && typeof hubState !== 'undefined') {
-        const folderCount = Array.isArray(hubState.folders) ? hubState.folders.length : 0;
+        const folderCount = hubState.folders ? Object.keys(hubState.folders).length : 0;
         folderStat.textContent = String(folderCount);
     }
     if (todayStat) todayStat.textContent = String(todayEvents.length);
