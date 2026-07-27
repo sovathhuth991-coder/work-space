@@ -22,8 +22,26 @@ function copyDayTo(sourceDay, targetDay) {
     }
     if (typeof saveStateForUndo === 'function') saveStateForUndo('schedule');
     const currentWeekId = getWeekId(new Date());
+
+    // Copying used to blindly stack every source task onto the target day
+    // regardless of what was already there. Now it checks each one against
+    // the target day's EXISTING events first (plus whatever from this same
+    // copy has already landed, so two source tasks that overlap each other
+    // don't both get waved through) and skips any that would conflict,
+    // rather than creating a pile of new conflicts to clean up by hand.
+    const targetExisting = events.filter(e => e.day === targetDay);
+    let copiedCount = 0;
+    let skippedCount = 0;
+
     sourceEvents.forEach((ev, i) => {
-        events.push({
+        const overlapsExisting = targetExisting.some(existing =>
+            ev.start < existing.end && ev.end > existing.start
+        );
+        if (overlapsExisting) {
+            skippedCount++;
+            return;
+        }
+        const newEvent = {
             ...ev,
             id: Date.now() + i,
             day: targetDay,
@@ -31,14 +49,28 @@ function copyDayTo(sourceDay, targetDay) {
             userToggled: false,
             weekId: currentWeekId,
             recurrence: null // a copy is independent, not part of the original's recurring series
-        });
+        };
+        events.push(newEvent);
+        targetExisting.push(newEvent); // so the next source task is checked against this one too
+        copiedCount++;
     });
+
     saveEvents();
     renderSchedule();
-    if (typeof showUndoToast === 'function' && typeof undo === 'function') {
-        showUndoToast(`Copied ${sourceEvents.length} task${sourceEvents.length > 1 ? 's' : ''} from ${sourceDay} to ${targetDay}`, undo);
+
+    let message;
+    if (copiedCount === 0) {
+        message = `Nothing copied — every task on ${sourceDay} conflicts with something already on ${targetDay}`;
+    } else if (skippedCount > 0) {
+        message = `Copied ${copiedCount} task${copiedCount > 1 ? 's' : ''} to ${targetDay} — skipped ${skippedCount} that would've conflicted`;
+    } else {
+        message = `Copied ${copiedCount} task${copiedCount > 1 ? 's' : ''} from ${sourceDay} to ${targetDay}`;
+    }
+
+    if (copiedCount > 0 && typeof showUndoToast === 'function' && typeof undo === 'function') {
+        showUndoToast(message, undo);
     } else if (typeof showToast === 'function') {
-        showToast(`Copied to ${targetDay}`, 'success');
+        showToast(message, copiedCount === 0 ? 'warning' : 'success');
     }
     openDayDiagram(targetDay);
 }
@@ -352,7 +384,9 @@ function validateTaskTimes(startTime, endTime, day, excludeId = null) {
         if (startTime < existing.end && endTime > existing.start) {
             issues.push({
                 type: 'warning',
-                message: `Overlaps with "${existing.title}" (${existing.start}–${existing.end})`
+                message: `Overlaps with "${existing.title}" (${existing.start}–${existing.end})`,
+                conflictStart: existing.start,
+                conflictEnd: existing.end
             });
         }
     });
@@ -369,7 +403,15 @@ function updateModalFormFeedback(day) {
     const start = `${sh.value}:${sm.value}`;
     const end = `${eh.value}:${em.value}`;
     const issues = validateTaskTimes(start, end, day, window.editingEventId ?? null);
-    feedback.innerHTML = issues.length ? issues.map(i => `<p class="form-feedback-${i.type}">${i.message}</p>`).join("") : "";
+    feedback.innerHTML = issues.length ? issues.map(i => {
+        const resolveButtons = (i.type === 'warning' && i.conflictStart) ? `
+            <div class="conflict-resolve-actions">
+                <button type="button" class="conflict-resolve-btn" onclick="resolveConflictShift('${i.conflictEnd}')">Shift after this task</button>
+                <button type="button" class="conflict-resolve-btn" onclick="resolveConflictShrink('${i.conflictStart}')">End before it starts</button>
+                <button type="button" class="conflict-resolve-btn" onclick="resolveConflictFindSlot('${day}')">Find next free slot</button>
+            </div>` : '';
+        return `<p class="form-feedback-${i.type}">${i.message}</p>${resolveButtons}`;
+    }).join("") : "";
 }
 
 function closeDayDiagram() {

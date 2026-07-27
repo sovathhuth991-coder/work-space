@@ -825,6 +825,14 @@
     color: var(--text-muted);
 }
 
+.timeline-item-actual.ran-over {
+    color: #f59e0b;
+}
+
+.timeline-item-actual.finished-early {
+    color: #3b82f6;
+}
+
 .timeline-item-cat {
     font-size: 0.65rem;
     padding: 4px 10px;

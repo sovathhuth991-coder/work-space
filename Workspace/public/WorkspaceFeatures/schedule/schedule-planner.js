@@ -320,6 +320,25 @@ function setTaskType(type) {
     const flexFields = document.getElementById('flexibleDurationFields');
     if (fixedFields) fixedFields.style.display = type === 'fixed' ? 'block' : 'none';
     if (flexFields) flexFields.style.display = type === 'flexible' ? 'block' : 'none';
+
+    // Carry the duration across instead of losing it: if a start and end
+    // were already dialed in on the Fixed side, pre-fill the Flexible
+    // duration fields with that same length so switching the toggle
+    // doesn't mean re-entering it from scratch.
+    if (type === 'flexible') {
+        const startMin = readWheelMinutes('start');
+        const endMin = readWheelMinutes('end');
+        if (startMin !== null && endMin !== null) {
+            const duration = ((endMin - startMin) % 1440 + 1440) % 1440;
+            if (duration > 0) {
+                const hoursEl = document.getElementById('flexDurationHours');
+                const minsEl = document.getElementById('flexDurationMinutes');
+                if (hoursEl && !hoursEl.value) hoursEl.value = Math.floor(duration / 60) || '';
+                if (minsEl && !minsEl.value) minsEl.value = duration % 60 || '';
+            }
+        }
+    }
+
     const submitBtn = document.getElementById('submitTaskBtn');
     if (submitBtn) {
         submitBtn.innerHTML = type === 'flexible'
@@ -365,10 +384,16 @@ function getTodayActualMinutesForTitle(title) {
     try {
         const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
         const today = new Date().toDateString();
+        // Trimmed + case-insensitive: "Physics" and "physics " (a slightly
+        // different capitalization/spacing between the schedule task and
+        // whatever the timer session got named) should still match rather
+        // than silently showing no actual time at all.
+        const normalizedTarget = String(title).trim().toLowerCase();
         let totalSec = 0;
         let found = false;
         completedSessions.forEach(s => {
-            if (s.taskName === title && new Date(s.timestamp).toDateString() === today) {
+            const normalizedName = String(s.taskName || '').trim().toLowerCase();
+            if (normalizedName === normalizedTarget && new Date(s.timestamp).toDateString() === today) {
                 totalSec += s.totalSeconds || 0;
                 found = true;
             }
@@ -397,10 +422,21 @@ function buildTimelineItem(ev, todayName, currentHHMM, overlaps) {
     const safeOverlaps = overlaps.map(o => escapeHtml(o)).join(', ');
     const safeLinkedTitle = linkedPage ? escapeHtml(linkedPage.title) : '';
     const actualMinutes = ev.completed ? getTodayActualMinutesForTitle(ev.title) : null;
-    const plannedVsActualHtml = actualMinutes !== null ? `
-        <div class="timeline-item-actual" title="Time actually logged for this task today, from the Timer feature">
-            Planned ${formatMinutesShort(getScheduledMinutes(ev))} · Actual ${formatMinutesShort(actualMinutes)}
-        </div>` : '';
+    let plannedVsActualHtml = '';
+    if (actualMinutes !== null) {
+        const plannedMinutes = getScheduledMinutes(ev);
+        const ratio = plannedMinutes > 0 ? actualMinutes / plannedMinutes : 1;
+        // Close to plan reads as neutral; meaningfully over or under gets a
+        // color so the pattern is visible at a glance across a whole day,
+        // not just readable one task at a time.
+        let statusClass = 'on-track';
+        if (ratio > 1.25) statusClass = 'ran-over';
+        else if (ratio < 0.75) statusClass = 'finished-early';
+        plannedVsActualHtml = `
+        <div class="timeline-item-actual ${statusClass}" title="Time actually logged for this task today, from the Timer feature">
+            Planned ${formatMinutesShort(plannedMinutes)} · Actual ${formatMinutesShort(actualMinutes)}
+        </div>`;
+    }
     return `
         <div class="timeline-item ${ev.completed ? 'completed' : ''} ${isNow ? 'active' : ''} ${isPast ? 'past' : ''}" data-event-id="${ev.id}" onclick="enterEditMode(${ev.id})" draggable="true">
             <div class="timeline-item-time">${escapeHtml(ev.start)} – ${escapeHtml(ev.end)}</div>
@@ -1066,6 +1102,44 @@ function resolveConflictShrink(conflictStartTime24) {
     if (typeof showToast === 'function') showToast('Shortened to end before the conflict', 'info');
 }
 window.resolveConflictShrink = resolveConflictShrink;
+
+// Scans the whole day's existing events for the first gap (from
+// searchFromMinutes onward) big enough to fit durationMinutes — smarter
+// than just jumping past the one conflicting task, which on a busy day
+// could just land you in a second conflict right after the first.
+function findNextFreeSlot(day, durationMinutes, searchFromMinutes) {
+    const dayEvents = events
+        .filter(e => e.day === day && e.id !== (window.editingEventId ?? null))
+        .map(e => {
+            const [sh, sm] = e.start.split(':').map(Number);
+            const [eh, em] = e.end.split(':').map(Number);
+            return { start: sh * 60 + sm, end: eh * 60 + em };
+        })
+        .sort((a, b) => a.start - b.start);
+
+    let candidate = searchFromMinutes;
+    for (const ev of dayEvents) {
+        if (candidate + durationMinutes <= ev.start) return candidate;
+        if (candidate < ev.end) candidate = ev.end;
+    }
+    return (candidate + durationMinutes <= 1440) ? candidate : null;
+}
+
+function resolveConflictFindSlot(day) {
+    const startMin = readWheelMinutes('start');
+    const endMin = readWheelMinutes('end');
+    if (startMin === null || endMin === null) return;
+    const duration = ((endMin - startMin) % 1440 + 1440) % 1440;
+    const slot = findNextFreeSlot(day, duration, startMin);
+    if (slot === null) {
+        if (typeof showToast === 'function') showToast("No free gap that size left today — try a different day", 'warning');
+        return;
+    }
+    applyWheelMinutes('start', slot);
+    applyWheelMinutes('end', slot + duration);
+    if (typeof showToast === 'function') showToast('Moved to the next open slot that fits', 'info');
+}
+window.resolveConflictFindSlot = resolveConflictFindSlot;
 
 function refreshWheelDisplay(prefix) {
     const hourVal = document.getElementById(`${prefix}Hour`).value;
