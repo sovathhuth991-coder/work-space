@@ -162,6 +162,17 @@
     font-weight: 600;
 }
 
+.pomodoro-done-at {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-top: 4px;
+    min-height: 1em;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
 /* ---- Cycle Indicator ---- */
 .pomodoro-cycle-bar {
     display: flex;

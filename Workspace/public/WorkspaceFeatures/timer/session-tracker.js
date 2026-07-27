@@ -253,7 +253,8 @@
             }
             // Broadcast idle to other timers (Bug 5 fix)
             if (typeof window.pausePomodoro === 'function') window.pausePomodoro();
-            if (typeof window.pauseTaskFocus === 'function') window.pauseTaskFocus();
+            // Bug 4 fix: correct function name is pauseTaskFocusIfRunning, not pauseTaskFocus
+            if (typeof window.pauseTaskFocusIfRunning === 'function') window.pauseTaskFocusIfRunning();
         }
         // If user becomes active again
         else if (!shouldBeIdle && idleStartTime) {
@@ -807,7 +808,8 @@
         const label = currentTaskData?.title || 'Untitled';
         const scheduled = scheduledInput ? (parseInt(scheduledInput.value) || 0) : 0;
         const scheduledSecs = scheduled * 60;
-        const totalSecs = focusSeconds + breakSeconds + idleSeconds;
+        const liveIdleSeconds = getLiveIdleSeconds();
+        const totalSecs = focusSeconds + breakSeconds + liveIdleSeconds;
         const efficiency = scheduledSecs > 0 ? Math.round((focusSeconds / scheduledSecs) * 100) : 0;
 
         if (totalSecs >= 5) {
@@ -890,7 +892,26 @@
         idleTimeAtStart = idleSeconds;
         updateUI();
     };
-    window.stopFocusAccumulation = window.pauseFocusAccumulation;
+    window.stopFocusAccumulation = function() {
+        // Bug 3 fix: actually clear the trackerInterval so the next
+        // startFocusAccumulation() can create a fresh one. The old alias to
+        // pauseFocusAccumulation left the interval running, causing
+        // startAccumulation() to silently bail on its `if (trackerInterval) return`
+        // guard the next time it was called.
+        stopAccumulation();
+        if (focusStartTime) {
+            focusSeconds = focusTimeAtStart + Math.floor((Date.now() - focusStartTime) / 1000);
+            focusStartTime = null;
+        }
+        if (breakStartTime) {
+            breakSeconds = breakTimeAtStart + Math.floor((Date.now() - breakStartTime) / 1000);
+            breakStartTime = null;
+        }
+        isRunning = false;
+        idleStartTime = Date.now();
+        idleTimeAtStart = idleSeconds;
+        updateUI();
+    };
 
     window.logCompletedSession = function({ taskName, taskStart, taskEnd, focusSeconds: fSecs, breakSeconds: bSecs, idleSeconds: iSecs }) {
         const totalSecs = (fSecs || 0) + (bSecs || 0) + (iSecs || 0);
@@ -1127,6 +1148,58 @@
 
         // Render session history on load (Bug 4 fix)
         if (typeof renderSessionHistory === 'function') renderSessionHistory();
+
+        // Keyboard shortcuts: Space = start/pause, R = reset
+        // Only fires when the timer view is visible and no input is focused.
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+            const timerView = document.getElementById('timer-view');
+            if (!timerView || !timerView.classList.contains('active')) return;
+
+            if (e.code === 'Space' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                e.preventDefault();
+                // Determine which mode is active and toggle start/pause
+                const pomodoroShell = document.getElementById('pomodoroShell');
+                const taskFocusShell = document.getElementById('taskFocusShell');
+                const pomodoroVisible = pomodoroShell && pomodoroShell.style.display !== 'none';
+                const taskFocusVisible = taskFocusShell && taskFocusShell.style.display !== 'none';
+
+                if (pomodoroVisible) {
+                    const pauseBtn = document.getElementById('pomodoroPauseBtn');
+                    const startBtn = document.getElementById('pomodoroStartBtn');
+                    if (pauseBtn && pauseBtn.style.display !== 'none') pauseBtn.click();
+                    else if (startBtn && startBtn.style.display !== 'none') startBtn.click();
+                } else if (taskFocusVisible) {
+                    const pauseBtn = document.getElementById('taskFocusPauseBtn');
+                    const startBtn = document.getElementById('taskFocusStartBtn');
+                    if (pauseBtn && pauseBtn.style.display !== 'none') pauseBtn.click();
+                    else if (startBtn && startBtn.style.display !== 'none') startBtn.click();
+                } else {
+                    // Countdown mode
+                    const pauseBtn = document.getElementById('pauseBtn');
+                    const startBtn = document.getElementById('startBtn');
+                    if (pauseBtn && pauseBtn.style.display !== 'none') pauseBtn.click();
+                    else if (startBtn && startBtn.style.display !== 'none') startBtn.click();
+                }
+            }
+
+            if ((e.code === 'KeyR') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                e.preventDefault();
+                const pomodoroShell = document.getElementById('pomodoroShell');
+                const taskFocusShell = document.getElementById('taskFocusShell');
+                const pomodoroVisible = pomodoroShell && pomodoroShell.style.display !== 'none';
+                const taskFocusVisible = taskFocusShell && taskFocusShell.style.display !== 'none';
+
+                if (pomodoroVisible) {
+                    const resetBtn = document.getElementById('pomodoroResetBtn');
+                    if (resetBtn) resetBtn.click();
+                } else if (!taskFocusVisible) {
+                    // Countdown mode only (Task Focus has no reset, it has Back)
+                    const resetBtn = document.getElementById('resetBtn');
+                    if (resetBtn) resetBtn.click();
+                }
+            }
+        });
 
         // Also refresh when switching to timer view
         document.addEventListener('viewChanged', function(e) {

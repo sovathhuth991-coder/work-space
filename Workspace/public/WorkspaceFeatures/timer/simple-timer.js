@@ -45,6 +45,17 @@
                 updateDisplay();
                 if (state.isRunning && remainingSeconds > 0) {
                     startTimer(false);
+                    // Improvement 3 fix: update the state pill after restoring a
+                    // running timer; startTimer sets isRunning but doesn't call
+                    // updateTimerState when skipSave is false.
+                    updateTimerState('running');
+                } else if (remainingSeconds > 0) {
+                    // Restored a paused timer
+                    updateTimerState('paused');
+                    if (startBtn) {
+                        startBtn.style.display = 'inline-block';
+                        startBtn.textContent = 'Resume';
+                    }
                 }
             }
         } catch (e) {
@@ -339,6 +350,10 @@
         remainingSeconds = totalSeconds;
         localStorage.removeItem('simpleTimerPersisted');
         updateDisplay();
+
+        // Bug 6 fix: reset the state indicator pill when a new preset is picked,
+        // otherwise it can stay showing "Running" or "Paused" from the old timer.
+        updateTimerState('ready');
 
         // Update active preset button
         presetBtns.forEach(function(btn) {

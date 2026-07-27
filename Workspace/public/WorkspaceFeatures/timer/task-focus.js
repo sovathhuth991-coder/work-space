@@ -219,7 +219,9 @@
 
         const scheduleTasks = getTodayScheduleTasks();
         const flexTasks = typeof getIncompleteFlexibleTasks === 'function' ? getIncompleteFlexibleTasks() : [];
-        const defaultTab = scheduleTasks.length > 0 ? 'schedule' : (flexTasks.length > 0 ? 'flexible' : 'schedule');
+        // Improvement 4: if no flexible tasks exist, default to Quick Task sub-tab
+        // so the user immediately sees something actionable rather than an empty list.
+        const defaultTab = scheduleTasks.length > 0 ? 'schedule' : (flexTasks.length > 0 ? 'flexible' : 'quick');
         switchTaskFocusSubTab(defaultTab);
     }
 

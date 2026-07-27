@@ -419,14 +419,14 @@ function renderSessionHistory() {
     const live = (typeof window.getCurrentSessionData === 'function') ? window.getCurrentSessionData() : null;
     const liveHtml = (live && live.taskName && live.totalSeconds > 0) ? `
         <div class="session-history-item session-history-live" title="Still in progress">
-            <div class="session-history-time">🔴 Now</div>
-            <div class="session-history-info">
+            <div class="session-history-primary">
+                <div class="session-history-time">🔴 Now</div>
                 <div class="session-history-task-name">${escapeHtml(live.taskName)}</div>
-                <div class="session-history-duration">
-                    <span class="focus-time">${ICON_CLOCK}${formatTimeShort(live.focusSeconds || 0)}</span>
-                    <span class="break-time">${ICON_CUP}${formatTimeShort(live.breakSeconds || 0)}</span>
-                    <span>${ICON_HOURGLASS}${formatTimeShort(live.totalSeconds || 0)}</span>
-                </div>
+            </div>
+            <div class="session-history-duration">
+                <span class="focus-time">${ICON_CLOCK}${formatTimeShort(live.focusSeconds || 0)}</span>
+                <span class="break-time">${ICON_CUP}${formatTimeShort(live.breakSeconds || 0)}</span>
+                <span>${ICON_HOURGLASS}${formatTimeShort(live.totalSeconds || 0)}</span>
             </div>
         </div>
     ` : '';
@@ -451,14 +451,14 @@ function renderSessionHistory() {
         const totalDuration = formatTimeShort(session.totalSeconds || 0);
         return `
             <div class="session-history-item" data-session-timestamp="${session.timestamp}" data-session-index="${index}" title="Click to view details">
-                <div class="session-history-time">${timeStr}</div>
-                <div class="session-history-info">
+                <div class="session-history-primary">
+                    <div class="session-history-time">${timeStr}</div>
                     <div class="session-history-task-name">${escapeHtml(taskName)}</div>
-                    <div class="session-history-duration">
-                        <span class="focus-time">${ICON_CLOCK}${focusTime}</span>
-                        <span class="break-time">${ICON_CUP}${breakTime}</span>
-                        <span>${ICON_HOURGLASS}${totalDuration}</span>
-                    </div>
+                </div>
+                <div class="session-history-duration">
+                    <span class="focus-time">${ICON_CLOCK}${focusTime}</span>
+                    <span class="break-time">${ICON_CUP}${breakTime}</span>
+                    <span>${ICON_HOURGLASS}${totalDuration}</span>
                 </div>
                 <button class="session-history-delete-btn" data-delete-timestamp="${session.timestamp}" title="Delete this entry">🗑</button>
                 <div class="session-history-arrow">${ICON_CHEVRON}</div>

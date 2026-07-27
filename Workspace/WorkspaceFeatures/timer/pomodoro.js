@@ -80,7 +80,8 @@
             statToday: document.getElementById('pomoStatToday'),
             countdownBtn: document.getElementById('pomodoroCountdownBtn'),
             pomodoroBtn: document.getElementById('pomodoroPomoBtn'),
-            taskFocusBtn: document.getElementById('taskFocusModeBtn')
+            taskFocusBtn: document.getElementById('taskFocusModeBtn'),
+            doneAtLabel: document.getElementById('pomodoroDoneAt')
         };
 
         if (!elements.shell) return;
@@ -180,6 +181,18 @@
         }
     }
 
+    function updateDoneAtLabel() {
+        if (!elements.doneAtLabel) return;
+        if (!isRunning || remainingSeconds <= 0) {
+            elements.doneAtLabel.textContent = '';
+            return;
+        }
+        const doneAt = new Date(Date.now() + remainingSeconds * 1000);
+        const hh = String(doneAt.getHours()).padStart(2, '0');
+        const mm = String(doneAt.getMinutes()).padStart(2, '0');
+        elements.doneAtLabel.textContent = `Done at ${hh}:${mm}`;
+    }
+
     function updateDisplay() {
         const mins = Math.floor(remainingSeconds / 60);
         const secs = remainingSeconds % 60;
@@ -188,6 +201,7 @@
             elements.display.textContent = timeString;
         }
         updateRing();
+        updateDoneAtLabel();
     }
 
     function updateCycleBar() {
@@ -319,7 +333,11 @@
                 preparePhase('break');
             }
         } else {
-            // Break completed — start next focus
+            // Break/long-break completed — start next focus.
+            // Bug 2 fix: reset cycleCount HERE (after long break finishes) so
+            // the cycle dots stay filled during the entire long break reward
+            // period, not vanishing the moment the long break starts.
+            if (completedPhase === 'long-break') cycleCount = 0;
             preparePhase('focus');
         }
 
@@ -383,8 +401,15 @@
             case 'long-break':
                 remainingSeconds = LONG_BREAK_MINUTES * 60;
                 currentTotal = LONG_BREAK_MINUTES * 60;
-                // Reset cycle counter after long break
-                cycleCount = 0;
+                // cycleCount resets AFTER the long break finishes (in phaseComplete)
+                // so the cycle dots remain filled throughout the break — they're
+                // only cleared once the reward period is actually over.
+                break;
+            case 'ready':
+                // Bug 1 fix: explicitly reset to focus defaults so the ring and
+                // display are correct when resetPomodoro() calls preparePhase('ready').
+                remainingSeconds = FOCUS_MINUTES * 60;
+                currentTotal = FOCUS_MINUTES * 60;
                 break;
         }
 
