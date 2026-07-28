@@ -155,7 +155,6 @@ function updateDashboardLiveSession() {
     renderAllSessions(current, next, todayEvents);
     updateHubSessionsWidget(current, next, todayEvents);
     updateQuickJumpLinks();
-    if (typeof updateFocusTimerTaskLink === 'function') updateFocusTimerTaskLink();
     updateDashboardStats();
     updateDashProgress(false);
     if (typeof updateDailyStats === 'function') updateDailyStats();
@@ -195,8 +194,12 @@ function updateHubSessionsWidget(current, next, todayEvents) {
                     <span style="font-size: 0.7rem; color: var(--text-muted);">NOW</span>
                 </div>
                 <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(current.title)}</div>
-                <div style="display: flex; gap: 8px; font-size: 0.75rem; color: var(--text-muted);">
-                    <span style="color: #34d399;">⏱ Active</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                    <span style="display:flex; align-items:center; gap:4px; font-size: 0.75rem; color: #34d399;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>Active</span>
+                    <button onclick="window.startFocusForTask('${current.id}', 'schedule')" title="Start a focus timer for this task" style="display:flex; align-items:center; gap:4px; padding:3px 10px; border-radius:99px; border:1px solid rgba(52,211,153,0.35); background:rgba(52,211,153,0.1); color:#34d399; font-size:0.7rem; font-weight:600; cursor:pointer;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+                        Focus
+                    </button>
                 </div>
             </div>
         `;
@@ -716,13 +719,13 @@ function saveFocusGoalModal() {
     const minutes = Math.max(0, Math.min(59, parseInt(minutesInput && minutesInput.value, 10) || 0));
     const totalMinutes = hours * 60 + minutes;
     if (totalMinutes <= 0) {
-        if (typeof showNotification === 'function') showNotification('Goal must be more than 0 minutes', 'error');
+        if (typeof showToast === 'function') showToast('Goal must be more than 0 minutes', 'error');
         return;
     }
     saveFocusGoal(totalMinutes);
     updateFocusGoalDisplay();
     closeFocusGoalModal();
-    if (typeof showNotification === 'function') showNotification('Daily focus goal updated!', 'success');
+    if (typeof showToast === 'function') showToast('Daily focus goal updated!', 'success');
 }
 window.editFocusGoal = editFocusGoal;
 window.openFocusGoalModal = openFocusGoalModal;

@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (DEBUG) {
         console.log('🚀 Workspace Hub initialized');
         console.log('📅 Events:', events.length);
-        console.log('📁 Folders:', hubState.folders.length);
+        console.log('📁 Folders:', Object.keys(hubState.folders || {}).length);
         console.log('📚 Library items:', libraryItems.length);
         console.log('✅ Tasks:', myTasks.length);
         console.log('🌓 Theme:', currentTheme);
