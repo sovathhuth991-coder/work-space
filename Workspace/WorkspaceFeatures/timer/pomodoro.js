@@ -341,27 +341,19 @@
             preparePhase('focus');
         }
 
-        // Auto-start next phase
-        phaseStartTime = Date.now();
-        phaseRemainingAtStart = remainingSeconds;
-        isRunning = true;
+        // Wait for manual start for the next phase
+        phaseStartTime = null;
+        isRunning = false;
 
         if (elements.startBtn) {
-            elements.startBtn.style.display = 'none';
-            elements.startBtn.disabled = true;
+            elements.startBtn.style.display = 'inline-block';
+            elements.startBtn.textContent = 'Start';
+            elements.startBtn.disabled = false;
         }
         if (elements.pauseBtn) {
-            elements.pauseBtn.style.display = 'inline-block';
-            elements.pauseBtn.disabled = false;
+            elements.pauseBtn.style.display = 'none';
+            elements.pauseBtn.disabled = true;
         }
-
-        pomoInterval = setInterval(tick, 100);
-
-        // Resume live ticking for the phase that just started — settled
-        // by pauseFocusAccumulation() above, so this begins clean from
-        // wherever the daily total actually stands, not from a stale
-        // mid-phase baseline.
-        if (typeof window.startFocusAccumulation === 'function') window.startFocusAccumulation(currentPhase !== 'focus');
     }
 
     // Logs whatever's been elapsed in the current phase but hasn't hit

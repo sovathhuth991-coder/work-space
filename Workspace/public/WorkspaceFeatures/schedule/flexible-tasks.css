@@ -45,7 +45,7 @@
 
 .add-flex-task-form input[type="text"]:focus {
     border-color: var(--accent-1);
-    box-shadow: 0 0 0 3px rgba(124, 109, 240, 0.1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 10%, transparent);
 }
 
 .flex-task-duration-inputs {
@@ -68,7 +68,7 @@
 
 .flex-task-duration-inputs input[type="number"]:focus {
     border-color: var(--accent-1);
-    box-shadow: 0 0 0 3px rgba(124, 109, 240, 0.1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 10%, transparent);
 }
 
 .flex-task-form-actions {
