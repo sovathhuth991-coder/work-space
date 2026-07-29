@@ -528,8 +528,13 @@
             return `
             <div class="task-focus-history-item">
                 <div class="tf-hist-main">
-                    <span class="tf-hist-title">${typeof escapeHtml === 'function' ? escapeHtml(s.taskName) : s.taskName}</span>
-                    <span class="tf-hist-date">${date}</span>
+                    <div style="display:flex; flex-direction:column; gap:2px;">
+                        <span class="tf-hist-title">${typeof escapeHtml === 'function' ? escapeHtml(s.taskName) : s.taskName}</span>
+                        <span class="tf-hist-date">${date}</span>
+                    </div>
+                    <button class="tf-hist-del-btn" onclick="deleteTaskFocusHistoryItem(${s.timestamp})" title="Delete Session">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
                 </div>
                 <div class="tf-hist-stats">
                     <div class="tf-hist-stat"><span class="lbl">Actual</span><span class="val">${actualStr}</span></div>
@@ -547,6 +552,19 @@
     window.pauseTaskFocusIfRunning = pauseTaskFocusIfRunning;
     window.initTaskFocus = initTaskFocus;
     window.switchTaskFocusSubTab = switchTaskFocusSubTab;
+
+    window.deleteTaskFocusHistoryItem = function(timestamp) {
+        if (!confirm('Delete this task focus session?')) return;
+        let sessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+        sessions = sessions.filter(s => s.timestamp !== timestamp);
+        localStorage.setItem('completedSessions', JSON.stringify(sessions));
+        
+        if (typeof window.refreshSessionTrackerTotals === 'function') {
+            window.refreshSessionTrackerTotals();
+        }
+        
+        renderTaskFocusHistory();
+    };
 
     // Switches to the Timer view's Task Focus mode and lands directly on a
     // given task's session screen — used by the "▶ Focus" button on the

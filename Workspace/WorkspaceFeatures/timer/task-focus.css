@@ -426,3 +426,26 @@
     background: rgba(245, 158, 11, 0.15);
     color: #f59e0b;
 }
+
+.tf-hist-del-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tf-hist-del-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.tf-hist-del-btn:hover {
+    color: var(--status-attention);
+    background: rgba(245, 158, 11, 0.1);
+}
