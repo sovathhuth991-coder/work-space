@@ -100,9 +100,8 @@
         }
     }
 
-    // ----- Activity Detection for Idle Time -----
     let lastActivityTime = Date.now();
-    const IDLE_THRESHOLD = 30000; // 30 seconds of inactivity = idle
+    const IDLE_THRESHOLD = 300000; // 5 minutes of inactivity = idle
     let activityCheckInterval = null;
 
     // ----- State (Current Session - resets per task) -----

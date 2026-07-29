@@ -1,0 +1,4 @@
+default_model = "kimi-code/k3"
+
+[providers.kimi]
+api_key = "your_actual_api_key_here"
