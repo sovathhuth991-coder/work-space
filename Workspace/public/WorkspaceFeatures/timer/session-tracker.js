@@ -913,7 +913,7 @@
         updateUI();
     };
 
-    window.logCompletedSession = function({ taskName, taskStart, taskEnd, focusSeconds: fSecs, breakSeconds: bSecs, idleSeconds: iSecs }) {
+    window.logCompletedSession = function({ taskName, taskStart, taskEnd, focusSeconds: fSecs, breakSeconds: bSecs, idleSeconds: iSecs, source, targetSeconds }) {
         const totalSecs = (fSecs || 0) + (bSecs || 0) + (iSecs || 0);
         if (totalSecs < 5) return; // same floor saveCompletedSession() uses
         const completedSessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
@@ -925,7 +925,9 @@
             breakSeconds: bSecs || 0,
             idleSeconds: iSecs || 0,
             totalSeconds: totalSecs,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            source: source || 'timer',
+            targetSeconds: targetSeconds || 0
         });
         localStorage.setItem('completedSessions', JSON.stringify(completedSessions));
 

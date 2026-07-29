@@ -332,3 +332,97 @@
         font-size: 2.8rem;
     }
 }
+
+/* ---- History screen ---- */
+.task-focus-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+    max-height: 280px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.task-focus-history-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.task-focus-history-item:hover {
+    background: rgba(124, 109, 240, 0.04);
+    border-color: rgba(124, 109, 240, 0.2);
+}
+
+.tf-hist-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding-bottom: 8px;
+}
+
+.tf-hist-title {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.tf-hist-date {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+.tf-hist-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.tf-hist-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tf-hist-stat .lbl {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.tf-hist-stat .val {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.tf-hist-eff {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.eff-fast {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.eff-neutral {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+}
+
+.eff-slow {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}

@@ -200,13 +200,21 @@
 
         const scheduleBtn = document.querySelector('.task-focus-subtab[data-tf-subtab="schedule"]');
         const flexibleBtn = document.querySelector('.task-focus-subtab[data-tf-subtab="flexible"]');
+        const historyBtn = document.querySelector('.task-focus-subtab[data-tf-subtab="history"]');
         const scheduleList = document.getElementById('taskFocusScheduleList');
         const flexWrap = document.getElementById('taskFocusFlexWrap');
+        const historyWrap = document.getElementById('taskFocusHistoryWrap');
 
         if (scheduleBtn) scheduleBtn.classList.toggle('active', tab === 'schedule');
         if (flexibleBtn) flexibleBtn.classList.toggle('active', tab === 'flexible');
+        if (historyBtn) historyBtn.classList.toggle('active', tab === 'history');
+        
         if (scheduleList) scheduleList.style.display = tab === 'schedule' ? 'block' : 'none';
         if (flexWrap) flexWrap.style.display = tab === 'flexible' ? 'block' : 'none';
+        if (historyWrap) {
+            historyWrap.style.display = tab === 'history' ? 'block' : 'none';
+            if (tab === 'history') renderTaskFocusHistory();
+        }
     }
 
     function showTaskFocusPicker() {
@@ -386,7 +394,7 @@
         if (elapsed < 5) return;
 
         if (typeof window.logCompletedSession === 'function') {
-            window.logCompletedSession({ taskName: task.title, focusSeconds: elapsed, breakSeconds: 0, idleSeconds: 0 });
+            window.logCompletedSession({ taskName: task.title, focusSeconds: elapsed, breakSeconds: 0, idleSeconds: 0, source: 'taskFocus', targetSeconds: task.durationSeconds });
         }
     }
 
@@ -483,6 +491,53 @@
         saveTaskFocusState();
         if (typeof stopFocusAccumulation === 'function') stopFocusAccumulation();
         showTaskFocusPicker();
+    }
+
+    function renderTaskFocusHistory() {
+        const historyList = document.getElementById('taskFocusHistoryList');
+        if (!historyList) return;
+
+        const sessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+        const tfSessions = sessions.filter(s => s.source === 'taskFocus').reverse();
+
+        if (tfSessions.length === 0) {
+            historyList.innerHTML = '<p class="task-focus-empty">No task focus history yet. Complete a task to see it here!</p>';
+            return;
+        }
+
+        historyList.innerHTML = tfSessions.map(s => {
+            const actual = s.focusSeconds || 0;
+            const target = s.targetSeconds || 0;
+            
+            // Format functions might not exist, use a simple fallback if needed
+            const actualMins = Math.floor(actual / 60);
+            const targetMins = Math.floor(target / 60);
+            const actualStr = actualMins >= 60 ? `${Math.floor(actualMins/60)}h ${actualMins%60}m` : `${actualMins}m`;
+            const targetStr = targetMins >= 60 ? `${Math.floor(targetMins/60)}h ${targetMins%60}m` : `${targetMins}m`;
+            
+            let effClass = 'eff-neutral';
+            let effText = 'Matched Estimate';
+            if (actual > 0 && target > 0) {
+                const ratio = actual / target;
+                if (ratio <= 0.85) { effClass = 'eff-fast'; effText = 'Faster than Estimated'; }
+                else if (ratio >= 1.15) { effClass = 'eff-slow'; effText = 'Slower than Estimated'; }
+            }
+
+            const date = new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+            return `
+            <div class="task-focus-history-item">
+                <div class="tf-hist-main">
+                    <span class="tf-hist-title">${typeof escapeHtml === 'function' ? escapeHtml(s.taskName) : s.taskName}</span>
+                    <span class="tf-hist-date">${date}</span>
+                </div>
+                <div class="tf-hist-stats">
+                    <div class="tf-hist-stat"><span class="lbl">Actual</span><span class="val">${actualStr}</span></div>
+                    <div class="tf-hist-stat"><span class="lbl">Target</span><span class="val">${targetStr}</span></div>
+                    <div class="tf-hist-eff ${effClass}">${effText}</div>
+                </div>
+            </div>`;
+        }).join('');
     }
 
     // ----- EXPOSE GLOBALLY -----
