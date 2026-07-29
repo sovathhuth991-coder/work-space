@@ -183,6 +183,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    flex-wrap: wrap;
+}
+
+.planner-nav-daygroup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .day-nav-arrow {
@@ -352,9 +360,10 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-left: 8px;
-    padding-left: 8px;
-    border-left: 1px solid var(--border-color);
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
 }
 
 .planner-copy-day select {

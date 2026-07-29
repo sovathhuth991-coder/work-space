@@ -252,8 +252,11 @@
             }
             // Broadcast idle to other timers (Bug 5 fix)
             if (typeof window.pausePomodoro === 'function') window.pausePomodoro();
-            // Bug 4 fix: correct function name is pauseTaskFocusIfRunning, not pauseTaskFocus
-            if (typeof window.pauseTaskFocusIfRunning === 'function') window.pauseTaskFocusIfRunning();
+            // Do NOT pause Task Focus timer on idle — Task Focus is an intentional
+            // work session that should keep counting down until the user explicitly
+            // pauses it or the task completes. Idle detection is meant for the
+            // simple countdown timer's session tracker, not for dedicated focus modes.
+            // if (typeof window.pauseTaskFocusIfRunning === 'function') window.pauseTaskFocusIfRunning();
         }
         // If user becomes active again
         else if (!shouldBeIdle && idleStartTime) {

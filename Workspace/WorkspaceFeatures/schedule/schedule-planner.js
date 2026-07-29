@@ -713,9 +713,11 @@ function buildPlannerDayNav(day) {
     return `
         <div class="planner-nav-bar">
             <div class="planner-nav-controls">
-                <button class="day-nav-arrow" onclick="openDayDiagram('${prev}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="15 18 9 12 15 6"/></svg><span class="arrow-label">${prev}</span></button>
-                <button class="day-nav-today" onclick="openDayDiagram('${todayName}')" ${day === todayName ? 'disabled' : ''}>Jump to Today</button>
-                <button class="day-nav-arrow" onclick="openDayDiagram('${next}')"><span class="arrow-label">${next}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="9 18 15 12 9 6"/></svg></button>
+                <div class="planner-nav-daygroup">
+                    <button class="day-nav-arrow" onclick="openDayDiagram('${prev}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="15 18 9 12 15 6"/></svg><span class="arrow-label">${prev}</span></button>
+                    <button class="day-nav-today" onclick="openDayDiagram('${todayName}')" ${day === todayName ? 'disabled' : ''}>Jump to Today</button>
+                    <button class="day-nav-arrow" onclick="openDayDiagram('${next}')"><span class="arrow-label">${next}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="9 18 15 12 9 6"/></svg></button>
+                </div>
                 <div class="planner-copy-day">
                     <select id="copyDayTarget" title="Copy ${day}'s tasks to another day">
                         <option value="">Copy to…</option>
