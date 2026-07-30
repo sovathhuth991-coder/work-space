@@ -15,6 +15,65 @@
     let timerStartTime = null;
     let timerRemainingAtStart = 0;
 
+    // ----- Simple Timer History (separate from schedule-linked sessions) -----
+    function getSimpleTimerHistory() {
+        try {
+            return JSON.parse(localStorage.getItem('simpleTimerSessions') || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveSimpleTimerSession(focusSeconds) {
+        if (focusSeconds < 5) return; // Don't save sessions less than 5 seconds
+        try {
+            const history = getSimpleTimerHistory();
+            history.push({
+                taskName: 'Simple Timer',
+                focusSeconds: focusSeconds,
+                totalSeconds: focusSeconds,
+                timestamp: Date.now()
+            });
+            localStorage.setItem('simpleTimerSessions', JSON.stringify(history));
+            renderSimpleTimerHistory();
+        } catch (e) {
+            console.warn('Could not save simple timer session:', e);
+        }
+    }
+
+    function renderSimpleTimerHistory() {
+        const container = document.getElementById('simpleTimerHistoryList');
+        if (!container) return;
+        const sessions = getSimpleTimerHistory().reverse();
+        if (sessions.length === 0) {
+            container.innerHTML = '<p class="simple-timer-history-empty">No simple timer sessions yet.</p>';
+            return;
+        }
+        container.innerHTML = sessions.map(s => {
+            const mins = Math.floor((s.focusSeconds || 0) / 60);
+            const secs = (s.focusSeconds || 0) % 60;
+            const timeStr = mins >= 60
+                ? `${Math.floor(mins/60)}h ${mins%60}m ${secs}s`
+                : `${mins}m ${secs}s`;
+            const date = new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+            return `
+            <div class="simple-timer-history-item">
+                <span class="simple-timer-history-time">${timeStr}</span>
+                <span class="simple-timer-history-date">${date}</span>
+                <button class="simple-timer-history-del" onclick="deleteSimpleTimerSession(${s.timestamp})" title="Delete">✕</button>
+            </div>`;
+        }).join('');
+    }
+
+    window.deleteSimpleTimerSession = function(timestamp) {
+        let sessions = getSimpleTimerHistory();
+        sessions = sessions.filter(s => s.timestamp !== timestamp);
+        localStorage.setItem('simpleTimerSessions', JSON.stringify(sessions));
+        renderSimpleTimerHistory();
+    };
+
+    window.renderSimpleTimerHistory = renderSimpleTimerHistory;
+
     // ----- PERSISTENCE (survives refresh) -----
     function saveTimerState() {
         try {
@@ -274,15 +333,9 @@
                     showToast('⏰ Timer complete!', 'success', 5000);
                 }
 
-                // Log this completed session to Total Timer / Today's Sessions
-                if (typeof window.logCompletedSession === 'function') {
-                    window.logCompletedSession({
-                        taskName: 'Simple Timer',
-                        focusSeconds: totalSeconds,
-                        breakSeconds: 0,
-                        idleSeconds: 0
-                    });
-                }
+                // Log this completed session to Simple Timer's own history
+                // (separate from schedule-linked sessions in Total Timer)
+                saveSimpleTimerSession(totalSeconds);
 
                 // Reset to initial state
                 updateTimerState('ready');
@@ -438,5 +491,6 @@
     updateDisplay();
     loadTimerState();
     if (pauseBtn) pauseBtn.style.display = 'none';
+    renderSimpleTimerHistory();
 
 })();

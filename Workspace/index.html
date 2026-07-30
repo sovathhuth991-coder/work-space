@@ -1196,6 +1196,16 @@
                         <p style="font-size: 0.7rem; color: var(--text-muted);">Simple countdown timer</p>
                     </div>
 
+                    <!-- ===== SIMPLE TIMER HISTORY (separate from schedule-linked sessions) ===== -->
+                    <div class="simple-timer-history" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                        <div class="simple-timer-history-header">
+                            <span class="simple-timer-history-title">📋 Simple Timer History</span>
+                        </div>
+                        <div id="simpleTimerHistoryList" class="simple-timer-history-list">
+                            <p class="simple-timer-history-empty">No simple timer sessions yet.</p>
+                        </div>
+                    </div>
+
                     <!-- MODE TOGGLE (always visible) -->
                     <div class="pomodoro-mode-toggle"
                         style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
@@ -1264,7 +1274,7 @@
                     <!-- Picker screen: choose a flexible task or quick-add one -->
                     <div id="taskFocusPicker" class="task-focus-picker">
                         <p class="task-focus-hint">Pick a task — the timer will match its target time.</p>
-                        
+
                         <div class="task-focus-subtabs">
                             <button class="task-focus-subtab active" data-tf-subtab="schedule">Schedule</button>
                             <button class="task-focus-subtab" data-tf-subtab="flexible">Flexible</button>
