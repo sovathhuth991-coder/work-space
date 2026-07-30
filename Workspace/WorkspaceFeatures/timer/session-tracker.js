@@ -776,8 +776,12 @@
             activityCheckInterval = setInterval(checkIdleState, 1000);
         }
 
-        // Also for current session
-        if (!isRunning && !sessionIdleStartTime) {
+        // Only start idle tracking if a schedule-linked timer (Pomodoro/Task Focus)
+        // is actually running. Do NOT auto-start idle tracking on page load,
+        // otherwise the Total Timer will show idle time accumulating even when
+        // the user hasn't started any timer — this was causing confusion with
+        // the Simple Timer which is now independent.
+        if (isRunning && !sessionIdleStartTime) {
             sessionIdleStartTime = Date.now();
             sessionIdleTimeAtStart = sessionIdleSeconds;
         }
@@ -1032,6 +1036,20 @@
         // simple-timer.js under its own "Simple Timer History" section.
         // Only Pomodoro and Task Focus modes feed into the Total Timer /
         // Current Session / Today's Sessions.
+
+        // Migration: Remove old "Simple Timer" entries from completedSessions
+        // (they were previously logged here but are now tracked separately
+        // in simpleTimerSessions). This runs once to clean up stale data.
+        try {
+            const sessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
+            const filtered = sessions.filter(s => s.taskName !== 'Simple Timer');
+            if (filtered.length !== sessions.length) {
+                localStorage.setItem('completedSessions', JSON.stringify(filtered));
+                console.log('[Session Tracker] Cleaned up old Simple Timer entries from completedSessions');
+            }
+        } catch (e) {
+            console.warn('Could not migrate completedSessions:', e);
+        }
 
         if (resetTrackerBtn) {
             resetTrackerBtn.addEventListener('click', function() {
