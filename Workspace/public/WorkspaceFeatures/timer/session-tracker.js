@@ -1025,78 +1025,13 @@
         };
     };
 
-    // ----- Hook into simple timer buttons -----
+    // ----- Hook into schedule-linked timer buttons (Pomodoro & Task Focus only) -----
     function initTracker() {
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
-
-        if (startBtn) {
-            startBtn.addEventListener('click', function() {
-                if (isRunning && isBreak) {
-                    isBreak = false;
-                    breakStartTime = null;
-                    focusStartTime = Date.now();
-                    focusTimeAtStart = focusSeconds;
-                    // Update session tracking
-                    if (sessionBreakStartTime) {
-                        const elapsed = Math.floor((Date.now() - sessionBreakStartTime) / 1000);
-                        sessionBreakSeconds = sessionBreakTimeAtStart + elapsed;
-                        sessionBreakStartTime = null;
-                    }
-                    sessionFocusStartTime = Date.now();
-                    sessionFocusTimeAtStart = sessionFocusSeconds;
-                } else if (!isRunning) {
-                    isRunning = true;
-                    isBreak = false;
-                    focusStartTime = Date.now();
-                    focusTimeAtStart = focusSeconds;
-                    startAccumulation();
-                    // Start session tracking
-                    if (sessionIdleStartTime) {
-                        const idleElapsed = Math.floor((Date.now() - sessionIdleStartTime) / 1000);
-                        sessionIdleSeconds = sessionIdleTimeAtStart + idleElapsed;
-                        sessionIdleStartTime = null;
-                    }
-                    if (!sessionInterval) {
-                        startCurrentSessionTracking();
-                    } else {
-                        sessionFocusStartTime = Date.now();
-                        sessionFocusTimeAtStart = sessionFocusSeconds;
-                    }
-                }
-            });
-        }
-
-        if (pauseBtn) {
-            pauseBtn.addEventListener('click', function() {
-                if (isRunning && !isBreak) {
-                    isBreak = true;
-                    focusStartTime = null;
-                    breakStartTime = Date.now();
-                    breakTimeAtStart = breakSeconds;
-                    // Update session tracking
-                    if (sessionFocusStartTime) {
-                        const elapsed = Math.floor((Date.now() - sessionFocusStartTime) / 1000);
-                        sessionFocusSeconds = sessionFocusTimeAtStart + elapsed;
-                        sessionFocusStartTime = null;
-                    }
-                    sessionBreakStartTime = Date.now();
-                    sessionBreakTimeAtStart = sessionBreakSeconds;
-                }
-            });
-        }
-
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function() {
-                resetTracker();
-                // Also reset current session timestamps but keep accumulated values
-                sessionFocusStartTime = null;
-                sessionBreakStartTime = null;
-                sessionIdleStartTime = Date.now();
-                sessionIdleTimeAtStart = sessionIdleSeconds;
-            });
-        }
+        // NOTE: The Simple Timer (Countdown mode) no longer hooks into the
+        // session tracker. Simple Timer sessions are tracked separately in
+        // simple-timer.js under its own "Simple Timer History" section.
+        // Only Pomodoro and Task Focus modes feed into the Total Timer /
+        // Current Session / Today's Sessions.
 
         if (resetTrackerBtn) {
             resetTrackerBtn.addEventListener('click', function() {
@@ -1179,7 +1114,8 @@
                     if (pauseBtn && pauseBtn.style.display !== 'none') pauseBtn.click();
                     else if (startBtn && startBtn.style.display !== 'none') startBtn.click();
                 } else {
-                    // Countdown mode
+                    // Countdown mode — Simple Timer is now independent, but
+                    // keep keyboard shortcut for convenience (Space to start/pause)
                     const pauseBtn = document.getElementById('pauseBtn');
                     const startBtn = document.getElementById('startBtn');
                     if (pauseBtn && pauseBtn.style.display !== 'none') pauseBtn.click();
