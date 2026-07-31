@@ -1095,6 +1095,25 @@
         return JSON.parse(localStorage.getItem('completedSessions') || '[]');
     };
 
+    // ===== Label-only update, no counter reset =====
+    // Bug fix: the Current Session card's task name (sessionTaskName) was
+    // ONLY ever set by the schedule's own auto-detection (applyCurrentTask →
+    // handleTaskChange) — window.setCurrentSessionTask below existed for
+    // Pomodoro/Task Focus to override it, but nothing ever called it. So
+    // whenever a schedule-linked Task Focus session ran, the "🔴 Now" row
+    // and Current Session name kept showing whatever the schedule tracker
+    // last set (including a stale value restored from localStorage), not
+    // the task actually running in Task Focus — e.g. a leftover "Simple
+    // Timer" label from before Simple Timer became independent. Use this
+    // (not setCurrentSessionTask) on every Start/Resume click, since it's
+    // safe to call repeatedly — it only repaints the label and does NOT
+    // reset sessionFocusSeconds/etc, so resuming from pause never loses
+    // progress the way calling setCurrentSessionTask on resume would.
+    window.setCurrentSessionTaskLabel = function(taskName, start, end) {
+        updateCurrentSessionTaskInfo(taskName, start, end);
+        saveSessionState();
+    };
+
     // ===== Get current session data for dashboard =====
     // ===== Set current session task info externally (Simple Timer, Pomodoro, Task Focus) =====
     window.setCurrentSessionTask = function(taskName, start, end) {

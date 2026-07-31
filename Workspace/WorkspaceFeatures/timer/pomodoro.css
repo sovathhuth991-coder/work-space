@@ -47,10 +47,10 @@
 }
 
 .pomodoro-mode-btn.active {
-    background: rgba(124, 109, 240, 0.2);
+    background: color-mix(in srgb, var(--accent-1) 20%, transparent);
     color: #fff;
-    border: 1px solid rgba(124, 109, 240, 0.5);
-    box-shadow: 0 0 20px rgba(124, 109, 240, 0.25);
+    border: 1px solid color-mix(in srgb, var(--accent-1) 50%, transparent);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--accent-1) 25%, transparent);
 }
 
 /* ---- Pomodoro Progress Ring (overrides generic ring) ---- */
@@ -249,8 +249,8 @@
 }
 
 .pomodoro-phase.ready {
-    background: rgba(124, 109, 240, 0.15);
-    border: 1px solid rgba(124, 109, 240, 0.3);
+    background: color-mix(in srgb, var(--accent-1) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-1) 30%, transparent);
     color: var(--accent-1);
 }
 
@@ -276,12 +276,12 @@
 .pomodoro-btn-primary {
     background: var(--accent-gradient);
     color: #fff;
-    box-shadow: 0 4px 20px rgba(124, 109, 240, 0.4);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--accent-1) 40%, transparent);
 }
 
 .pomodoro-btn-primary:hover {
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 30px rgba(124, 109, 240, 0.6);
+    box-shadow: 0 6px 30px color-mix(in srgb, var(--accent-1) 60%, transparent);
 }
 
 .pomodoro-btn-primary:active {

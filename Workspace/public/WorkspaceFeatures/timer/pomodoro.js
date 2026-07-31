@@ -251,6 +251,13 @@
 
         pomoInterval = setInterval(tick, 100);
 
+        // Make sure the Current Session card shows the Pomodoro phase
+        // that's actually running, not whatever the schedule auto-detector
+        // last set (see session-tracker.js's setCurrentSessionTaskLabel).
+        if (typeof window.setCurrentSessionTaskLabel === 'function') {
+            window.setCurrentSessionTaskLabel(currentPhase === 'focus' ? 'Pomodoro — Focus' : 'Pomodoro — Break', '', '');
+        }
+
         // Keep session-tracker's live Focus/Break/Idle numbers in sync
         // while this phase runs — logPomodoroPartialProgress/phaseComplete
         // hand the settled time off to history once the phase ends.
