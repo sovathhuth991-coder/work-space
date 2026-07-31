@@ -912,11 +912,74 @@
     // twice (once live, once in history). logCompletedSession() below
     // closes that by subtracting back out whatever it just logged, so the
     // handoff from "live" to "history" is seamless.
+    //
+    // Bug fix: updateTotalTimerFromHistory() — the function that actually
+    // paints the Total Timer / header numbers AND the Current Session card —
+    // reads sessionFocusSeconds/sessionBreakSeconds/sessionIdleSeconds, not
+    // focusSeconds/breakSeconds above. Those session* values only ever move
+    // when sessionFocusStartTime/sessionBreakStartTime get set, which used
+    // to happen only via a schedule task-change (handleTaskChange) or an
+    // idle→active transition (checkIdleState). Neither of those necessarily
+    // fires when the user presses Start on Pomodoro/Task Focus, so the
+    // display would silently freeze the moment a session started. These two
+    // helpers do the same idle↔focus/break transition checkIdleState does,
+    // so starting/pausing a Pomodoro or Task Focus session keeps the
+    // Current Session and Total Timer numbers actually ticking.
+    function beginSessionRun(isBreakPhase) {
+        if (sessionIdleStartTime) {
+            const idleElapsed = Math.floor((Date.now() - sessionIdleStartTime) / 1000);
+            sessionIdleSeconds = sessionIdleTimeAtStart + idleElapsed;
+            sessionIdleStartTime = null;
+        }
+        if (!isBreakPhase) {
+            if (sessionBreakStartTime) {
+                const elapsed = Math.floor((Date.now() - sessionBreakStartTime) / 1000);
+                sessionBreakSeconds = sessionBreakTimeAtStart + elapsed;
+                sessionBreakStartTime = null;
+            }
+            if (!sessionFocusStartTime) {
+                sessionFocusStartTime = Date.now();
+                sessionFocusTimeAtStart = sessionFocusSeconds;
+            }
+        } else {
+            if (sessionFocusStartTime) {
+                const elapsed = Math.floor((Date.now() - sessionFocusStartTime) / 1000);
+                sessionFocusSeconds = sessionFocusTimeAtStart + elapsed;
+                sessionFocusStartTime = null;
+            }
+            if (!sessionBreakStartTime) {
+                sessionBreakStartTime = Date.now();
+                sessionBreakTimeAtStart = sessionBreakSeconds;
+            }
+        }
+        // In case no schedule task has ever triggered the session interval
+        // (e.g. nothing scheduled today), make sure it's actually running.
+        if (!sessionInterval) startCurrentSessionTracking();
+    }
+
+    function pauseSessionRun() {
+        if (sessionFocusStartTime) {
+            const elapsed = Math.floor((Date.now() - sessionFocusStartTime) / 1000);
+            sessionFocusSeconds = sessionFocusTimeAtStart + elapsed;
+            sessionFocusStartTime = null;
+        }
+        if (sessionBreakStartTime) {
+            const elapsed = Math.floor((Date.now() - sessionBreakStartTime) / 1000);
+            sessionBreakSeconds = sessionBreakTimeAtStart + elapsed;
+            sessionBreakStartTime = null;
+        }
+        if (!sessionIdleStartTime) {
+            sessionIdleStartTime = Date.now();
+            sessionIdleTimeAtStart = sessionIdleSeconds;
+        }
+    }
+
     window.startFocusAccumulation = function(isBreakPhase) {
         isRunning = true;
         isBreak = !!isBreakPhase;
         idleStartTime = null;
         startAccumulation();
+        beginSessionRun(isBreak);
         updateUI();
     };
     window.pauseFocusAccumulation = function() {
@@ -931,6 +994,7 @@
         isRunning = false;
         idleStartTime = Date.now();
         idleTimeAtStart = idleSeconds;
+        pauseSessionRun();
         updateUI();
     };
     window.stopFocusAccumulation = function() {
@@ -951,6 +1015,7 @@
         isRunning = false;
         idleStartTime = Date.now();
         idleTimeAtStart = idleSeconds;
+        pauseSessionRun();
         updateUI();
     };
 
