@@ -249,6 +249,17 @@
                     breakSeconds = breakTimeAtStart + elapsed;
                     breakStartTime = null;
                 }
+                // Also pause session focus/break timers when idle
+                if (sessionFocusStartTime) {
+                    const elapsed = Math.floor((Date.now() - sessionFocusStartTime) / 1000);
+                    sessionFocusSeconds = sessionFocusTimeAtStart + elapsed;
+                    sessionFocusStartTime = null;
+                }
+                if (sessionBreakStartTime) {
+                    const elapsed = Math.floor((Date.now() - sessionBreakStartTime) / 1000);
+                    sessionBreakSeconds = sessionBreakTimeAtStart + elapsed;
+                    sessionBreakStartTime = null;
+                }
             }
             // Broadcast idle to other timers (Bug 5 fix)
             if (typeof window.pausePomodoro === 'function') window.pausePomodoro();
@@ -271,6 +282,14 @@
             } else if (isRunning && isBreak) {
                 breakStartTime = Date.now();
                 breakTimeAtStart = breakSeconds;
+            }
+            // Also resume session focus/break timers if they were running
+            if (isRunning && !isBreak && !sessionFocusStartTime) {
+                sessionFocusStartTime = Date.now();
+                sessionFocusTimeAtStart = sessionFocusSeconds;
+            } else if (isRunning && isBreak && !sessionBreakStartTime) {
+                sessionBreakStartTime = Date.now();
+                sessionBreakTimeAtStart = sessionBreakSeconds;
             }
         }
 
@@ -385,23 +404,33 @@
             sessionInterval = null;
         }
 
+        // Track whether the user was idle when they left, so we
+        // don't restart focus/break session timers on page load.
+        let wasIdle = false;
+
         // Initialize session timestamps based on daily tracker state
         if (isRunning && !isBreak && !sessionFocusStartTime) {
             if (sessionIdleStartTime) {
                 const idleElapsed = Math.floor((Date.now() - sessionIdleStartTime) / 1000);
                 sessionIdleSeconds = sessionIdleTimeAtStart + idleElapsed;
                 sessionIdleStartTime = null;
+                wasIdle = true;
             }
-            sessionFocusStartTime = Date.now();
-            sessionFocusTimeAtStart = sessionFocusSeconds;
+            if (!wasIdle) {
+                sessionFocusStartTime = Date.now();
+                sessionFocusTimeAtStart = sessionFocusSeconds;
+            }
         } else if (isRunning && isBreak && !sessionBreakStartTime) {
             if (sessionIdleStartTime) {
                 const idleElapsed = Math.floor((Date.now() - sessionIdleStartTime) / 1000);
                 sessionIdleSeconds = sessionIdleTimeAtStart + idleElapsed;
                 sessionIdleStartTime = null;
+                wasIdle = true;
             }
-            sessionBreakStartTime = Date.now();
-            sessionBreakTimeAtStart = sessionBreakSeconds;
+            if (!wasIdle) {
+                sessionBreakStartTime = Date.now();
+                sessionBreakTimeAtStart = sessionBreakSeconds;
+            }
         } else if (!isRunning && !sessionIdleStartTime) {
             sessionIdleStartTime = Date.now();
             sessionIdleTimeAtStart = sessionIdleSeconds;
@@ -724,18 +753,24 @@
         if (trackerInterval) return;
 
         // Resume from idle if needed
+        let wasIdle = false;
         if (idleStartTime) {
             const idleElapsed = Math.floor((Date.now() - idleStartTime) / 1000);
             idleSeconds = idleTimeAtStart + idleElapsed;
             idleStartTime = null;
+            wasIdle = true;
         }
 
-        if (isRunning && !isBreak && !focusStartTime) {
-            focusStartTime = Date.now();
-            focusTimeAtStart = focusSeconds;
-        } else if (isRunning && isBreak && !breakStartTime) {
-            breakStartTime = Date.now();
-            breakTimeAtStart = breakSeconds;
+        // Don't restart focus/break timers if the user was idle when they
+        // left — idle time must not count as focus or break time.
+        if (!wasIdle) {
+            if (isRunning && !isBreak && !focusStartTime) {
+                focusStartTime = Date.now();
+                focusTimeAtStart = focusSeconds;
+            } else if (isRunning && isBreak && !breakStartTime) {
+                breakStartTime = Date.now();
+                breakTimeAtStart = breakSeconds;
+            }
         }
 
         trackerInterval = setInterval(function() {
