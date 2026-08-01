@@ -171,6 +171,53 @@
         return (eh * 60 + em) - (sh * 60 + sm);
     }
 
+    function timeToMinutes(timeStr) {
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+    }
+
+    function formatMinutesLabel(mins) {
+        mins = Math.max(0, Math.round(mins));
+        return mins >= 60
+            ? `${Math.floor(mins / 60)}h ${mins % 60 ? mins % 60 + 'm' : ''}`.trim()
+            : `${mins}m`;
+    }
+
+    // ----- Per-schedule-task progress, so backing out of a partially-
+    // focused schedule task and picking it again resumes instead of
+    // restarting at the full scheduled duration. Flexible tasks already
+    // carry their own remainingSeconds (see updateFlexibleTaskRemaining);
+    // schedule tasks didn't have anywhere to persist that, so a re-pick
+    // always used dur*60. Scoped to today's date since schedule events are
+    // weekly-recurring templates — a stale entry from last Monday must
+    // never bleed into this Monday's Biology block.
+    function getScheduleProgressMap() {
+        try {
+            const raw = JSON.parse(localStorage.getItem('taskFocusScheduleProgress') || 'null');
+            const today = new Date().toDateString();
+            if (!raw || raw.date !== today) return {};
+            return raw.progress || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveScheduleTaskProgress(id, remainingSeconds) {
+        try {
+            const map = getScheduleProgressMap();
+            map[id] = remainingSeconds;
+            localStorage.setItem('taskFocusScheduleProgress', JSON.stringify({ date: new Date().toDateString(), progress: map }));
+        } catch (e) { /* ignore */ }
+    }
+
+    function clearScheduleTaskProgress(id) {
+        try {
+            const map = getScheduleProgressMap();
+            delete map[id];
+            localStorage.setItem('taskFocusScheduleProgress', JSON.stringify({ date: new Date().toDateString(), progress: map }));
+        } catch (e) { /* ignore */ }
+    }
+
     function renderTaskFocusScheduleList() {
         const el = document.getElementById('taskFocusScheduleList');
         if (!el) return;
@@ -179,18 +226,28 @@
             el.innerHTML = '<p class="task-focus-empty">No incomplete tasks on today\'s schedule.</p>';
             return;
         }
+        const progressMap = getScheduleProgressMap();
+        const nowMinutes = timeToMinutes(new Date().toTimeString().slice(0, 5));
         el.innerHTML = tasks.map(ev => {
             const dur = eventDurationMinutes(ev);
-            const durLabel = dur >= 60
-                ? `${Math.floor(dur / 60)}h ${dur % 60 ? dur % 60 + 'm' : ''}`.trim()
-                : `${dur}m`;
+            const savedRemaining = progressMap[ev.id];
+            const hasProgress = typeof savedRemaining === 'number' && savedRemaining > 0 && savedRemaining < dur * 60;
+            const durLabel = hasProgress
+                ? `${formatMinutesLabel(savedRemaining / 60)} left`
+                : formatMinutesLabel(dur);
+            const isActive = nowMinutes >= timeToMinutes(ev.start) && nowMinutes < timeToMinutes(ev.end);
+            const category = ev.category || 'study';
             return `
             <div class="task-focus-schedule-item">
                 <div class="task-focus-schedule-info">
-                    <span class="task-focus-schedule-title">${escapeHtml(ev.title)}</span>
+                    <div class="task-focus-schedule-title-row">
+                        <span class="mini-dot-marker cat-${escapeHtml(category)}" title="${escapeHtml(category)}"></span>
+                        <span class="task-focus-schedule-title">${escapeHtml(ev.title)}</span>
+                        ${isActive ? '<span class="task-focus-now-badge">Now</span>' : ''}
+                    </div>
                     <span class="task-focus-schedule-time">${ev.start}–${ev.end} · ${durLabel}</span>
                 </div>
-                <button class="task-focus-pick-btn" data-action="focusScheduleTask" data-id="${ev.id}" data-kind="schedule">Focus</button>
+                <button class="task-focus-pick-btn" data-action="focusScheduleTask" data-id="${ev.id}" data-kind="schedule">${hasProgress ? 'Resume' : 'Focus'}</button>
             </div>`;
         }).join('');
     }
@@ -282,13 +339,17 @@
                 return;
             }
             const dur = eventDurationMinutes(ev);
+            const savedRemaining = getScheduleProgressMap()[ev.id];
+            const remaining = (typeof savedRemaining === 'number' && savedRemaining > 0 && savedRemaining < dur * 60)
+                ? savedRemaining
+                : dur * 60;
             currentTask = {
                 kind: 'schedule',
                 id: ev.id,
                 day: ev.day,
                 title: ev.title,
                 durationSeconds: dur * 60,
-                remainingSeconds: dur * 60
+                remainingSeconds: remaining
             };
         } else {
             const task = typeof getFlexibleTaskById === 'function' ? getFlexibleTaskById(id) : null;
@@ -362,6 +423,8 @@
         currentTask.remainingSeconds = remainingSeconds;
         if (currentTask.kind === 'flexible' && typeof updateFlexibleTaskRemaining === 'function') {
             updateFlexibleTaskRemaining(currentTask.id, remainingSeconds);
+        } else if (currentTask.kind === 'schedule') {
+            saveScheduleTaskProgress(currentTask.id, remainingSeconds);
         }
     }
 
@@ -437,6 +500,7 @@
 
         if (task) {
             if (task.kind === 'schedule') {
+                clearScheduleTaskProgress(task.id);
                 if (typeof toggleTaskComplete === 'function') toggleTaskComplete(task.id, task.day);
             } else {
                 if (typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
@@ -471,6 +535,7 @@
 
         if (task) {
             if (task.kind === 'schedule') {
+                clearScheduleTaskProgress(task.id);
                 if (typeof toggleTaskComplete === 'function') toggleTaskComplete(task.id, task.day);
             } else {
                 if (typeof markFlexibleTaskComplete === 'function') markFlexibleTaskComplete(task.id);
