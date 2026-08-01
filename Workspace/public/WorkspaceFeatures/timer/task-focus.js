@@ -364,7 +364,10 @@
     function persistProgress() {
         if (!currentTask) return;
         currentTask.remainingSeconds = remainingSeconds;
-        if (currentTask.kind === 'flexible' && typeof updateFlexibleTaskRemaining === 'function') {
+        // `kind === 'flexible'` covers tasks created after the kind field was
+        // added; `durationMinutes != null` covers legacy tasks saved before
+        // that field existed (only flexible tasks carry durationMinutes).
+        if ((currentTask.kind === 'flexible' || currentTask.durationMinutes != null) && typeof updateFlexibleTaskRemaining === 'function') {
             updateFlexibleTaskRemaining(currentTask.id, remainingSeconds);
         }
     }

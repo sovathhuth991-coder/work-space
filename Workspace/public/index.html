@@ -1057,9 +1057,9 @@
                     <div class="timer-left-column">
                         <!-- ===== TOTAL TIMER (Session Tracker + Current Session) ===== -->
                         <div id="sessionTracker" class="session-tracker-enhanced"
-                            style="background: #1a1a1a; padding: 16px; border-radius: 10px;">
+                            style="background: var(--bg-card); padding: 16px; border-radius: 10px;">
                             <div class="session-tracker-header">
-                                <div class="session-tracker-title">⏱ Total Timer</div>
+                                <div class="session-tracker-title"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> Total Timer</div>
                             </div>
 
                             <div class="session-time-display">
@@ -1090,9 +1090,9 @@
 
                         <!-- ===== CURRENT SESSION ===== -->
                         <div class="current-session-tracker session-tracker-enhanced"
-                            style="background: rgba(26, 26, 26, 0.6); padding: 14px; border-radius: 10px; margin-top: 0;">
+                            style="background: color-mix(in srgb, var(--bg-card) 60%, transparent); padding: 14px; border-radius: 10px; margin-top: 0;">
                             <div class="session-tracker-header">
-                                <div class="session-tracker-title" style="color:#ec4899;"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg> Current Session</div>
+                                <div class="session-tracker-title" style="color:var(--accent-2);"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg> Current Session</div>
                             </div>
                             <div id="currentSessionTaskInfo" style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-bottom:10px;">
                                 <div id="currentSessionTaskName" style="font-size:0.85rem;color:var(--text-primary);font-weight:600;">No active task</div>
@@ -1140,8 +1140,8 @@
                             <svg viewBox="0 0 280 280">
                                 <defs>
                                     <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+                                        <stop offset="0%" style="stop-color:var(--accent-1);stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:var(--accent-2);stop-opacity:1" />
                                     </linearGradient>
                                 </defs>
                                 <circle class="ring-bg" cx="140" cy="140" r="130" />

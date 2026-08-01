@@ -539,7 +539,7 @@
 
         if (tasks.length === 0) {
             currentTaskData = null;
-            currentTaskDisplay.textContent = 'No tasks scheduled for today';
+            if (currentTaskDisplay) currentTaskDisplay.textContent = 'No tasks scheduled for today';
             if (autoLabelBadge) {
                 autoLabelBadge.textContent = '📭 No tasks';
                 autoLabelBadge.style.color = '#888';

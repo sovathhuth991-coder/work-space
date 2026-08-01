@@ -39,7 +39,7 @@
 
 .task-focus-subtab.active {
     color: var(--accent-1);
-    background: rgba(124, 109, 240, 0.08);
+    background: color-mix(in srgb, var(--accent-1) 8%, transparent);
     border-color: var(--border-color);
     border-bottom: 1px solid var(--bg-card);
     margin-bottom: -1px;
@@ -83,8 +83,8 @@
 }
 
 .task-focus-schedule-item:hover {
-    background: rgba(124, 109, 240, 0.06);
-    border-color: rgba(124, 109, 240, 0.2);
+    background: color-mix(in srgb, var(--accent-1) 6%, transparent);
+    border-color: color-mix(in srgb, var(--accent-1) 20%, transparent);
 }
 
 .task-focus-schedule-info {
@@ -356,8 +356,8 @@
 }
 
 .task-focus-history-item:hover {
-    background: rgba(124, 109, 240, 0.04);
-    border-color: rgba(124, 109, 240, 0.2);
+    background: color-mix(in srgb, var(--accent-1) 4%, transparent);
+    border-color: color-mix(in srgb, var(--accent-1) 20%, transparent);
 }
 
 .tf-hist-main {

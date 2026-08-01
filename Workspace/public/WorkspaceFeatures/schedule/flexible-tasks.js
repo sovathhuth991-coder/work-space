@@ -31,6 +31,7 @@ function formatDurationShort(minutes) {
 function createFlexibleTask(title, durationMinutes) {
     const task = {
         id: Date.now(),
+        kind: 'flexible',
         title: String(title).trim().slice(0, 80),
         durationMinutes,
         durationSeconds: durationMinutes * 60,

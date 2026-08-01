@@ -208,7 +208,7 @@
         if (scheduleBtn) scheduleBtn.classList.toggle('active', tab === 'schedule');
         if (flexibleBtn) flexibleBtn.classList.toggle('active', tab === 'flexible');
         if (historyBtn) historyBtn.classList.toggle('active', tab === 'history');
-        
+
         if (scheduleList) scheduleList.style.display = tab === 'schedule' ? 'block' : 'none';
         if (flexWrap) flexWrap.style.display = tab === 'flexible' ? 'block' : 'none';
         if (historyWrap) {
@@ -364,7 +364,10 @@
     function persistProgress() {
         if (!currentTask) return;
         currentTask.remainingSeconds = remainingSeconds;
-        if (currentTask.kind === 'flexible' && typeof updateFlexibleTaskRemaining === 'function') {
+        // `kind === 'flexible'` covers tasks created after the kind field was
+        // added; `durationMinutes != null` covers legacy tasks saved before
+        // that field existed (only flexible tasks carry durationMinutes).
+        if ((currentTask.kind === 'flexible' || currentTask.durationMinutes != null) && typeof updateFlexibleTaskRemaining === 'function') {
             updateFlexibleTaskRemaining(currentTask.id, remainingSeconds);
         }
     }
@@ -515,13 +518,13 @@
         historyList.innerHTML = tfSessions.map(s => {
             const actual = s.focusSeconds || 0;
             const target = s.targetSeconds || 0;
-            
+
             // Format functions might not exist, use a simple fallback if needed
             const actualMins = Math.floor(actual / 60);
             const targetMins = Math.floor(target / 60);
             const actualStr = actualMins >= 60 ? `${Math.floor(actualMins/60)}h ${actualMins%60}m` : `${actualMins}m`;
             const targetStr = targetMins >= 60 ? `${Math.floor(targetMins/60)}h ${targetMins%60}m` : `${targetMins}m`;
-            
+
             let effClass = 'eff-neutral';
             let effText = 'Matched Estimate';
             if (actual > 0 && target > 0) {
@@ -565,11 +568,11 @@
         let sessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
         sessions = sessions.filter(s => s.timestamp !== timestamp);
         localStorage.setItem('completedSessions', JSON.stringify(sessions));
-        
+
         if (typeof window.refreshSessionTrackerTotals === 'function') {
             window.refreshSessionTrackerTotals();
         }
-        
+
         renderTaskFocusHistory();
     };
 
