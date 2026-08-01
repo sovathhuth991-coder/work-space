@@ -208,7 +208,7 @@
         if (scheduleBtn) scheduleBtn.classList.toggle('active', tab === 'schedule');
         if (flexibleBtn) flexibleBtn.classList.toggle('active', tab === 'flexible');
         if (historyBtn) historyBtn.classList.toggle('active', tab === 'history');
-
+        
         if (scheduleList) scheduleList.style.display = tab === 'schedule' ? 'block' : 'none';
         if (flexWrap) flexWrap.style.display = tab === 'flexible' ? 'block' : 'none';
         if (historyWrap) {
@@ -329,15 +329,11 @@
         if (elements.pauseBtn) elements.pauseBtn.style.display = 'inline-block';
         tfInterval = setInterval(tick, 100);
 
-        // Make sure the Current Session card shows the task actually
-        // running in Task Focus, not whatever the schedule auto-detector
-        // last set (see setCurrentSessionTaskLabel's comment).
-        if (typeof window.setCurrentSessionTaskLabel === 'function' && currentTask) {
-            window.setCurrentSessionTaskLabel(currentTask.title, '', '');
+        // Take ownership of the Current Session card, showing this task's
+        // title instead of whatever the schedule auto-detector last set.
+        if (typeof window.FocusSession === 'object' && currentTask) {
+            window.FocusSession.begin({ source: 'taskFocus', label: currentTask.title, phase: 'focus' });
         }
-
-        // Sync with total timer / session tracker
-        if (typeof startFocusAccumulation === 'function') startFocusAccumulation();
     }
 
     function tick() {
@@ -364,10 +360,7 @@
     function persistProgress() {
         if (!currentTask) return;
         currentTask.remainingSeconds = remainingSeconds;
-        // `kind === 'flexible'` covers tasks created after the kind field was
-        // added; `durationMinutes != null` covers legacy tasks saved before
-        // that field existed (only flexible tasks carry durationMinutes).
-        if ((currentTask.kind === 'flexible' || currentTask.durationMinutes != null) && typeof updateFlexibleTaskRemaining === 'function') {
+        if (currentTask.kind === 'flexible' && typeof updateFlexibleTaskRemaining === 'function') {
             updateFlexibleTaskRemaining(currentTask.id, remainingSeconds);
         }
     }
@@ -388,7 +381,7 @@
         if (elements.pauseBtn) elements.pauseBtn.style.display = 'none';
 
         // Pause total timer sync
-        if (typeof pauseFocusAccumulation === 'function') pauseFocusAccumulation();
+        if (typeof window.FocusSession === 'object') window.FocusSession.pause();
     }
 
     // Exposed for pomodoro.js's mode switcher, so leaving this mode while
@@ -414,8 +407,9 @@
         isRunning = false;
         phaseStartTime = null;
 
-        // Stop total timer sync — this saves accumulated time and pauses the session tracker
-        if (typeof stopFocusAccumulation === 'function') stopFocusAccumulation();
+        // Stop total timer sync — this settles accumulated time and hands
+        // Current Session back to the schedule's own auto-detection.
+        if (typeof window.FocusSession === 'object') window.FocusSession.release();
 
         const task = currentTask;
         if (elements.ringContainer) {
@@ -430,20 +424,15 @@
             sendNotification('🎯 Focus Session', `"${task.title}" is done — nice work.`, '🎯', 'task-focus-notification');
         }
 
-        // Save to completedSessions history BEFORE resetting daily totals,
-        // so renderSessionHistory() can show finished sessions independent of live counts.
+        // Save to completedSessions history — FocusSession.release() above
+        // already settled/cleared the live counters, so this is purely an
+        // explicit, precise log of this task's own elapsed/target seconds.
         saveTaskFocusSession();
 
         // Clear persisted task focus state on completion
         localStorage.removeItem('taskFocusPersisted');
 
-        // Reset daily totals without triggering resetTracker's extra updateUI(),
-        // then do one final updateUI() ourselves so the display shows the new totals.
-        if (typeof window.resetDailyTotals === 'function') {
-            window.resetDailyTotals();
-        }
-
-        // Final UI refresh to show cleared totals + history in the Total Timer
+        // Final UI refresh to show the new totals + history in the Total Timer
         if (typeof window.updateTotalTimerFromHistory === 'function') window.updateTotalTimerFromHistory();
 
         if (task) {
@@ -467,8 +456,9 @@
         isRunning = false;
         phaseStartTime = null;
 
-        // Stop total timer sync — this saves accumulated time
-        if (typeof stopFocusAccumulation === 'function') stopFocusAccumulation();
+        // Stop total timer sync — settles accumulated time and hands
+        // Current Session back to the schedule's own auto-detection.
+        if (typeof window.FocusSession === 'object') window.FocusSession.release();
 
         const task = currentTask;
         saveTaskFocusSession();
@@ -476,12 +466,7 @@
         // Clear persisted task focus state on early completion
         localStorage.removeItem('taskFocusPersisted');
 
-        // Reset daily totals without double-counting, then update UI once.
-        if (typeof window.resetDailyTotals === 'function') {
-            window.resetDailyTotals();
-        }
-
-        // Final UI refresh to show cleared totals + history in the Total Timer
+        // Final UI refresh to show the new totals + history in the Total Timer
         if (typeof window.updateTotalTimerFromHistory === 'function') window.updateTotalTimerFromHistory();
 
         if (task) {
@@ -499,7 +484,7 @@
     function backToPicker() {
         pauseTaskFocusIfRunning();
         saveTaskFocusState();
-        if (typeof stopFocusAccumulation === 'function') stopFocusAccumulation();
+        if (typeof window.FocusSession === 'object') window.FocusSession.release();
         showTaskFocusPicker();
     }
 
@@ -518,13 +503,13 @@
         historyList.innerHTML = tfSessions.map(s => {
             const actual = s.focusSeconds || 0;
             const target = s.targetSeconds || 0;
-
+            
             // Format functions might not exist, use a simple fallback if needed
             const actualMins = Math.floor(actual / 60);
             const targetMins = Math.floor(target / 60);
             const actualStr = actualMins >= 60 ? `${Math.floor(actualMins/60)}h ${actualMins%60}m` : `${actualMins}m`;
             const targetStr = targetMins >= 60 ? `${Math.floor(targetMins/60)}h ${targetMins%60}m` : `${targetMins}m`;
-
+            
             let effClass = 'eff-neutral';
             let effText = 'Matched Estimate';
             if (actual > 0 && target > 0) {
@@ -568,11 +553,11 @@
         let sessions = JSON.parse(localStorage.getItem('completedSessions') || '[]');
         sessions = sessions.filter(s => s.timestamp !== timestamp);
         localStorage.setItem('completedSessions', JSON.stringify(sessions));
-
+        
         if (typeof window.refreshSessionTrackerTotals === 'function') {
             window.refreshSessionTrackerTotals();
         }
-
+        
         renderTaskFocusHistory();
     };
 

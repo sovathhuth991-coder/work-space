@@ -251,17 +251,19 @@
 
         pomoInterval = setInterval(tick, 100);
 
-        // Make sure the Current Session card shows the Pomodoro phase
-        // that's actually running, not whatever the schedule auto-detector
-        // last set (see session-tracker.js's setCurrentSessionTaskLabel).
-        if (typeof window.setCurrentSessionTaskLabel === 'function') {
-            window.setCurrentSessionTaskLabel(currentPhase === 'focus' ? 'Pomodoro — Focus' : 'Pomodoro — Break', '', '');
+        // Take ownership of the Current Session card, showing this phase
+        // instead of whatever the schedule auto-detector last set. Passing
+        // onIdlePause here is what makes Pomodoro (unlike Task Focus) pause
+        // itself when the user goes idle — see checkIdleState in
+        // session-tracker.js.
+        if (typeof window.FocusSession === 'object') {
+            window.FocusSession.begin({
+                source: 'pomodoro',
+                label: currentPhase === 'focus' ? 'Pomodoro — Focus' : 'Pomodoro — Break',
+                phase: currentPhase === 'focus' ? 'focus' : 'break',
+                onIdlePause: function() { if (typeof window.pausePomodoro === 'function') window.pausePomodoro(); }
+            });
         }
-
-        // Keep session-tracker's live Focus/Break/Idle numbers in sync
-        // while this phase runs — logPomodoroPartialProgress/phaseComplete
-        // hand the settled time off to history once the phase ends.
-        if (typeof window.startFocusAccumulation === 'function') window.startFocusAccumulation(currentPhase !== 'focus');
     }
 
     function tick() {
@@ -309,11 +311,12 @@
             sendNotification('⏰ Pomodoro', msg, '🍅', 'pomodoro-notification');
         }
 
-        // Settle the live focusSeconds/breakSeconds counter before logging —
-        // see the comment in logPomodoroPartialProgress() for why the order
-        // matters here (a still-ticking trackerInterval would otherwise
-        // regenerate the same elapsed amount right after the decrement).
-        if (typeof window.pauseFocusAccumulation === 'function') window.pauseFocusAccumulation();
+        // Settle the live session counters before logging — pause() (not
+        // release()) because Pomodoro is about to call FocusSession.begin()
+        // again for the next phase in a moment, and should keep ownership
+        // of Current Session across that transition rather than handing it
+        // back to the schedule tracker and immediately reclaiming it.
+        if (typeof window.FocusSession === 'object') window.FocusSession.pause();
 
         // Log this phase to Today's Sessions / Total Timer — Pomodoro keeps
         // its own state entirely separate from session-tracker.js, so this
@@ -370,13 +373,12 @@
     function logPomodoroPartialProgress() {
         if (!isRunning || currentPhase === 'ready') return;
         const elapsed = currentTotal - remainingSeconds;
-        // Settle the live focusSeconds/breakSeconds counter FIRST — if this
-        // ran after logCompletedSession's decrement instead, the still-ticking
-        // trackerInterval would just regenerate the same elapsed amount on
-        // its next 100ms tick (focusStartTime wouldn't be cleared yet) and
-        // silently undo the decrement, causing exactly the double-count
-        // logCompletedSession is supposed to prevent.
-        if (typeof window.stopFocusAccumulation === 'function') window.stopFocusAccumulation();
+        // Settle the live session counters and release ownership FIRST,
+        // before logging — logCompletedSession() below resets the session
+        // counters to 0 itself once it writes to history, so this ordering
+        // just makes sure we're reading settled numbers, not a value that's
+        // still ticking mid-computation.
+        if (typeof window.FocusSession === 'object') window.FocusSession.release();
         if (elapsed < 5 || typeof window.logCompletedSession !== 'function') return;
         if (currentPhase === 'focus') {
             window.logCompletedSession({ taskName: 'Pomodoro — Focus', focusSeconds: elapsed, breakSeconds: 0, idleSeconds: 0 });
@@ -426,7 +428,7 @@
         phaseStartTime = null;
         elements.ringContainer?.classList.remove('pomodoro-running');
 
-        if (typeof window.pauseFocusAccumulation === 'function') window.pauseFocusAccumulation();
+        if (typeof window.FocusSession === 'object') window.FocusSession.pause();
 
         if (elements.startBtn) {
             elements.startBtn.style.display = 'inline-block';
@@ -447,7 +449,7 @@
         phaseStartTime = null;
         cycleCount = 0;
         elements.ringContainer?.classList.remove('pomodoro-running');
-        if (typeof window.stopFocusAccumulation === 'function') window.stopFocusAccumulation();
+        // (FocusSession.release() already ran inside logPomodoroPartialProgress() above)
 
         preparePhase('ready');
         setPhase('ready');
@@ -487,7 +489,7 @@
             isRunning = false;
             phaseStartTime = null;
             elements.ringContainer?.classList.remove('pomodoro-running');
-            if (typeof window.stopFocusAccumulation === 'function') window.stopFocusAccumulation();
+            // (FocusSession.release() already ran inside logPomodoroPartialProgress() above)
 
             // Pause simple timer when switching away from countdown mode (Bug 6 fix)
             if (mode !== 'countdown' && typeof window.pauseSimpleTimer === 'function') {
