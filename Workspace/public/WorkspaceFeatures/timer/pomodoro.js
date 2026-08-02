@@ -105,7 +105,7 @@
             elements.startBtn.addEventListener('click', startPomodoro);
         }
         if (elements.pauseBtn) {
-            elements.pauseBtn.addEventListener('click', pausePomodoro);
+            elements.pauseBtn.addEventListener('click', function() { pausePomodoro(false); });
         }
         if (elements.resetBtn) {
             elements.resetBtn.addEventListener('click', resetPomodoro);
@@ -261,7 +261,7 @@
                 source: 'pomodoro',
                 label: currentPhase === 'focus' ? 'Pomodoro — Focus' : 'Pomodoro — Break',
                 phase: currentPhase === 'focus' ? 'focus' : 'break',
-                onIdlePause: function() { if (typeof window.pausePomodoro === 'function') window.pausePomodoro(); }
+                onIdlePause: function() { if (typeof window.pausePomodoro === 'function') window.pausePomodoro(true); }
             });
         }
     }
@@ -419,7 +419,7 @@
         updateStats();
     }
 
-    function pausePomodoro() {
+    function pausePomodoro(fromIdle) {
         if (!isRunning) return;
 
         clearInterval(pomoInterval);
@@ -428,7 +428,14 @@
         phaseStartTime = null;
         elements.ringContainer?.classList.remove('pomodoro-running');
 
-        if (typeof window.FocusSession === 'object') window.FocusSession.pause();
+        // Explicit pause (button click) counts the paused time as break —
+        // see FocusSession.pause(). An idle-triggered auto-pause skips this
+        // because checkIdleState() in session-tracker.js already settled
+        // the live counters into idle itself before calling this, and
+        // calling FocusSession.pause() here too would overwrite that with
+        // a break-count instead, which is wrong for genuinely detected
+        // inactivity.
+        if (!fromIdle && typeof window.FocusSession === 'object') window.FocusSession.pause();
 
         if (elements.startBtn) {
             elements.startBtn.style.display = 'inline-block';

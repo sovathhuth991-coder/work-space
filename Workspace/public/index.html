@@ -1135,7 +1135,6 @@
                     <!-- COUNTDOWN CONTENT (hidden when Pomodoro active) -->
                     <div class="countdown-content">
                         <!-- Progress Ring -->
-                        <div class="timer-modes-label">Modes</div>
                         <div class="timer-progress-ring">
                             <svg viewBox="0 0 280 280">
                                 <defs>
@@ -1207,8 +1206,9 @@
                     </div>
 
                     <!-- MODE TOGGLE (always visible) -->
+                    <div class="timer-modes-label" style="margin-top:20px;">Modes</div>
                     <div class="pomodoro-mode-toggle"
-                        style="display:flex;gap:8px;justify-content:center;margin:20px auto;max-width:500px;">
+                        style="display:flex;gap:8px;justify-content:center;margin:0 auto 20px;max-width:500px;">
                         <button id="pomodoroCountdownBtn" class="pomodoro-mode-btn active"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg> Countdown</button>
                         <button id="pomodoroPomoBtn" class="pomodoro-mode-btn"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12a3 3 0 0 1 0 6h-1"/><path d="M4 9v6a3 3 0 0 0 3 3h5a3 3 0 0 0 3-3V9"/><path d="M8 2c0 1-1 1.5-1 2.5S8 6 8 7"/><path d="M12 2c0 1-1 1.5-1 2.5S12 6 12 7"/></svg> Pomodoro</button>
                         <button id="taskFocusModeBtn" class="pomodoro-mode-btn"><svg class="wh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg> Task Focus</button>

@@ -146,8 +146,12 @@
         // If user becomes idle and we're not already tracking idle time
         if (shouldBeIdle && !idleStartTime) {
             idleStartTime = Date.now();
-            if (isRunning) {
-                // Pause session focus/break timers when idle
+            // Only sources that registered onIdlePause (Pomodoro) get
+            // auto-paused into idle after inactivity — Task Focus
+            // deliberately keeps counting straight through (an intentional
+            // work session), so it's skipped entirely here rather than
+            // having its focus time finalized/frozen like Pomodoro's.
+            if (isRunning && typeof activeSessionOnIdlePause === 'function') {
                 if (sessionFocusStartTime) {
                     const elapsed = Math.floor((Date.now() - sessionFocusStartTime) / 1000);
                     sessionFocusSeconds = sessionFocusTimeAtStart + elapsed;
@@ -158,12 +162,16 @@
                     sessionBreakSeconds = sessionBreakTimeAtStart + elapsed;
                     sessionBreakStartTime = null;
                 }
+                // Genuine detected AFK time always counts as idle — set
+                // directly here rather than through FocusSession.pause(),
+                // since pause() now means "on break" (see FocusSession
+                // below), not "gone idle".
+                if (!sessionIdleStartTime) {
+                    sessionIdleStartTime = Date.now();
+                    sessionIdleTimeAtStart = sessionIdleSeconds;
+                }
+                activeSessionOnIdlePause();
             }
-            // Let the active session decide whether it wants to pause itself
-            // on idle — Pomodoro does, Task Focus deliberately doesn't (an
-            // intentional work session that should keep counting down until
-            // explicitly paused or completed). See FocusSession.begin().
-            if (typeof activeSessionOnIdlePause === 'function') activeSessionOnIdlePause();
         }
         // If user becomes active again
         else if (!shouldBeIdle && idleStartTime) {
@@ -700,9 +708,17 @@
             updateUI();
         },
         pause() {
-            isRunning = false;
-            idleStartTime = Date.now();
-            pauseSessionRun();
+            // A deliberate pause means "I'm taking a break" — it counts as
+            // break time, not idle. Idle is reserved for genuine detected
+            // inactivity (see checkIdleState), which is a different thing
+            // from a pause the user chose to take. isRunning stays true —
+            // we're still actively counting, just as break instead of
+            // focus — and ownership is retained, so Resume (begin() again)
+            // picks back up the same session instead of the schedule
+            // tracker reclaiming Current Session in between.
+            idleStartTime = null;
+            isBreak = true;
+            beginSessionRun(true);
             updateUI();
         },
         release() {
