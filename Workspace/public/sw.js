@@ -1,5 +1,5 @@
 // Service Worker for Workspace Hub PWA
-const CACHE_NAME = 'workspace-hub-v20260803132822';
+const CACHE_NAME = 'workspace-hub-v20260803133859';
 const STATIC_ASSETS = [
   'index.html',
   'TUTORIAL.md',
@@ -24,8 +24,8 @@ const STATIC_ASSETS = [
   'WorkspaceShared/animations.css',
   'WorkspaceFeatures/analytics/analytics.css',
   'WorkspaceFeatures/dev-tools/dev-tools.css',
-  'WorkspaceFeatures/timer/timer-enhancements.css',
-  'WorkspaceFeatures/timer/pomodoro.css',
+  'WorkspaceFeatures/timer/shared/timer-enhancements.css',
+  'WorkspaceFeatures/timer/pomodoro/pomodoro.css',
   'WorkspaceFeatures/journal/journal.css',
   'WorkspaceFeatures/date-countdown/date-countdown.css',
   'WorkspaceFeatures/reading/reading.css',
@@ -73,9 +73,9 @@ const STATIC_ASSETS = [
   'WorkspaceFeatures/schedule/schedule-core.js',
   'WorkspaceFeatures/schedule/schedule-planner.js',
   'WorkspaceFeatures/lessons/lessons.js',
-  'WorkspaceFeatures/timer/simple-timer.js',
-  'WorkspaceFeatures/timer/pomodoro.js',
-  'WorkspaceFeatures/timer/session-tracker.js',
+  'WorkspaceFeatures/timer/countdown/countdown.js',
+  'WorkspaceFeatures/timer/pomodoro/pomodoro.js',
+  'WorkspaceFeatures/timer/shared/session-tracker.js',
   'WorkspaceFeatures/graph/graph.js',
   'WorkspaceFeatures/schedule/calendar.js',
   'WorkspaceFeatures/habits/habits.js',
