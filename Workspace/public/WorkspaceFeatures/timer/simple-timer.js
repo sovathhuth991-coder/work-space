@@ -298,19 +298,11 @@
             pauseBtn.disabled = false;
         }
 
+        // Update state indicator
         updateTimerState('running');
 
-        // Connect to shared session tracker so Countdown counts towards
-        // Total Timer / Current Session / Today's Sessions.
-        if (typeof window.FocusSession === 'object') {
-            const mins  = Math.round(totalSeconds / 60);
-            const label = typeof window.getSimpleTimerLabel === 'function'
-                ? window.getSimpleTimerLabel()
-                : `Focus Timer — ${mins} min`;
-            window.FocusSession.begin({ source: 'simpleTimer', label: label, phase: 'focus' });
-        }
-
-        timerStartTime        = Date.now();
+        // Initialize timestamp-based timing
+        timerStartTime = Date.now();
         timerRemainingAtStart = remainingSeconds;
 
         timerInterval = setInterval(function() {
@@ -341,22 +333,9 @@
                     showToast('⏰ Timer complete!', 'success', 5000);
                 }
 
-                // Log to Simple Timer's own history
+                // Log this completed session to Simple Timer's own history
+                // (separate from schedule-linked sessions in Total Timer)
                 saveSimpleTimerSession(totalSeconds);
-
-                // Also log to shared Today's Sessions / Total Timer
-                if (typeof window.logCompletedSession === 'function') {
-                    const mins  = Math.round(totalSeconds / 60);
-                    const label = typeof window.getSimpleTimerLabel === 'function'
-                        ? window.getSimpleTimerLabel()
-                        : `Focus Timer — ${mins} min`;
-                    window.logCompletedSession({
-                        taskName: label, focusSeconds: totalSeconds,
-                        breakSeconds: 0, idleSeconds: 0, source: 'simpleTimer',
-                    });
-                } else if (typeof window.FocusSession === 'object') {
-                    window.FocusSession.release();
-                }
 
                 // Reset to initial state
                 updateTimerState('ready');
@@ -374,15 +353,22 @@
 
     function pauseTimer() {
         if (!isRunning) return;
+
         clearInterval(timerInterval);
         timerInterval = null;
         isRunning = false;
+
+        // Keep the remaining seconds as they are (already calculated by timestamp)
         timerStartTime = null;
+
+        // Update state indicator
         updateTimerState('paused');
         saveTimerState();
-        // Deliberate pause counts as break time in Total Timer / Current Session
-        if (typeof window.FocusSession === 'object') window.FocusSession.pause();
-        if (startBtn) { startBtn.style.display = 'inline-block'; startBtn.textContent = 'Resume'; }
+
+        if (startBtn) {
+            startBtn.style.display = 'inline-block';
+            startBtn.textContent = 'Resume';
+        }
         if (pauseBtn) pauseBtn.style.display = 'none';
     }
 
@@ -395,20 +381,21 @@
         timerRemainingAtStart = 0;
         localStorage.removeItem('simpleTimerPersisted');
         updateDisplay();
+
+        // Update state indicator
         updateTimerState('ready');
-        // Release session tracker ownership (logs nothing — user abandoned the timer)
-        if (typeof window.FocusSession === 'object' && window.FocusSession.isActive() === 'simpleTimer') {
-            window.FocusSession.release();
+
+        if (startBtn) {
+            startBtn.style.display = 'inline-block';
+            startBtn.textContent = 'Start';
         }
-        if (startBtn) { startBtn.style.display = 'inline-block'; startBtn.textContent = 'Start'; }
-        if (pauseBtn) { pauseBtn.style.display = 'none'; pauseBtn.disabled = true; }
+        if (pauseBtn) {
+            pauseBtn.style.display = 'none';
+            pauseBtn.disabled = true;
+        }
     }
 
     function setPreset(minutes) {
-        // If timer was mid-session, release the tracker without logging
-        if (typeof window.FocusSession === 'object' && window.FocusSession.isActive() === 'simpleTimer') {
-            window.FocusSession.release();
-        }
         clearInterval(timerInterval);
         timerInterval = null;
         isRunning = false;
