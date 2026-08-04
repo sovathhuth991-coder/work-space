@@ -433,9 +433,27 @@
             if (typeof showToast === 'function') showToast(name + ' coming soon!', 'info', 3000);
         }
 
-        if (countdownBtn) countdownBtn.addEventListener('click', showCountdown);
-        if (pomoBtn)      pomoBtn.addEventListener('click', function () { showComingSoon('Pomodoro'); });
-        if (tfBtn)        tfBtn.addEventListener('click',  function () { showComingSoon('Task Focus'); });
+        if (countdownBtn) countdownBtn.addEventListener('click', function () {
+            // Deactivate Task Focus (pauses it if running) then show countdown
+            if (typeof window.deactivateTaskFocusMode === 'function') window.deactivateTaskFocusMode();
+            showCountdown();
+        });
+        if (pomoBtn) pomoBtn.addEventListener('click', function () { showComingSoon('Pomodoro'); });
+        if (tfBtn)   tfBtn.addEventListener('click', function () {
+            // Pause countdown if it's running before switching modes
+            if (timerRunning) pauseTimer();
+            // Hide countdown UI, hand off to Task Focus
+            var cdContent = qs('.countdown-content');
+            var pomShell  = el('pomodoroShell');
+            var tfShell   = el('taskFocusShell');
+            if (cdContent) cdContent.style.display = 'none';
+            if (pomShell)  pomShell.style.display   = 'none';
+            if (tfShell)   tfShell.style.display    = 'none'; // task-focus.js will show it
+            if (countdownBtn) countdownBtn.classList.remove('active');
+            if (pomoBtn)      pomoBtn.classList.remove('active');
+            if (tfBtn)        tfBtn.classList.add('active');
+            if (typeof window.activateTaskFocusMode === 'function') window.activateTaskFocusMode();
+        });
 
         showCountdown();
     }
