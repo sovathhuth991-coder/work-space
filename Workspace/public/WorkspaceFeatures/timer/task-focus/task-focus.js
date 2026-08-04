@@ -428,8 +428,15 @@
 
     // ── Public surface ────────────────────────────────────────
     window.activateTaskFocusMode = function () {
-        var shell = el('taskFocusShell');
+        // Hide other modes
+        var cdContent = document.querySelector('.countdown-content');
+        var pomShell  = document.getElementById('pomodoroShell');
+        if (cdContent) cdContent.style.display = 'none';
+        if (pomShell)  pomShell.style.display  = 'none';
+        // Show our shell
+        var shell = document.getElementById('taskFocusShell');
         if (shell) shell.style.display = '';
+        // Show the right screen
         if (currentTask) showSessionScreen();
         else             showPickerScreen();
     };

@@ -1,5 +1,5 @@
 // Service Worker for Workspace Hub PWA
-const CACHE_NAME = 'workspace-hub-v20260804190332';
+const CACHE_NAME = 'workspace-hub-v20260805045847';
 const STATIC_ASSETS = [
   'index.html',
   'TUTORIAL.md',
