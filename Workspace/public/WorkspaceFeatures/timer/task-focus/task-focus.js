@@ -433,12 +433,20 @@
         var pomShell  = document.getElementById('pomodoroShell');
         if (cdContent) cdContent.style.display = 'none';
         if (pomShell)  pomShell.style.display  = 'none';
-        // Show our shell
+        // Show our shell — must use 'block' not '' because .pomodoro-shell
+        // has display:none in CSS so removing the inline style just reverts
+        // to the CSS rule and keeps it hidden.
         var shell = document.getElementById('taskFocusShell');
-        if (shell) shell.style.display = '';
+        if (shell) shell.style.display = 'block';
         // Show the right screen
         if (currentTask) showSessionScreen();
         else             showPickerScreen();
+    };
+
+    window.deactivateTaskFocusMode = function () {
+        if (timerRunning) pauseTask();
+        var shell = document.getElementById('taskFocusShell');
+        if (shell) shell.style.display = 'none';
     };
 
     window.deactivateTaskFocusMode = function () {

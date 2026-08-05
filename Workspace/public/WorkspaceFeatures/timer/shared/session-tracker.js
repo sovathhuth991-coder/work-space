@@ -453,7 +453,7 @@
             } else {
                 // Fallback if task-focus.js not loaded yet — just show the shell
                 var tfShell = el('taskFocusShell');
-                if (tfShell) tfShell.style.display = '';
+                if (tfShell) tfShell.style.display = 'block';
             }
         });
 

@@ -1286,7 +1286,7 @@
                         <div id="taskFocusFlexWrap" style="display:none;">
                             <div id="taskFocusPickList" class="task-focus-pick-list"></div>
                             <div class="task-focus-quick-add">
-                                <input type="text" id="taskFocusQuickTitle" placeholder="Or start something new (e.g. Math)" maxlength="80">
+                                <input type="text" id="taskFocusQuickTitle" placeholder="Name your focus session…" maxlength="80">
                                 <div class="task-focus-quick-duration">
                                     <input type="number" id="taskFocusQuickHours" placeholder="Hrs" min="0" max="23">
                                     <input type="number" id="taskFocusQuickMinutes" placeholder="Min" min="0" max="59">
@@ -1302,12 +1302,17 @@
 
                     <!-- Session screen: the dedicated countdown for the chosen task -->
                     <div id="taskFocusSession" class="task-focus-session" style="display:none;">
+
+                        <div class="task-focus-task-header">
+                            <div id="taskFocusTaskName" class="task-focus-task-name-hero">Task</div>
+                        </div>
+
                         <div class="task-focus-ring-container" id="taskFocusRingContainer">
                             <svg viewBox="0 0 280 280">
                                 <defs>
                                     <linearGradient id="taskFocusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                        <stop offset="0%" style="stop-color:var(--accent-1);stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:var(--accent-2);stop-opacity:1" />
                                     </linearGradient>
                                 </defs>
                                 <circle class="task-focus-ring-bg" cx="140" cy="140" r="130" />
@@ -1316,7 +1321,6 @@
                             </svg>
                             <div class="timer-display-container">
                                 <div id="taskFocusDisplay" class="task-focus-display">00:00</div>
-                                <div id="taskFocusTaskName" class="task-focus-label">Task</div>
                             </div>
                         </div>
 
@@ -1326,10 +1330,14 @@
                         </div>
 
                         <div class="task-focus-controls">
-                            <button id="taskFocusStartBtn" class="pomodoro-btn pomodoro-btn-primary">Start</button>
-                            <button id="taskFocusPauseBtn" class="pomodoro-btn pomodoro-btn-secondary" style="display:none;">Pause</button>
-                            <button id="taskFocusDoneBtn" class="pomodoro-btn pomodoro-btn-secondary">✓ Mark Done</button>
-                            <button id="taskFocusBackBtn" class="pomodoro-btn pomodoro-btn-secondary">← Switch Task</button>
+                            <div class="task-focus-controls-primary">
+                                <button id="taskFocusStartBtn">Start</button>
+                                <button id="taskFocusPauseBtn" style="display:none;">Pause</button>
+                            </div>
+                            <div class="task-focus-controls-secondary">
+                                <button id="taskFocusDoneBtn">✓ Done</button>
+                                <button id="taskFocusBackBtn">← Switch</button>
+                            </div>
                         </div>
                     </div>
                 </div>

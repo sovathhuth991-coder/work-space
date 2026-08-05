@@ -1,63 +1,61 @@
 /* ============================================================
-   TASK FOCUS — pick a flexible task, get a countdown sized to
-   its target duration. Third timer mode alongside Countdown and
-   Pomodoro.
+   TASK FOCUS — task-focus.css
    ============================================================ */
 
 .task-focus-shell {
     text-align: center;
+    padding: 4px 0 8px;
 }
 
-/* ---- Sub-tabs ---- */
+/* ─── Sub-tabs: segment-control style ─────────────────────── */
 .task-focus-subtabs {
     display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0;
+    gap: 0;
+    margin-bottom: 18px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 999px;
+    padding: 3px;
+    border: 1px solid var(--border-color);
 }
 
 .task-focus-subtab {
     flex: 1;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    border: 1px solid transparent;
-    border-bottom: none;
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: none;
     background: transparent;
     color: var(--text-muted);
     font-size: var(--text-sm);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
     white-space: nowrap;
 }
 
-.task-focus-subtab:hover {
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.03);
-}
+.task-focus-subtab:hover { color: var(--text-secondary); }
 
 .task-focus-subtab.active {
+    background: color-mix(in srgb, var(--accent-1) 15%, var(--bg-card));
     color: var(--accent-1);
-    background: color-mix(in srgb, var(--accent-1) 8%, transparent);
-    border-color: var(--border-color);
-    border-bottom: 1px solid var(--bg-card);
-    margin-bottom: -1px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.3);
 }
 
-/* ---- Picker screen ---- */
+/* ─── Picker hint ─────────────────────────────────────────── */
 .task-focus-hint {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--text-muted);
-    margin: 0 0 16px 0;
+    margin: 0 0 14px;
+    text-align: left;
 }
 
-.task-focus-pick-list {
+/* ─── Pick lists ──────────────────────────────────────────── */
+.task-focus-pick-list,
+#taskFocusScheduleList {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
-    max-height: 280px;
+    gap: 6px;
+    margin-bottom: 14px;
+    max-height: 300px;
     overflow-y: auto;
     text-align: left;
 }
@@ -66,92 +64,49 @@
     font-size: var(--text-base);
     color: var(--text-muted);
     text-align: center;
-    padding: 12px 0;
+    padding: 28px 0;
     margin: 0;
 }
 
-.task-focus-schedule-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: var(--radius-sm);
-    transition: all 0.2s ease;
-}
-
-.task-focus-schedule-item:hover {
-    background: color-mix(in srgb, var(--accent-1) 6%, transparent);
-    border-color: color-mix(in srgb, var(--accent-1) 20%, transparent);
-}
-
-.task-focus-schedule-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
-.task-focus-schedule-title-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-}
-
-.task-focus-schedule-title {
-    font-size: var(--text-md);
-    font-weight: 600;
-    color: var(--text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.task-focus-now-badge {
-    flex-shrink: 0;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--accent-1);
-    background: color-mix(in srgb, var(--accent-1) 15%, transparent);
-    border: 1px solid color-mix(in srgb, var(--accent-1) 35%, transparent);
-    border-radius: 999px;
-    padding: 1px 7px;
-}
-
-.task-focus-schedule-time {
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-}
-
+/* Task row card */
+.task-focus-schedule-item,
 .task-focus-pick-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.05);
     border-radius: var(--radius-sm);
-    transition: all 0.2s ease;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: left;
+    cursor: default;
 }
 
+.task-focus-schedule-item:hover,
 .task-focus-pick-item:hover {
-    background: rgba(16, 185, 129, 0.06);
-    border-color: rgba(16, 185, 129, 0.2);
+    background: color-mix(in srgb, var(--accent-1) 6%, transparent);
+    border-color: color-mix(in srgb, var(--accent-1) 20%, transparent);
 }
 
+.task-focus-schedule-info,
 .task-focus-pick-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+}
+
+.task-focus-schedule-title-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     min-width: 0;
 }
 
+.task-focus-schedule-title,
 .task-focus-pick-title {
     font-size: var(--text-md);
     font-weight: 600;
@@ -161,51 +116,74 @@
     white-space: nowrap;
 }
 
+.task-focus-schedule-time,
 .task-focus-pick-duration {
     font-size: var(--text-sm);
     color: var(--text-muted);
 }
 
+/* "Now" badge */
+.task-focus-now-badge {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-1);
+    background: color-mix(in srgb, var(--accent-1) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-1) 28%, transparent);
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+
+/* Focus / Resume button */
 .task-focus-pick-btn {
     flex-shrink: 0;
-    padding: 8px 18px;
-    border-radius: 20px;
-    font-size: var(--text-base);
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: var(--text-sm);
     font-weight: 600;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    color: var(--status-online);
+    background: color-mix(in srgb, var(--accent-1) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-1) 28%, transparent);
+    color: var(--accent-1);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
+    white-space: nowrap;
 }
 
 .task-focus-pick-btn:hover {
-    background: rgba(16, 185, 129, 0.22);
+    background: color-mix(in srgb, var(--accent-1) 20%, transparent);
     transform: translateY(-1px);
 }
 
+/* ─── Quick-add (Flexible tab) ────────────────────────────── */
 .task-focus-quick-add {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border-color);
+    gap: 9px;
+    padding: 14px;
+    margin-top: 6px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-md);
 }
 
 .task-focus-quick-add input[type="text"] {
     padding: 10px 16px;
-    border-radius: 20px;
+    border-radius: 999px;
     border: 1px solid var(--border-color);
     background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: var(--text-md);
     outline: none;
     font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .task-focus-quick-add input[type="text"]:focus {
-    border-color: var(--status-online);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    border-color: var(--accent-1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 12%, transparent);
 }
 
 .task-focus-quick-duration {
@@ -216,8 +194,8 @@
 
 .task-focus-quick-duration input[type="number"] {
     flex: 1;
-    padding: 10px 12px;
-    border-radius: 20px;
+    padding: 9px 8px;
+    border-radius: 999px;
     border: 1px solid var(--border-color);
     background: var(--bg-secondary);
     color: var(--text-primary);
@@ -228,34 +206,54 @@
 }
 
 .task-focus-quick-duration input[type="number"]:focus {
-    border-color: var(--status-online);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    border-color: var(--accent-1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-1) 12%, transparent);
 }
 
 .task-focus-quick-duration button {
-    padding: 10px 24px;
-    border-radius: 20px;
+    padding: 9px 22px;
+    border-radius: 999px;
     font-size: var(--text-md);
     font-weight: 600;
-    background: linear-gradient(135deg, #10b981, #3b82f6);
+    background: var(--accent-gradient);
     border: none;
     color: #fff;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
     white-space: nowrap;
 }
 
 .task-focus-quick-duration button:hover {
+    opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--accent-1) 30%, transparent);
 }
 
-/* ---- Session screen (ring reuses the same geometry as Countdown/Pomodoro) ---- */
+/* ─── Session screen ──────────────────────────────────────── */
+
+/* Task name hero — the thing you're focused on, up top */
+.task-focus-task-header {
+    margin-bottom: 12px;
+}
+
+.task-focus-task-name-hero {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 360px;
+    margin: 0 auto;
+    letter-spacing: -0.01em;
+}
+
+/* Ring */
 .task-focus-ring-container {
     position: relative;
-    width: 280px;
-    height: 280px;
-    margin: 0 auto 24px;
+    width: 260px;
+    height: 260px;
+    margin: 0 auto 16px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -263,16 +261,14 @@
 
 .task-focus-ring-container svg {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     transform: rotate(-90deg);
 }
 
 .task-focus-ring-bg {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.05);
+    stroke: rgba(255,255,255,0.06);
     stroke-width: 8;
 }
 
@@ -283,189 +279,220 @@
     stroke-linecap: round;
     stroke-dasharray: 816.8;
     stroke-dashoffset: 0;
-    transition: stroke-dashoffset 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+    transition: stroke-dashoffset 0.4s ease;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-1) 55%, transparent));
 }
 
 .task-focus-ring-glow {
     fill: none;
     stroke: url(#taskFocusGradient);
-    stroke-width: 12;
+    stroke-width: 14;
     stroke-linecap: round;
     stroke-dasharray: 816.8;
     stroke-dashoffset: 0;
-    opacity: 0.3;
-    filter: blur(4px);
-    transition: stroke-dashoffset 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0.2;
+    filter: blur(5px);
+    transition: stroke-dashoffset 0.4s ease;
 }
 
+/* Time display inside ring */
 .task-focus-display {
-    font-size: 3.6rem;
+    font-size: 3.2rem;
     font-weight: 700;
     color: #fff;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
     line-height: 1;
-    text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-    margin-bottom: 8px;
 }
 
-.task-focus-label {
-    font-size: var(--text-base);
+/* State indicator pill */
+#taskFocusStateIndicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: var(--text-sm);
     color: var(--text-muted);
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin: 0 auto;
-    font-weight: 600;
+    margin-bottom: 16px;
 }
 
-#taskFocusStateIndicator.running {
-    background: rgba(16, 185, 129, 0.15);
-    border-color: rgba(16, 185, 129, 0.3);
-    color: var(--status-online);
-    animation: pulse 2s infinite;
-}
-
-#taskFocusStateIndicator.paused {
-    background: rgba(245, 158, 11, 0.15);
-    border-color: rgba(245, 158, 11, 0.3);
-    color: var(--status-attention);
-}
-
+/* ─── Controls ────────────────────────────────────────────── */
 .task-focus-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.task-focus-controls-primary {
     display: flex;
     gap: 10px;
     justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 20px;
 }
 
-@media (max-width: 600px) {
-    .task-focus-ring-container {
-        width: 240px;
-        height: 240px;
-    }
-
-    .task-focus-display {
-        font-size: 2.8rem;
-    }
+.task-focus-controls-secondary {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
 }
 
-/* ---- History screen ---- */
+/* Start / Resume — hero action */
+#taskFocusStartBtn {
+    padding: 14px 48px;
+    border-radius: 999px;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    background: var(--accent-gradient);
+    color: #fff;
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--accent-1) 35%, transparent);
+    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+}
+
+#taskFocusStartBtn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px color-mix(in srgb, var(--accent-1) 45%, transparent);
+}
+
+/* Pause — softer, same width feel */
+#taskFocusPauseBtn {
+    padding: 14px 48px;
+    border-radius: 999px;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    cursor: pointer;
+    background: color-mix(in srgb, var(--accent-1) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-1) 28%, transparent);
+    color: var(--accent-1);
+    transition: all 0.2s ease;
+}
+
+#taskFocusPauseBtn:hover {
+    background: color-mix(in srgb, var(--accent-1) 18%, transparent);
+}
+
+/* Done / Switch — quiet secondary row */
+#taskFocusDoneBtn,
+#taskFocusBackBtn {
+    padding: 9px 22px;
+    border-radius: 999px;
+    font-size: var(--text-base);
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-secondary);
+    transition: all 0.18s ease;
+}
+
+#taskFocusDoneBtn:hover {
+    background: color-mix(in srgb, var(--status-online) 10%, transparent);
+    border-color: color-mix(in srgb, var(--status-online) 25%, transparent);
+    color: var(--status-online);
+}
+
+#taskFocusBackBtn:hover {
+    background: rgba(255,255,255,0.07);
+    color: var(--text-primary);
+}
+
+/* ─── History screen ──────────────────────────────────────── */
 .task-focus-history-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-    max-height: 280px;
+    gap: 6px;
+    max-height: 300px;
     overflow-y: auto;
     text-align: left;
 }
 
 .task-focus-history-item {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 14px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.05);
     border-radius: var(--radius-sm);
-    transition: all 0.2s ease;
+    transition: background 0.15s, border-color 0.15s;
 }
 
 .task-focus-history-item:hover {
-    background: color-mix(in srgb, var(--accent-1) 4%, transparent);
-    border-color: color-mix(in srgb, var(--accent-1) 20%, transparent);
+    background: color-mix(in srgb, var(--accent-1) 5%, transparent);
+    border-color: color-mix(in srgb, var(--accent-1) 18%, transparent);
 }
 
 .tf-hist-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding-bottom: 8px;
+    flex: 1;
+    min-width: 0;
+    text-align: left;
 }
 
 .tf-hist-title {
     font-size: var(--text-md);
     font-weight: 600;
     color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tf-hist-date {
     font-size: var(--text-xs);
     color: var(--text-muted);
+    margin-top: 2px;
 }
 
 .tf-hist-stats {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
+    flex-shrink: 0;
 }
 
 .tf-hist-stat {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    align-items: flex-end;
+    gap: 1px;
 }
 
 .tf-hist-stat .lbl {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
     color: var(--text-muted);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
 }
 
 .tf-hist-stat .val {
     font-size: var(--text-sm);
     font-weight: 600;
     color: var(--text-secondary);
+    font-family: var(--font-mono);
 }
 
 .tf-hist-eff {
-    margin-left: auto;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
 }
 
-.eff-fast {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-}
+.eff-fast    { background: rgba(16,185,129,0.14); color: #10b981; }
+.eff-neutral { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+.eff-slow    { background: rgba(245,158,11,0.14);  color: #f59e0b; }
 
-.eff-neutral {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-muted);
-}
-
-.eff-slow {
-    background: rgba(245, 158, 11, 0.15);
-    color: #f59e0b;
-}
-
-.tf-hist-del-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: 6px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.tf-hist-del-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-.tf-hist-del-btn:hover {
-    color: var(--status-attention);
-    background: rgba(245, 158, 11, 0.1);
+/* ─── Responsive ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .task-focus-ring-container { width: 220px; height: 220px; }
+    .task-focus-display { font-size: 2.6rem; }
+    #taskFocusStartBtn,
+    #taskFocusPauseBtn { padding: 12px 36px; font-size: var(--text-md); }
+    .task-focus-task-name-hero { font-size: var(--text-lg); }
 }
